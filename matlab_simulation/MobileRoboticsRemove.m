@@ -17,14 +17,14 @@ if (strcmp(os, 'Windows_NT'))
     sep = '\';
 end
    
-% Add base and all subdirectories to path
-addpath(base);
+% Add base and specific subdirectories to path
+rmpath(base);
 
 dirlist = {'3-motion','4-sensor','5-estimation','6-mapping','7-control','8-planning','9-utilities', '9-utilities/geometry', '10-environments'}; 
 
 for i=1:length(dirlist)
     subdir = sprintf('%s%s%s', base,sep,dirlist{i});
-    addpath(subdir);
+    rmpath(subdir);
 end
 
 savepath
