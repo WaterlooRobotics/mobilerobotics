@@ -44,8 +44,8 @@ point = scale*point;
 % Rotation matrix
 R = rot(h+pi/2,3);
 R = R(1:2,1:2); 
-bot = (R*bot')';
-point = (R*point')';
+bot = (R'*bot')';
+point = (R'*point')';
 
 % Centres
 bot(:,1) = bot(:,1)+x;
