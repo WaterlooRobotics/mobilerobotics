@@ -1,3 +1,5 @@
+pkg load statistics
+
 % Particle filter example
 clear;clc;
 

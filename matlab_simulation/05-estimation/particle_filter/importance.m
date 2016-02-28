@@ -1,5 +1,6 @@
 %% Importance Sampling graphic
-clear;clc;
+clear;
+clc;
 %% Generate two interesting distributions
 
 % First distribution
@@ -7,9 +8,9 @@ L=5;
 mu = 0; % mean (mu)
 S = 0.5;% covariance (Sigma)
 x = [mu-L*sqrt(S):0.005:mu+L*sqrt(S)]; % x points
-gx = normpdf(x,mu,S); % p(x) 
+gx = normpdf(x,mu,S); % p(x)
 gx = gx + 0.1; % Add uniform base probability
-gx = gx/sum(gx); % Normalize 
+gx = gx/sum(gx); % Normalize
 Gx = cumsum(gx);
 
 % Second distribution
@@ -20,7 +21,7 @@ mu2 = -0;
 S2 = 0.5;
 fx2 = normpdf(x,mu2,S2);
 fx = fx1+fx2 + 0.1; % Form f(x)
-fx = fx/sum(fx); % Normalize 
+fx = fx/sum(fx); % Normalize
 Fx = cumsum(fx);
 
 %% Importance Sampling
@@ -58,7 +59,7 @@ xPindnew = hist(indPnew,M);
 %% Plotting
 
 % Plot of both distributions, and initial sample of g(x)
-figure(1);clf; 
+figure(1);clf;
 % f(x) and g(x)
 subplot(3,1,1); hold on;
 plot(x,fx/0.01,'b');

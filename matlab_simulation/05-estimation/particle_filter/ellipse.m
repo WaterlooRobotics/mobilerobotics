@@ -8,7 +8,7 @@ S = [4 -1; -1 1];
 [SE, Se]=eig(S);
 
 % Generate samples
-samples = SE*sqrt(Se)*randn(2,10000);
+samples = SE * sqrt(Se) * randn(2,10000);
 
 % Create ellipse plots
 figure(1);clf;hold on;
