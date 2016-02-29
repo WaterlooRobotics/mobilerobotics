@@ -33,7 +33,7 @@ else
     addpath(base);
 end
 
-dirlist = {'3-motion','4-sensor','5-estimation','6-mapping','7-control','8-planning','9-utilities', '9-utilities/geometry', '10-environments'}; 
+dirlist = {'03-motion','04-sensor','05-estimation','06-mapping','07-control','08-planning','09-utilities', '09-utilities/geometry', '10-environments'}; 
 
 for i=1:length(dirlist)
     subdir = sprintf('%s%s%s', base,sep,dirlist{i});
