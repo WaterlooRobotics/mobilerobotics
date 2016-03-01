@@ -1,6 +1,6 @@
 % Unscented Kalman filter example
 addpath('./lib')
-addpath('./lib/flyover_example')
+addpath('./lib/flyover')
 clear;
 clc;
 
