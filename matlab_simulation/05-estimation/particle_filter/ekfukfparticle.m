@@ -5,7 +5,7 @@ clear;
 clc;
 
 %% Create AVI object
-makemovie = 0;
+makemovie = 1;
 if(makemovie)
     vidObj = VideoWriter('ekflocalization.avi');
     vidObj.Quality = 100;
@@ -63,10 +63,10 @@ w_c(2:2 * n + 1) = 1/(2 * (n + lambda));
 % %Number of particles
 I = 5000;
 % % Prior
-X = randn(3,I);
-X(1,:) = X(1,:)+ mu(1);
-X(2,:) = X(2,:)+ mu(2);
-X(3,:) = X(3,:)+ mu(3);
+X = randn(3, I);
+X(1,:) = X(1, :) + mu(1);
+X(2,:) = X(2, :) + mu(2);
+X(3,:) = X(3, :) + mu(3);
 X0 = X;
 
 
@@ -107,27 +107,15 @@ for t = 2:length(T)
     K_Su(:, t) = K_u;
 
     %% Particle Filter
-    %  Particle filter estimation
-    for i = 1:I
-        ep = RE * sqrt(Re) * randn(n, 1);
-        Xp(:,i) = Ad * X(:, i) + ep;
-        w(i) = max(0.00001, normpdf(y(:, t), sqrt(Xp(1, i)^2 + Xp(3, i)^2), sqrt(Q)));
-    end
-    
-    W = cumsum(w);
-    for j = 1:I
-         seed = W(end)*rand(1);
-         X(:,j) = Xp(:,find(W>seed,1));
-    end
-    muParticle = mean(X');
-    SParticle = cov(X');
+    [muParticle, SParticle, X] = pf_nonlinear(t, I, Ad, X, R, Q, y);
     
     % store PF results
     muP_S(:, t) = muParticle;
     SP_S(:, :, t) = SParticle;
 
+    
     % plot results
-    %plot_ekf_ufk_pf(1, t, x, mu, mu_S, mu_Su, muP_S, S, S_u, X);
+    plot_ekf_ufk_pf(1, t, x, mu, mu_S, mu_Su, muP_S, S, S_u, X);
 
     if (makemovie)
         writeVideo(vidObj, getframe(gca));
