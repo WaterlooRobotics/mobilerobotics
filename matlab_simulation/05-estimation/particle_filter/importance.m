@@ -1,4 +1,4 @@
-addpath('./lib/importance_sampling_example')
+addpath('./lib/importance_sampling')
 
 %% Importance Sampling graphic
 clear;
