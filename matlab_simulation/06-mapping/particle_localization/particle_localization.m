@@ -1,5 +1,6 @@
 % Particle filter localization
-clear;clc;
+clear;
+clc;
 
 %% Create AVI object
 makemovie = 1;
@@ -23,8 +24,8 @@ u = ones(2, length(T));
 u(2,:)=0.3*u(2,:);
 
 % Disturbance model
-R = [0.0001 0 0; 
-     0 0.0001 0; 
+R = [0.0001 0 0;
+     0 0.0001 0;
      0 0 0.001];
 [RE, Re] = eig(R);
 
@@ -37,7 +38,7 @@ switch(meas)
     case 2
         Q = 0.01;
     case 3
-         Q = [0.01 0; 
+         Q = [0.01 0;
               0 0.01];
 end
 [QE, Qe] = eig(Q);
@@ -148,4 +149,3 @@ for t=2:length(T)
     if (makemovie) writeVideo(vidObj, getframe(gca)); end
 end
 if (makemovie) close(vidObj); end
-

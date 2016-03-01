@@ -1,15 +1,12 @@
 % Example of error ellipse and Gaussian noise generation
 addpath('./lib')
 
-
 % Define distribution
 mu = [1; 2];
 S = [4 -1; -1 1];
 
-% Find eigenstuff
-[SE, Se] = eig(S);
-
 % Generate samples
+[SE, Se] = eig(S);
 samples = SE * sqrt(Se) * randn(2, 10000);
 
 % Create ellipse plots
