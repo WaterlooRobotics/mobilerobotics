@@ -1,5 +1,5 @@
 addpath('./lib')
-addpath('./lib/particle_example')
+addpath('./lib/particle')
 clear;
 clc;
 
