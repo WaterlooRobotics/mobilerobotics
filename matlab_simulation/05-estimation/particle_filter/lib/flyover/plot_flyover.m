@@ -1,4 +1,4 @@
-function plot_ekf_ufk_pf(figure_index, t, x, mu, mu_S, mu_Su, muP_S, S, S_u, X)
+function plot_flyover(figure_index, t, x, mu_S, mu_Su, muP_S, X)
     figure(figure_index);
     clf;
     hold on;
@@ -23,7 +23,7 @@ function plot_ekf_ufk_pf(figure_index, t, x, mu, mu_S, mu_Su, muP_S, S, S_u, X)
     plot([20 -1], [0 0],'b--')
     
     % plot details
-    title('True state, EKF, UKF and PF')
+    title('Flyover Example')
     axis equal
     axis([-5 20 -1 10])
     legend('True state', 'EKF', 'UKF', 'PF')

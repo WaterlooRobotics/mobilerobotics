@@ -32,7 +32,7 @@ R = [.001 0 0; 0 .001 0 ; 0 0 .001];
 [RE, Re] = eig (R);
 
 % Measurement model defined below
-Q = [.01];
+Q = [0.01];
 
 % Simulation Initializations
 Tf = 8;
@@ -40,14 +40,14 @@ T = 0:dt:Tf;
 n = length(Ad(1,:));
 x = zeros(n,length(T));
 x(:,1) = x0;
-m = length(Q(:,1));
-y = zeros(m,length(T));
-mup_S = zeros(n,length(T));
-mu_S = zeros(n,length(T));
-K_S = zeros(n,length(T));
-mup_Su = zeros(n,length(T));
-mu_Su = zeros(n,length(T));
-K_Su = zeros(n,length(T));
+m = length(Q(:, 1));
+y = zeros(m, length(T));
+mup_S = zeros(n, length(T));
+mu_S = zeros(n, length(T));
+K_S = zeros(n, length(T));
+mup_Su = zeros(n, length(T));
+mu_Su = zeros(n, length(T));
+K_Su = zeros(n, length(T));
 
 % Unscented transform parameters
 alpha = 1.2;
@@ -68,6 +68,8 @@ X(1,:) = X(1, :) + mu(1);
 X(2,:) = X(2, :) + mu(2);
 X(3,:) = X(3, :) + mu(3);
 X0 = X;
+muP_S = zeros(n, length(T));
+SP_S = zeros(3, 3, length(T));
 
 
 %% Main loop
@@ -114,21 +116,20 @@ for t = 2:length(T)
     SP_S(:, :, t) = SParticle;
 
     
-    % plot results
-    plot_ekf_ufk_pf(1, t, x, mu, mu_S, mu_Su, muP_S, S, S_u, X);
-
+    %% Plot and record video
+    % plot flyover
+    plot_flyover(1, t, x, mu_S, mu_Su, muP_S, X);
+    
+    % record flyover plot frame
     if (makemovie)
         writeVideo(vidObj, getframe(gca));
     end
-
 end
 
+% close video object
 if (makemovie)
     close(vidObj);
 end
 
 % plot errors
 plot_errors(2, T, x, mu_S, mu_Su, muP_S);
-
-
-
