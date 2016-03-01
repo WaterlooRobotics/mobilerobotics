@@ -83,15 +83,21 @@ ylabel('# samples');
 axis([-3 2 0 1.1*max(xPH./M)])
 
 % Weights for each sample
-figure(2);clf;
-subplot(2,1,1); hold on;
+figure(2);
+clf;
+subplot(2,1,1); 
+hold on;
+
 plot(x,fx/0.001,'b');
 plot(x,gx/0.001,'r');
 plot(x,fx./gx,'g');
+
 title('Weights for each sample of g(x)')
 legend('f(x)', 'g(x)','f(x)/g(x)')
 axis([-3 2 0 7])
-subplot(2,1,2); hold on;
+subplot(2,1,2); 
+hold on;
+
 for m=1:25:M
     plot([xP(m);xP(m)],[0 wx(m)],'g')
 end
@@ -99,15 +105,20 @@ xlabel('x')
 ylabel('Weights f(x)/g(x)')
 axis([-3 2 0 max(wx)])
 
-figure(3);clf;
-subplot(2,1,1); hold on;
+figure(3);
+clf;
+subplot(2,1,1); 
+hold on;
+
 plot(x,fx/0.01,'b');
 plot(x,gx/0.01,'r');
+
 title('Distributions, and importance sampled f(x)')
 legend('f(x)', 'g(x)')
 axis([-3 2 0 0.7])
 
-subplot(2,1,2); hold on;
+subplot(2,1,2); 
+hold on;
 [xPnewH,xnewH] = hist(xPnew,200);
 plot(xnewH,xPnewH./M,'b');
 xlabel('x');

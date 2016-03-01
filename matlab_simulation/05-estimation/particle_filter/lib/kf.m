@@ -1,4 +1,4 @@
-function [mup, mu, Sp, S] = kalman_filter(t, A, B, C, R, Q, y, u, mu, S)
+function [mup, mu, Sp, S] = kf(t, A, B, C, R, Q, y, u, mu, S)
     % prediction update
     mup = A * mu + B * u(t);
     Sp = A * S * transpose(A) + R;

@@ -1,4 +1,4 @@
-function h=error_ellipse(varargin)
+function h = error_ellipse(varargin)
 % ERROR_ELLIPSE - plot an error ellipse, or ellipsoid, defining confidence region
 %    ERROR_ELLIPSE(C22) - Given a 2x2 covariance matrix, plot the
 %    associated error ellipse, at the origin. It returns a graphics handle

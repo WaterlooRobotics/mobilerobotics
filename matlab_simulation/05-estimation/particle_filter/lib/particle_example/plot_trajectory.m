@@ -3,7 +3,7 @@ function plot_trajectory(figure_index, T, x, y, mu_S, muP_S)
     clf;
     hold on;
     
-    plot(T, x(2:end),'b')
+    plot(T, x(2:end), 'b')
     %plot(T,y,'rx')
     %plot(T,u,'g');
     plot(T, mu_S, 'r--')

@@ -67,10 +67,10 @@ for t = 1:length(T)
     y(t) = C * x(t + 1) + d;
 
     % kalman filter estimation
-    [mup, mu, Sp, S] = kalman_filter(t, A, B, C, R, Q, y, u, mu, S);
+    [mup, mu, Sp, S] = kf(t, A, B, C, R, Q, y, u, mu, S);
     
     % particle filter estimation
-    [muParticle, SParticle, Xp] = particle_filter(t, M, A, B, C, X, R, Q, y, u);
+    [muParticle, SParticle, Xp] = pf(t, M, A, B, C, X, R, Q, y, u);
 
     % store kalman filter estimates
     mup_S(t) = mup;
