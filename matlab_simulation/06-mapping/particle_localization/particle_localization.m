@@ -47,8 +47,8 @@ end
 D = 100;
 % Prior - uniform over -5 5 position, and 0 2*pi heading
 X = zeros(3, D);
-X(1:2,:) = 2 * rand(2, D) - 1;
-X(3,:) = pi / 4 * rand(1, D) - pi / 8;
+X(1:2, :) = 2 * rand(2, D) - 1;
+X(3, :) = pi / 4 * rand(1, D) - pi / 8;
 X0 = X;
 Xp = X;
 w = zeros(1, D);
@@ -69,7 +69,8 @@ y = zeros(m, length(T));
 mf = zeros(2, length(T));
 muParticle_S = zeros(1, D, length(T));
 
-% plot_initial_state(1, map, x, X, D);
+% plot intial state
+plot_initial_state(1, map, x, X, D);
 
 
 % Main loop
@@ -82,7 +83,7 @@ for t = 2:length(T)
     
     % take measurement
     % pick feature
-    mf(:,t) = closestfeature(map,x(:,t));
+    mf(:, t) = closestfeature(map, x(:, t));
     % Select a motion disturbance
     d = QE * sqrt(Qe) * randn(m, 1);
     % determine measurement
@@ -100,34 +101,12 @@ for t = 2:length(T)
     end
 
     % particle filter estimation
-    for dd = 1:D
-        e = RE * sqrt(Re) * randn(n, 1);
-        Xp(:, dd) = [X(1, dd) + u(1, t) * cos(X(3, dd)) * dt;
-                    X(2, dd) + u(1, t) * sin(X(3, dd)) * dt;
-                    X(3, dd) + u(2, t) * dt] + e;
-        switch(meas)
-            case 1  % 1 - range
-                r = range(mf(1, t), Xp(1, dd), mf(2, t), Xp(2, dd));
-                hXp = r + d;
-            case 2  % 2 - bearing
-                b = bearing(mf(1, t), mf(2, t), Xp(1, t), Xp(2, t), Xp(3, t));
-                hXp = b + d;
-            case 3  % 3 - both
-                r = range(mf(1, t), Xp(1, dd), mf(2, t), Xp(2, dd));
-                b = bearing(mf(1, t), mf(2, t), Xp(1, dd), Xp(2, dd), Xp(3, dd));
-                hXp = [r; b] + d;
-        end
-        w(dd) = max(1e-8, mvnpdf(y(:, t), hXp, Q));
-    end
-    W = cumsum(w);
+    [X] = pf_localization(t, dt, meas, n, D, R, Q, d, X, Xp, mf, y, u);
 
-    for dd = 1:D
-        seed = max(W) * rand(1);
-        X(:, dd) = Xp(:, find(W > seed, 1));
-    end
-
+    % store particle filter states
     muParticle = mean(X);
-    SParticle = var(X);    muParticle_S(1, :, t) = muParticle;
+    SParticle = var(X);    
+    muParticle_S(1, :, t) = muParticle;
     
     % record
     if (makemovie) 
