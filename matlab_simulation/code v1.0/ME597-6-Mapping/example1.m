@@ -15,13 +15,6 @@
 % 4 Plot all data for this example
 
 
-
-
-
-
-
-
-
 % Occupancy Grid Mapping
 clear; clc;
 
@@ -55,17 +48,6 @@ u = [3 0 -3 0;
 % Robot sensor rotation command
 w = 0.3*ones(length(T));
 
-%{ 
-% True map
-M = 50;
-N = 60;
-map = zeros(M,N);
-map(4:10,5:10) = 1;
-map(30:35,40:45) = 1;
-map(3:6,40:60) = 1;
-map(20:30,25:29) = 1;
-map(40:50,5:25) = 1;
-%}
 map = loadmap(1);
 
 % remove these later
@@ -100,32 +82,14 @@ for t=2:length(T)
         x(1:2,t) = move;
     end
     x(3,t) = x(3,t-1) + w(t);
-    
-    % Generate a measurement data set
-    meas_r = getranges(map,x(:,t),meas_phi,rmax);
-
 
     %% Map update
     measL = zeros(M,N);
     
-    [L, measL] = bresmap(M,N,x(1,t),x(2,t),meas_phi(i)+x(3,t),meas_r(i),rmax);
-    
-    % Loop through each laser point/angle
-    for i = 1:length(meas_phi)
-        % Get inverse measurement model
-        invmod = inversescannerbres(M,N,x(1,t),x(2,t),meas_phi(i)+x(3,t),meas_r(i),rmax);
-        
-        % Loop through each cell from measurement model
-        for j = 1:length(invmod(:,1));
-            ix = invmod(j,1);
-            iy = invmod(j,2);
-            il = invmod(j,3);
-            
-            % Calculate updated log odds
-            L(ix,iy) = L(ix,iy) +log(il./(1-il))-L0(ix,iy);
-            measL(ix,iy)= measL(ix,iy) +log(il./(1-il))-L0(ix,iy);
-        end
-    end
+	% Call occupancy grid mapping function
+    [L, measL] = ogmap(map, x, meas_phi, rmax, 0);
+
+
     % Calculate probabilities
     m = exp(L)./(1+exp(L));
     invmod_T = exp(measL)./(1+exp(measL));
