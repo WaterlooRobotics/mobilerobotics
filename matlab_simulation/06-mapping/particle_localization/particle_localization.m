@@ -1,3 +1,5 @@
+addpath('./lib');
+
 % Particle filter localization
 clear;
 clc;
