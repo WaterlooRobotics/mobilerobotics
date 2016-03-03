@@ -49,23 +49,24 @@ while(true)
     y = [y; in];
     
     bel_open_pri = [bel_open(end), 1-bel_open(end)];
-%     bf_open = bayes_f(motion_m(:,:,u(end)+1), meas_m, bel_open_pri)
+    bf_open = bayes_filter(motion_m(:,:,u(end)+1)', meas_m(y(end)+1,:)', bel_open_pri');
     
-    prob_motion = motion_m(:,:,u(end)+1);
-    prob_meas = meas_m(y(end)+1,:);
-    pred_pri = [bel_open_pri; bel_open_pri];
+%     prob_motion = motion_m(:,:,u(end)+1)';
+%     prob_meas = meas_m(y(end)+1,:)';
+%     pred_pri = bel_open_pri';
+%     
+%     % Prediction update
+%     pred_upd = prob_motion(:,:) * pred_pri(:,:);
+%     % Measurement update
+%     meas_upd = prob_meas.*pred_upd;
+%     % Normalize
+%     meas_upd = meas_upd/norm(meas_upd);
+%     bf_open = [pred_upd meas_upd]
+%   
+    bel_open = [bel_open; 1/(sum(bf_open(:,2)))*bf_open(1,2)];
     
-    % Prediction update
-    pred_upd = dot(prob_motion(:,:)',pred_pri(:,:),2);
-    % Measurement update
-    meas_upd = prob_meas.*pred_upd';
-    % Normalize
-    meas_upd = meas_upd/norm(meas_upd);
-    bf_open = [pred_upd meas_upd']
-  
-    bel_open = [bel_open; 1/(sum(meas_upd))*meas_upd(1)];
-    
-    display(bel_open(end))
+    prompt = sprintf('bel(open)=%f',bel_open(end));
+    disp(prompt)
 end
 
 

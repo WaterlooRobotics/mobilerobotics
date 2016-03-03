@@ -158,6 +158,12 @@ for t=1:T
     bf = bayes_filter(mot_mod(:,:,u(t)), meas_mod(new_y,:)', bel);
     belp = bf(:,1);
     bel = bf(:,2);
+
+%      % Prediction update
+%     belp = squeeze(mot_mod(:,:,u(t)))*bel;
+%     % Measurement update
+%     bel = meas_mod(new_y,:)'.*belp;
+%     bel = bel/norm(bel);
     
     [pmax y_bel(t)] = max(bel); 
     
