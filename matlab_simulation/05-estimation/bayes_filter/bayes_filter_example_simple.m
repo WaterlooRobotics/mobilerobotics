@@ -48,23 +48,24 @@ while(true)
     in = input(prompt);
     y = [y; in];
     
-    bel_open_pri = [bel_open(end); 1-bel_open(end)];
+    bel_open_pri = [bel_open(end), 1-bel_open(end)];
 %     bf_open = bayes_f(motion_m(:,:,u(end)+1), meas_m, bel_open_pri)
     
     prob_motion = motion_m(:,:,u(end)+1);
-    prob_meas = meas_m;
-    pred_pri = diag(bel_open_pri);
+    prob_meas = meas_m(y(end)+1,:);
+    pred_pri = [bel_open_pri; bel_open_pri];
     
     % Prediction update
-    pred_upd = prob_motion * pred_pri;
+    pred_upd = dot(prob_motion(:,:)',pred_pri(:,:),2);
     % Measurement update
-    meas_upd = prob_meas.*pred_upd;
+    meas_upd = prob_meas.*pred_upd';
     % Normalize
     meas_upd = meas_upd/norm(meas_upd);
-    bf_open = [pred_upd meas_upd]
-    
+    bf_open = [pred_upd meas_upd']
   
-    bel_open = [bel_open; bf_open(y(end)+1,3)];
+    bel_open = [bel_open; 1/(sum(meas_upd))*meas_upd(1)];
+    
+    display(bel_open(end))
 end
 
 
