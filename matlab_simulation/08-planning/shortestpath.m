@@ -98,7 +98,14 @@ while (~done)
             end
             [val, best] = min(OpenSet(:,3));
             bestnode = OpenSet(best,:);
-
+            % Check end condition
+            if (bestnode(1)==finish)
+                done = 1;
+                % Move best to closed set
+                C = [C; bestnode];                
+                continue;
+            end 
+            
          case 4 %Dijkstra's 
             % Check if open set is empty
             if (length(OpenSet(:,1))==0)
@@ -113,6 +120,15 @@ while (~done)
             end
             [val, best] = min(OpenSet(:,3));
             bestnode = OpenSet(best,:);
+            % Check end condition
+            if (bestnode(1)==finish)
+                done = 1;
+                % Move best to closed set
+                C = [C; bestnode];                
+               
+                continue;
+            end 
+
             
          case 2 %Breadth-First
             if (length(OpenSet(:,1))==0)
@@ -123,26 +139,35 @@ while (~done)
              bestnode = OpenSet(best,:);
             % remove best node from open set
             OpenSet = OpenSet([best+1:end],:);                 
+            % Check end condition
+            if (bestnode(1)==finish)
+               % Move best to closed set
+                C = [C; bestnode];
+                continue;
+            end            
          case 3 %Depth-First
             if (length(OpenSet(:,1))==0)
                 done = 1;
                 continue;
             end
-             best = 1;  % Grap next node in the open set
-             bestnode = OpenSet(best,:);
+            best = 1;  % Grap next node in the open set
+            bestnode = OpenSet(best,:);
             % remove best node from open set
-            OpenSet = OpenSet([best+1:end],:);             
+            OpenSet = OpenSet([best+1:end],:);            
+            % Check end condition
+            if (bestnode(1)==finish)
+               % Move best to closed set
+                C = [C;bestnode];
+                continue;
+            end            
             
      end
      bestnode
+   
      % Move best to closed set
      C = [C; bestnode];
 
-     % Check end condition
-     if (bestnode(1)==finish)
-        done = 1;
-        continue;
-     end     
+    
 
     % Get all neighbours of best node
     neigh = find(edges(bestnode(1),:)==1);
@@ -152,7 +177,9 @@ while (~done)
         % If neighbour is in closed set, skip        
         found = find(C(:,1)==neigh(i),1);
         if (length(found)==1)
-            continue;
+            if(C(found,1)~=finish)
+                continue;
+            end
         end
         
         dcur = bestnode(4)+dists(bestnode(1),neigh(i));
@@ -169,7 +196,7 @@ while (~done)
                    end
                 end
               
-            case 2 %Breadth-First
+            case 2 %Breadth-First   (QUEUE)
                 % If neighbour is not in open set, add it
                 if (length(found)==0)
                    OpenSet = [OpenSet; neigh(i) bestnode(1) dcur dcur];     
@@ -180,7 +207,7 @@ while (~done)
                    end
                 end                   
             
-            case 3 %Depth-First
+            case 3 %Depth-First  (STACK)
                 % If neighbour is not in open set, add it
                 if (length(found)==0)
                    OpenSet = [neigh(i) bestnode(1) dcur dcur; OpenSet];
@@ -193,7 +220,7 @@ while (~done)
             case 4 %Dijkstra's 
                 % If neighbour is not in open set, add it
                 if (length(found)==0) 
-                        OpenSet = [OpenSet; neigh(i) bestnode(1) dcur dcur]; 
+                   OpenSet = [OpenSet; neigh(i) bestnode(1) dcur dcur]; 
                 
                 else % If neighbour is in open set, check if new route is better
                     if (dcur < OpenSet(found,4))
@@ -230,7 +257,8 @@ end
 done = 0;
 cur = finish;
 curC = find(C(:,1)==finish);
-prev =  C(curC,2);
+[ldistance,lessCostIndex]= min(C(curC,3));
+prev = C(curC(lessCostIndex),2);
 spath = [cur];
 sdist = 0;
 while (~done)
@@ -241,7 +269,8 @@ while (~done)
     plot([nodes(prev,1) nodes(cur,1)], [nodes(prev,2) nodes(cur,2)],'g','LineWidth',2)
     cur = prev;
     curC = find(C(:,1)==cur);
-    prev = C(curC,2);
+    [ldistance,lessCostIndex]= min(C(curC,3));
+    prev = C(curC(lessCostIndex),2);
     if ((createVideo >0) && (createVideo <=1))
        writeVideo(vidObj, getframe(gcf));
     end
