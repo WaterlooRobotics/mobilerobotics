@@ -156,8 +156,8 @@ for t=1:T
     
     %% Bayesian Estimation
     bf = bayes_filter(mot_mod(:,:,u(t)), meas_mod(new_y,:)', bel);
-    bel = bf(:,2);
     belp = bf(:,1);
+    bel = bf(:,2);
     
     [pmax y_bel(t)] = max(bel); 
     

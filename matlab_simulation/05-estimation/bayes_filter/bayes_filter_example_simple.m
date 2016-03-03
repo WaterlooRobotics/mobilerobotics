@@ -20,10 +20,10 @@ motion_m(:,:,2) = [1 0; 0.8 0.2];
 % Measurement Model
 %  measurements = {sens_open,sens_closed}
 %  p(y|x)
-%         y = sens_open sens_closed
-%                +-        -+ x =
-%                | 0.6  0.2 | open
-%                | 0.4  0.8 | closed
+%             x = open  closed
+%                +-        -+ y =
+%                | 0.6  0.2 | sens_open
+%                | 0.4  0.8 | sens_closed
 %                +-        -+
 meas_m = [0.6 0.2; 0.4, 0.8];
 % State Vector (boolean door open or closed)
@@ -36,13 +36,8 @@ y = [];
 %% Initial Set-up
 % At beginning, assume the door is equally likely to be open or closed
 % This forms our initial prior belief
-bel_open_pri = [];
-bel_closed_pri = [];
-
-bel_open_pri = [bel_open_pri; 0.5]; % Concatenate
-bel_closed_pri = [bel_closed_pri; 0.5];
-bel_open = bel_open_pri;
-bel_closed = bel_closed_pri;
+bel_open = [];
+bel_open = [bel_open; 0.5]; % Concatenate
 
 %% Running the model
 while(true)
@@ -53,11 +48,23 @@ while(true)
     in = input(prompt);
     y = [y; in];
     
-    bf_open = bayes_filter(motion_m, meas_m, bel_open(end))
-    bf_closed = bayes_filter(motion_m, meas_m, bel_closed(end))
+    bel_open_pri = [bel_open(end); 1-bel_open(end)];
+%     bf_open = bayes_f(motion_m(:,:,u(end)+1), meas_m, bel_open_pri)
     
-    bel_open = [bel_open; bf_open(:,2)];
-    bel_closed = [bel_closed; bf_closed(:,2)];
+    prob_motion = motion_m(:,:,u(end)+1);
+    prob_meas = meas_m;
+    pred_pri = diag(bel_open_pri);
+    
+    % Prediction update
+    pred_upd = prob_motion * pred_pri;
+    % Measurement update
+    meas_upd = prob_meas.*pred_upd;
+    % Normalize
+    meas_upd = meas_upd/norm(meas_upd);
+    bf_open = [pred_upd meas_upd]
+    
+  
+    bel_open = [bel_open; bf_open(y(end)+1,3)];
 end
 
 
