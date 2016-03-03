@@ -12,6 +12,8 @@ V1.1 - Improved readability
      - Added circle() function for plotting functionality
      - Removed predicted mean from figure(2) due to unseen benefit
      - Added instructions
+V1.2 - Feature measurement moved to separate function
+     - Removed old EKF_Localiztion
 
 INTRUCTIONS
 You can observe the effects of:
@@ -34,15 +36,15 @@ Guidelines
 -Comment well
 -Robust to error
 -Organized
--Split into algoithm, environment/utilities/planning/control/mapping
-                        estimation/sensor/motion
 -Use MATLAB style guide
 
 To do
--Decide on what to turn into fuction
--Suggest maybe writing function to create Gt and Ht
--Update functions already there
 -Creative example that show concepts
+-Work with EKF guy
+    -In:function handle, mup, prior S, h(x) function handle, Q, R
+    -Out:x(k), S 
+-Feature selection methods into environment function
+-Test
 %}
 clear;clc;
 
@@ -80,7 +82,7 @@ R = [1e-4 0 0;
 [eigenvectorR, eigenvalueR] = eig(R);
 
 % Measurement type and noise
-MEASUREMENT_TYPE = 1; % 1 - range, 2 - bearing, 3 - both
+MEASUREMENT_TYPE = 3; % 1 - range, 2 - bearing, 3 - both
 switch(MEASUREMENT_TYPE)
     case 1
         Q = 0.005;
@@ -127,34 +129,10 @@ for t=2:length(T)
               + motionDisturbance;
 
     % Take measurement
-    % Identify features that are in view
-    featureInViewFlag = zeros(nFeatures,1); % Initialize inview vector
-    for i=1:nFeatures
-        % If feature is visible
-        if (inview(featureMap(i,:) , x(:,t) , RANGE_MAX , THETA_MAX))
-            featureInViewFlag(i) = 1;   % Set feature to visible
-            selectedFeature = featureMap(i,:);
-            % Select a motion disturbance
-            measurementDisturbance = eigenvectorQ * sqrt(eigenvalueQ) * randn(nMeasurements,1);
-            % Determine measurement
-            switch(MEASUREMENT_TYPE)
-                case 1
-                    y(i,t) = max(0.001,sqrt((selectedFeature(1)-x(1,t))^2 +...
-                        (selectedFeature(2)-x(2,t))^2) +...
-                        measurementDisturbance);
-                case 2
-                    y(i,t) = [atan2(selectedFeature(2)-x(2,t),...
-                        selectedFeature(1)-x(1,t))-x(3,t)] +...
-                        measurementDisturbance;
-                case 3
-                    y(2*(i-1)+1:2*i,t) = ...
-                        [max(0.001, sqrt((selectedFeature(1)-x(1,t))^2 + (selectedFeature(2)-x(2,t))^2));
-                        atan2(selectedFeature(2)-x(2,t),selectedFeature(1)-x(1,t))-x(3,t)] + measurementDisturbance;
-            end
-        end
-    end
+    [p,featureInViewFlag] = get2dpointmeasurement(featureMap,x(:,t),RANGE_MAX,THETA_MAX,Q,MEASUREMENT_TYPE);
+    y(1:length(p),t)=p;
 
-    %% Extended Kalman Filter Estimation
+    %% Extended Kalman Filter Estimation - To be replace by function
     % PREDICTION UPDATE
     % Predicted mean
     mup =    [mu(1) + u(1,t)*cos(mu(3))*dt;
