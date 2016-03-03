@@ -155,10 +155,10 @@ for t=1:T
     yt(t) = new_y;
     
     %% Bayesian Estimation
-    bf = bayes_filter(mot_mod(:,:,u(t)), meas_mod(new_y,:), bel);
+    bf = bayes_filter(mot_mod(:,:,u(t)), meas_mod(new_y,:)', bel);
     bel = bf(:,2);
     belp = bf(:,1);
-
+    
     [pmax y_bel(t)] = max(bel); 
     
     %% Plot beliefs
