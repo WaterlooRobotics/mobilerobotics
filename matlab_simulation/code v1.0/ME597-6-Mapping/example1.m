@@ -75,6 +75,7 @@ x(:,1) = x0;
 for t=2:length(T)
     % Robot motion
     move = x(1:2,t-1) + u(:,ui)
+	% If the robot hits a wall or obstacle, change direction
     if ((move(1)>M||move(2)>N||move(1)<1||move(2)<1) || (map(move(1),move(2))==1))
         x(:,t) = x(:,t-1);
         ui = mod(ui,4)+1;
