@@ -12,6 +12,7 @@ V1.1 - Improved readability
      - Added instructions
 V1.2 - Feature measurement moved to separate function
      - Removed old EKF_Localiztion
+
 INTRUCTIONS
 You can observe the effects of:
 -Bad prior
@@ -26,6 +27,11 @@ You can observe the effects of:
     -Change RANGE_MAX or THETA_MAX
 -Feature density
     -Add/remove features from featureMap
+
+EXPLAIN WHY ONLY USE ONE MEASUREMENT 
+-EKF not programmed to use multiple measurments if they are available
+-further away objects seems to improve bearning uncertainty, but whether or
+not they are used depend on where they are in the featuresMap
 
 To do
 -Creative example that show concepts
@@ -68,13 +74,16 @@ u(2,:)=0.3 * u(2,:);
 motion_model = @ (x,u) [x(1) + u(1)*cos(x(3))*dt;
                         x(2) + u(1)*sin(x(3))*dt;
                         x(3) + u(2)*dt]
+linearized_motion_model = @ (mu,u)[ 1 0 -u(1)*sin(mu(3))*dt;
+                                    0 1 u(1)*cos(mu(3))*dt;
+                                    0 0 1];
 R = [1e-4 0 0; 
      0 1e-4 0; 
      0 0 1e-5];
 [eigenvectorR, eigenvalueR] = eig(R);
 
 % Measurement type and noise
-MEASUREMENT_TYPE = 1; % 1 - range, 2 - bearing, 3 - both
+MEASUREMENT_TYPE = 3; % 1 - range, 2 - bearing, 3 - both
 switch(MEASUREMENT_TYPE)
     case 1
         Q = 0.005;
@@ -121,17 +130,96 @@ for t=2:length(T)
     [p,featureInViewFlag] = get2dpointmeasurement(featureMap,x(:,t),RANGE_MAX,THETA_MAX,Q,MEASUREMENT_TYPE);
     y(1:length(p),t)=p;
 
-    %% Extended Kalman Filter Estimation - To be replace by function
+%     %% Extended Kalman Filter Estimation - To be replace by function
+%     % PREDICTION UPDATE
+%     % Predicted mean
+%     mup =    [mu(1) + u(1,t)*cos(mu(3))*dt;
+%               mu(2) + u(1,t)*sin(mu(3))*dt;
+%               mu(3) + u(2,t)*dt];
+%     % Predicted covariance      
+%     Gt = linearized_motion_model(mu,u(:,t));
+%     Sp = Gt*S*Gt' + R;
+%     % Store results
+%     mup_S(:,t) = mup;
+%     % Linearization
+%     for i=1:nFeatures
+%         if (featureInViewFlag(i)&~featureFoundFlag)
+%             featureFoundFlag=1;
+%             selectedFeature = featureMap(i,:);
+%             featureRange = sqrt((selectedFeature(1)-mup(1))^2 + ...
+%                 (selectedFeature(2)-mup(2))^2);
+%             
+% %           [mu, S, mup, K] = ekf(mu,u,S,y,motion_model,measurement_model,linearized_motion_model,linearized_measurement_model,Q,R)
+%             % Linearize measurement matrix
+%             switch(MEASUREMENT_TYPE) 
+%                 case 1
+%                     Ht = [ -(selectedFeature(1)-mup(1))/featureRange ...
+%                            -(selectedFeature(2)-mup(2))/featureRange ...
+%                             0];
+%                case 2
+%                     Ht = [ (selectedFeature(2)-mup(2))/featureRange^2 ...
+%                         -(selectedFeature(1)-mup(1))/featureRange^2 ...
+%                         -1];
+%                 case 3
+%                     Ht = [ -(selectedFeature(1)-mup(1))/featureRange ...
+%                         -(selectedFeature(2)-mup(2))/featureRange ...
+%                         0;
+%                         (selectedFeature(2)-mup(2))/featureRange^2 ...
+%                         -(selectedFeature(1)-mup(1))/featureRange^2 ...
+%                         -1]; ...
+%             end
+%         
+%             % MEASUREMENT UPDATE
+%             % Calculate Kalman gain
+%             K = Sp * Ht' * inv(Ht * Sp * Ht' + Q);
+%             % Error threshold checking
+%             % [I] holds error between measurement and prediction (range and/or bearing)
+%             switch(MEASUREMENT_TYPE)
+%                 case 1
+%                     I = y(i,t) - sqrt((selectedFeature(1)-mup(1))^2 +...
+%                         (selectedFeature(2)-mup(2))^2);
+%                     Inn(t) = I;
+%                 case 2
+%                     I = y(i,t) - (atan2(selectedFeature(2)-mup(2),...
+%                         selectedFeature(1)-mup(1)) - mup(3));
+%                     I = mod(I+pi,2*pi)-pi;
+%                     Inn(t) = I;
+%                 case 3
+%                     I = y(2*(i-1)+1:2*i,t)-[sqrt((selectedFeature(1)-mup(1))^2 + (selectedFeature(2)-mup(2))^2);
+%                         (atan2(selectedFeature(2)-mup(2),selectedFeature(1)-mup(1)) - mup(3))];
+%                     I(2) = mod(I(2)+pi,2*pi)-pi;
+%                     Inn(:,t) = I;
+%             end
+%             % If error in __ go to debug mode
+%                 % Case 1: range > 10 units
+%                 % Case 2: bearing > 10 rads
+%                 % Case 3: norm(range;bearing) > 10
+%             if (norm(I) > 10)
+%                 keyboard;
+%             end
+%             % Update prediction
+%             mu = mup + K*I;
+%             % Update covariance
+%             S = (eye(nStates) - K*Ht) * Sp;
+%         end
+%     end
+%     % ADD ERROR CHECKING
+%     
+%     
+%     
+%     featureFoundFlag=0;
+%     % If no features in view no updated prediction
+%     if (sum(featureInViewFlag)==0) mu = mup; end
+%     
+%     % Store results
+%     mu_S(:,t) = mu;
+    
+    %% Temp Copy of EKF
     % PREDICTION UPDATE
-    % Predicted mean
+    % Predicted mean. Needed to calculated linearized measurement model
     mup =    [mu(1) + u(1,t)*cos(mu(3))*dt;
               mu(2) + u(1,t)*sin(mu(3))*dt;
               mu(3) + u(2,t)*dt];
-    % Predicted covariance      
-    Gt = [ 1 0 -u(1,t)*sin(mu(3))*dt;
-           0 1 u(1,t)*cos(mu(3))*dt;
-           0 0 1];
-    Sp = Gt*S*Gt' + R;
     % Store results
     mup_S(:,t) = mup;
     % Linearization
@@ -141,63 +229,70 @@ for t=2:length(T)
             selectedFeature = featureMap(i,:);
             featureRange = sqrt((selectedFeature(1)-mup(1))^2 + ...
                 (selectedFeature(2)-mup(2))^2);
-            
-            [mu, S, mup, K] = ekf(mu,u,S,y,motion_model,measurement_model,linearized_motion_model,linearized_measurement_model,Q,R)
-            % Linearize measurement matrix
+            % Define measurement model and do EKF
             switch(MEASUREMENT_TYPE) 
                 case 1
-                    Ht = [ -(selectedFeature(1)-mup(1))/featureRange ...
-                           -(selectedFeature(2)-mup(2))/featureRange ...
-                            0];
-               case 2
-                    Ht = [ (selectedFeature(2)-mup(2))/featureRange^2 ...
-                        -(selectedFeature(1)-mup(1))/featureRange^2 ...
-                        -1];
+                    measurement_model = @ (mup) ...
+                        sqrt((selectedFeature(1)-mup(1))^2 + ...
+                        (selectedFeature(2)-mup(2))^2);
+                    linearized_measurement_model = @ (mup) ...
+                        [ -(selectedFeature(1)-mup(1))/featureRange ...
+                          -(selectedFeature(2)-mup(2))/featureRange ...
+                          0];
+                    [mu, S, test, K] = ekf(mu, u(:,t), S, y(i,t), motion_model, ...
+                        measurement_model, linearized_motion_model, ...
+                        linearized_measurement_model,Q,R);
+                case 2
+                    measurement_model = @ (mup) ...
+                        (atan2(selectedFeature(2)-mup(2),...
+                        selectedFeature(1)-mup(1)) - mup(3));
+                    linearized_measurement_model = @ (mup) ...
+                        [ (selectedFeature(2)-mup(2))/featureRange^2 ...
+                          -(selectedFeature(1)-mup(1))/featureRange^2 ...
+                          -1];
+                    [mu, S, test, K] = ekf(mu, u(:,t), S, y(i,t), motion_model, ...
+                        measurement_model, linearized_motion_model, ...
+                        linearized_measurement_model,Q,R);
                 case 3
-                    Ht = [ -(selectedFeature(1)-mup(1))/featureRange ...
+                    measurement_model = @ (mup) ...
+                        [sqrt((selectedFeature(1)-mup(1))^2 + (selectedFeature(2)-mup(2))^2);
+                        (atan2(selectedFeature(2)-mup(2),selectedFeature(1)-mup(1)) - mup(3))];
+                    linearized_measurement_model = @ (mup) ...
+                        [ -(selectedFeature(1)-mup(1))/featureRange ...
                         -(selectedFeature(2)-mup(2))/featureRange ...
                         0;
                         (selectedFeature(2)-mup(2))/featureRange^2 ...
                         -(selectedFeature(1)-mup(1))/featureRange^2 ...
-                        -1]; ...
+                        -1];
+                    [mu, S, test, K] = ekf(mu, u(:,t), S, y(2*(i-1)+1:2*i,t),...
+                        motion_model,measurement_model, ...
+                        linearized_motion_model, linearized_measurement_model,Q,R);
             end
-        
-            % MEASUREMENT UPDATE
-            % Calculate Kalman gain
-            K = Sp * Ht' * inv(Ht * Sp * Ht' + Q);
-            % Error threshold checking
-            % [I] holds error between measurement and prediction (range and/or bearing)
-            switch(MEASUREMENT_TYPE)
-                case 1
-                    I = y(i,t) - sqrt((selectedFeature(1)-mup(1))^2 +...
-                        (selectedFeature(2)-mup(2))^2);
-                    Inn(t) = I;
-                case 2
-                    I = y(i,t) - (atan2(selectedFeature(2)-mup(2),...
-                        selectedFeature(1)-mup(1)) - mup(3));
-                    I = mod(I+pi,2*pi)-pi;
-                    Inn(t) = I;
-                case 3
-                    I = y(2*(i-1)+1:2*i,t)-[sqrt((selectedFeature(1)-mup(1))^2 + (selectedFeature(2)-mup(2))^2);
-                        (atan2(selectedFeature(2)-mup(2),selectedFeature(1)-mup(1)) - mup(3))];
-                    I(2) = mod(I(2)+pi,2*pi)-pi;
-                    Inn(:,t) = I;
-            end
-            % If error in __ go to debug mode
-                % Case 1: range > 10 units
-                % Case 2: bearing > 10 rads
-                % Case 3: norm(range;bearing) > 10
-            if (norm(I) > 10)
-                keyboard;
-            end
-            % Update prediction
-            mu = mup + K*I;
-            % Update covariance
-            S = (eye(nStates) - K*Ht) * Sp;
         end
     end
     % ADD ERROR CHECKING
-    
+%     switch(MEASUREMENT_TYPE)
+%         case 1
+%             I = y(i,t) - sqrt((selectedFeature(1)-mup(1))^2 +...
+%                 (selectedFeature(2)-mup(2))^2);
+%             Inn(t) = I;
+%         case 2
+%             I = y(i,t) - (atan2(selectedFeature(2)-mup(2),...
+%                 selectedFeature(1)-mup(1)) - mup(3));
+%             I = mod(I+pi,2*pi)-pi;
+%             Inn(t) = I;
+%         case 3
+%             I = y(2*(i-1)+1:2*i,t)-[sqrt((selectedFeature(1)-mup(1))^2 + (selectedFeature(2)-mup(2))^2);
+%                 (atan2(selectedFeature(2)-mup(2),selectedFeature(1)-mup(1)) - mup(3))];
+%             I(2) = mod(I(2)+pi,2*pi)-pi;
+%             Inn(:,t) = I;
+%     end
+%     % If error in __ go to debug mode
+%         % Case 1: range > 10 units
+%         % Case 2: bearing > 10 rads
+%         % Case 3: norm(range;bearing) > 10
+%     if (norm(I) > 10)
+%         keyboard;
     
     
     featureFoundFlag=0;
@@ -206,7 +301,6 @@ for t=2:length(T)
     
     % Store results
     mu_S(:,t) = mu;
-
     %% Plot results
     %Plotting initializations
     figure(1);clf; hold on;
