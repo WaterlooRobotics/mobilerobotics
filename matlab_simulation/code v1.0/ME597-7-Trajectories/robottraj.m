@@ -8,16 +8,19 @@ Tmax = 10;
 dt = 0.1;
 T = 0:dt:Tmax;
 
+% Let user choose the input trajectory
 disp('What is the input trajectory?')
 disp('1: Spiral; 2: Nudges; 3: Swerves; 4: Corner;')
 disp('5: User defined motion model')
 prompt = '';
 index = input(prompt);
 
+% Let user define an initial condition
 disp('Please give an initial condition, i.e. [1 1 1]')
 prompt = '';
 x0 = input(prompt)';
 
+% Define the states and initial condition
 xddot = zeros(3,length(T));
 xd = zeros(3,length(T)+1);
 xd(:,1)= x0;
@@ -27,6 +30,7 @@ if index == 1
     % Spiral
     v = sin(0.2*T);
     w = ones(size(T));
+    
     for t=1:length(T)
         xddot(:,t) = [v(t)*cos(xd(3,t));
                       v(t)*sin(xd(3,t));
@@ -48,9 +52,6 @@ elseif index == 2
     w = zeros(size(T));
     c = floor(length(w)/8);
     w(2*c+1) = 5;
-%     w(3*c+1:4*c) = -1;
-%     w(4*c+1:5*c) = -1;
-%     w(5*c+1:6*c) = 1;
 
     for t=1:length(T)
         xddot(:,t) = [v(t)*cos(xd(3,t));
