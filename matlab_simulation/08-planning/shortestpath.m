@@ -91,11 +91,6 @@ while (~done)
                 sdist = 0;
                 return;
             end             
-            if (length(OpenSet(:,1))==0)
-                spath = [];
-                sdist = 0;
-                return;
-            end
             [val, best] = min(OpenSet(:,3));
             bestnode = OpenSet(best,:);
             % Check end condition
@@ -113,11 +108,6 @@ while (~done)
                 sdist = 0;
                 return;
             end             
-            if (length(OpenSet(:,1))==0)
-                spath = [];
-                sdist = 0;
-                return;
-            end
             [val, best] = min(OpenSet(:,3));
             bestnode = OpenSet(best,:);
             % Check end condition
@@ -125,7 +115,6 @@ while (~done)
                 done = 1;
                 % Move best to closed set
                 C = [C; bestnode];                
-               
                 continue;
             end 
 
@@ -139,12 +128,7 @@ while (~done)
              bestnode = OpenSet(best,:);
             % remove best node from open set
             OpenSet = OpenSet([best+1:end],:);                 
-            % Check end condition
-            if (bestnode(1)==finish)
-               % Move best to closed set
-                C = [C; bestnode];
-                continue;
-            end            
+          
          case 3 %Depth-First
             if (length(OpenSet(:,1))==0)
                 done = 1;
@@ -154,15 +138,8 @@ while (~done)
             bestnode = OpenSet(best,:);
             % remove best node from open set
             OpenSet = OpenSet([best+1:end],:);            
-            % Check end condition
-            if (bestnode(1)==finish)
-               % Move best to closed set
-                C = [C;bestnode];
-                continue;
-            end            
-            
+
      end
-     bestnode
    
      % Move best to closed set
      C = [C; bestnode];
