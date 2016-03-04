@@ -1,4 +1,4 @@
-function [mean_,covariance,mean_predicted, kalman_gain] = kalman_filter(motion_model,mean_,covariance,R,measurement_model,measurement,Q)
+function [mean_,covariance,mean_predicted, kalman_gain] = kalman_filter(sysd,mean_,covariance,R,control,measurement,Q)
 
 % Performs one iteration of Kalman Filtering
 
@@ -10,6 +10,7 @@ function [mean_,covariance,mean_predicted, kalman_gain] = kalman_filter(motion_m
 %       measurement_model  : Function reference for measurement model
 %       measurement        : Measurment of current time step 
 %       Q                  : Measurement disturbance
+%       example            : Which example we want to test
 
 % Outputs:
 %       mean_predicted     : Predicted mean after motion update
@@ -17,9 +18,13 @@ function [mean_,covariance,mean_predicted, kalman_gain] = kalman_filter(motion_m
 %       mean_              : Final estimated mean after iteration
 %       covariance         : Final estimated covariance after iteration 
 
+% Get A,B,C,D matrices for motion prediction
+A = sysd.A;
+B = sysd.B;
+C = sysd.C;
+D = sysd.D;
+
 % Prediction Step:
-% Get A and B matrices for motion prediction
-[A, B] = motion_model();
 
 % Get dimension of state
 n = length(A(1,:));
@@ -31,8 +36,6 @@ mup = A*mean_ + B*control;
 Sp = A*covariance*A' + R;
 
 % Measurement Step:
-% Get C matrix for measurement prediction
-[C] = measurement_model();
 
 % Calculate kalman gain
 kalman_gain = Sp*C'*inv(C*Sp*C'+Q);
