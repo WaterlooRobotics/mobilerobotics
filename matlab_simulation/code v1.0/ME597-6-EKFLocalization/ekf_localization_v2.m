@@ -1,7 +1,6 @@
 %{
-Extended Kalman Filter Localization
-Author: Rhyse
-Date: March 4, 2016
+EXTENDED KALMAN FILTER LOCALIZATION
+
 VERSION HISTORY
 V1.0 - Provided by prof Waslander
 V1.1 - Improved readability
@@ -12,6 +11,8 @@ V1.1 - Improved readability
      - Added instructions
 V1.2 - Feature measurement moved to separate function
      - Removed old EKF_Localiztion
+V1.3 - Added function handles for motion and measurement model
+     - Integrated EKF function code
 
 INTRUCTIONS
 You can observe the effects of:
@@ -38,6 +39,8 @@ To do
 -Creative example that show concepts
 -Feature selection methods into environment function
 -Test
+-replace for loop with find
+-turn ekf localization into function
 %}
 clear;clc;
 
@@ -51,7 +54,6 @@ if(makemovie)
 end
 
 %% Initialization
-
 % Time
 Tf = 20;
 dt = 0.1;
@@ -68,16 +70,16 @@ S = 0.1 * eye(3);% covariance (Sigma)
 u = ones(2, length(T));
 u(2,:)=0.3 * u(2,:);
 
-% Motion Disturbance model
+% Motion model
 motion_model = @ (x,u) [x(1) + u(1)*cos(x(3))*dt;
                         x(2) + u(1)*sin(x(3))*dt;
                         x(3) + u(2)*dt]
 linearized_motion_model = @ (mu,u)[ 1 0 -u(1)*sin(mu(3))*dt;
                                     0 1 u(1)*cos(mu(3))*dt;
                                     0 0 1];
-R = [1e-4 0 0; 
-     0 1e-4 0; 
-     0 0 1e-5];
+R = [1e-4 0    0; 
+     0    1e-4 0; 
+     0    0    1e-5];
 [eigenvectorR, eigenvalueR] = eig(R);
 
 % Measurement type and noise
@@ -88,8 +90,8 @@ switch(MEASUREMENT_TYPE)
     case 2
         Q = 0.005;
     case 3
-        Q = [0.05 0;
-              0 0.05];
+        Q = [0.05 0 ; 
+             0    0.05];
 end
 [eigenvectorQ, eigenvalueQ] = eig(Q);
 
@@ -99,11 +101,7 @@ THETA_MAX = pi / 4; % rads
 
 % Feature Map
 % Position of features on map [X Position, Y Position ; ...]
-featureMap = [ 5 5;  
-               3  1;
-               -4  5;
-               -2  3;
-               0  4];
+featureMap = [ 5 5 ; 3  1 ; -4  5 ; -2  3 ; 0  4 ];
 nFeatures = length(featureMap(:,1));
 
 % Simulation Initializations
@@ -130,15 +128,12 @@ for t=2:length(T)
     
     %% Extended Kalman Filter
     % Predicted mean. Needed to calculated linearized measurement model
-    mup =    [mu(1) + u(1,t)*cos(mu(3))*dt;
-              mu(2) + u(1,t)*sin(mu(3))*dt;
-              mu(3) + u(2,t)*dt];
+    mup = motion_model(mu,u(:,t));
     % Store results
     mup_S(:,t) = mup;
     
     % Call EKF function
     for i=1:nFeatures
-        
         % If a feature is in view and no features have been observed yet
         if (featureInViewFlag(i)&~featureFoundFlag)
             featureFoundFlag=1; %Robot has seen a feature for time t
@@ -177,7 +172,6 @@ for t=2:length(T)
                     I = y(i,t) - measurement_model(mup);
                     I = mod(I+pi,2*pi)-pi;
                     Inn(t) = I;
-            Inn(t) = I;
                 case 3
                     measurement_model = @ (mup) ...
                         [sqrt((selectedFeature(1)-mup(1))^2 + (selectedFeature(2)-mup(2))^2);
@@ -200,17 +194,14 @@ for t=2:length(T)
                 % Case 1: Radius error > 10
                 % Case 2: Bearing error > 10 rad
                 % Case 3: Norm of radius and bearing error > 10
-            if (norm(I) > 10)
-                keyboard;
-            end
+            if (norm(I) > 10) keyboard; end
         end
     end
-    %
+    
     % Reset feature found flag
-        featureFoundFlag=0;
+    featureFoundFlag=0;
     % If no features in view no updated prediction
     if (sum(featureInViewFlag)==0) mu = mup; end
-    
     % Store results
     mu_S(:,t) = mu;
     %% Plot results
@@ -219,12 +210,10 @@ for t=2:length(T)
     axis equal
     axis([-4 6 -1 7]) % Set to maximum of robot trajectory and map features
     
-    % PLOT
     % Plot states
     plot(x(1,1:t),x(2,1:t), 'ro--')
     % Plot map features
     plot(featureMap(:,1),featureMap(:,2),'go', 'MarkerSize',10,'LineWidth',2);
-    
     
     % Plot initial prediction (model propgation)
     plot(mup_S(1,1:t),mup_S(2,1:t), 'go--')
@@ -236,6 +225,7 @@ for t=2:length(T)
     S_pos = [S(1,1) S(1,2); S(2,1) S(2,2)];
     error_ellipse(S_pos,mu_pos,0.95);
     error_ellipse(S_pos,mu_pos,0.999);
+    
     % Plot robot measurement to inview features
     for i = 1:nFeatures
         if (featureInViewFlag(i))
@@ -256,16 +246,14 @@ for t=2:length(T)
     drawnow;
     
     if (makemovie) writeVideo(vidObj, getframe(gca)); end
-
 end
+
 % Add plotting options for figure 1
 title('Range & Bearing Measurements for Localization')
 xlabel('X Postion [Unit]')
 ylabel('Y Position [Unit]')
 legend('Robot State','Map Feature','Initial State Prediction',...
     'Updated State Prediction')
-
-if (makemovie) close(vidObj); end
 
 %Plot measurement vs prediction error time series
 figure(2);clf; hold on;
@@ -281,3 +269,5 @@ switch (MEASUREMENT_TYPE)
     case 3
         legend('Range Error','Bearing Error')
 end
+
+if (makemovie) close(vidObj); end
