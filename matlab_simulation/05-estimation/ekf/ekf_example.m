@@ -37,8 +37,11 @@ x = zeros(n,length(T));
 x(:,1) = x0;
 m = length(Q(:,1));
 y = zeros(m,length(T));
+
+% Variables to store during iteration
 mup_S = zeros(n,length(T));
 mu_S = zeros(n,length(T));
+K_S = zeros(n,n,length(T));
 
 %% Main loop
 for t=2:length(T)
