@@ -3,15 +3,22 @@ function [ mu, S, mup, K, I ] = multisensorekf(selectedFeature, MEASUREMENT_TYPE
 %capabilities
 
 %Sensor types listed as MEASUREMENT_TYPE
-% Inputs:   featureMap: 2D array holding [x position, y position ; ...]
-%           state: True robot state at considered time step [x position, y position, theta]
-%           RANGE_MAX: Maximum range of scanner
-%           THETA_MAX: Maximum bearing of scanner [rad]
+% Inputs:   selectedFeature: Location of feature using for localization [X pos, Y pos]
 %           MEASUREMENT_TYPE: 1 - range, 2 - bearing, 3 - both
-% Outputs:  measurement: Vector containing range&|bearing measurement for
-%                           all objects in view
-%           featureInViewFlag: A vector which indicates which features are
-%                               in view
+%           index: Which feature is being considered
+%           mu: State estimate at time t-1
+%           u: Input at time t
+%           S: Covariance matrix
+%           y: Measurement at time t
+%           motion_model: function handle of non-linear motion model
+%           linearized_motion_model: motion_model linearized
+%           Q: Measurement disturbance matrix
+%           R: Motion disturbance matrix
+% Outputs:  mu: Updated state prediction
+%           S: Updated covariance matrix
+%           mup: State prediction using motion model only
+%           K: Kalman gain
+%           I: Error between measurement and model prediction
 
 %% Initialize variables
 K=0;
