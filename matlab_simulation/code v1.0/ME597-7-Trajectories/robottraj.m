@@ -9,7 +9,7 @@ dt = 0.1;
 T = 0:dt:Tmax;
 
 disp('What is the input trajectory?')
-disp('1: Swerves; 2: Nudge; 3: Lane change; 4: Corner;')
+disp('1: Spiral; 2: Nudges; 3: Swerves; 4: Corner;')
 disp('5: User defined motion model')
 prompt = '';
 index = input(prompt);
@@ -24,7 +24,7 @@ xd(:,1)= x0;
 
 
 if index == 1
-    % Swerves
+    % Spiral
     v = sin(0.2*T);
     w = ones(size(T));
     for t=1:length(T)
@@ -39,7 +39,7 @@ if index == 1
     for t=1:3:length(T)
         drawcar(xd(1,t),xd(2,t),xd(3,t),.05,1);
     end
-    title('Desired Trajectory: Swerves');
+    title('Desired Trajectory: Spiral');
     axis equal;
     
 elseif index == 2
@@ -47,10 +47,10 @@ elseif index == 2
     v = 2*ones(size(T));
     w = zeros(size(T));
     c = floor(length(w)/8);
-    w(2*c+1:3*c) = 1;
-    w(3*c+1:4*c) = -1;
-    w(4*c+1:5*c) = -1;
-    w(5*c+1:6*c) = 1;
+    w(2*c+1) = 5;
+%     w(3*c+1:4*c) = -1;
+%     w(4*c+1:5*c) = -1;
+%     w(5*c+1:6*c) = 1;
 
     for t=1:length(T)
         xddot(:,t) = [v(t)*cos(xd(3,t));
@@ -68,7 +68,7 @@ elseif index == 2
     axis equal;
 
 elseif index == 3
-    % Lane change
+    % Swerves
     v = 2*ones(size(T));
     w = zeros(size(T));
     c = floor(length(w)/8);
@@ -87,7 +87,7 @@ elseif index == 3
     for t=1:5:length(T)
         drawcar(xd(1,t),xd(2,t),xd(3,t),.3,3);
     end
-    title('Desired Trajectory: Lane change');
+    title('Desired Trajectory: Swerves');
     axis equal;
     
 elseif index == 4
@@ -124,7 +124,7 @@ elseif index == 5
     for t=1:5:length(T)
         drawcar(xd(1,t),xd(2,t),xd(3,t),.05,5);
     end
-    title('Desired Trajectory: Corner');
+    title('Desired Trajectory: User defined');
     axis equal;
     
 else
