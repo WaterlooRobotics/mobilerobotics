@@ -1,19 +1,9 @@
-
-% each "example" is basically just a simulation loop, or a specific combination of map and sensor
-% arrangement. The example loads a map and robot path, then defines the
-% sensors used, and then runs a simulation loop. The algorithm function is
-% called from within the simulation loop.
-
-% 1 Load map (make a simple map function to generate different
-% environments (also generate robot path)
-
-% 2 determine what sensors to use
-
-% 3 loop through and call the map update function each loop to get new cell
-% probabilities
-
-% 4 Plot all data for this example
-
+% Each "example" is basically just a simulation loop that moves the robot 
+% and plots the results. The different examples are just different
+% combinations of sensor arrangements and environments.
+% The example loads a map and robot starting position, then defines the
+% sensors used, and then runs a simulation loop. The mapping algorithm 
+% function is called from within the simulation loop.
 
 % Occupancy Grid Mapping
 clear; clc;
@@ -34,25 +24,20 @@ if(makemovie2)
     open(vidObj2);
 end
 
-
 % Simulation time
 Tmax = 150;
 T = 0:Tmax;
 
-% Initial Robot location
-x0 = [5 20 0]
+% Load map
+[map, M, N, x0] = loadmap(2);
+
 % Robot motions
 u = [3 0 -3 0;
      0 3 0 -3];
- ui=1;
+ui=1;
+
 % Robot sensor rotation command
 w = 0.3*ones(length(T));
-
-map = loadmap(1);
-
-% remove these later
-M = length(map(:, 1));
-N = length(map(1, :));
 
 % Belief map
 m = 0.5*ones(M,N);
@@ -70,7 +55,6 @@ beta = 0.05; % Width of a beam (Angle beyond which to exclude)
 x = zeros(3,length(T)+1);
 x(:,1) = x0;
 
-
 %% Main simulation
 for t=2:length(T)
     % Robot motion
@@ -84,12 +68,10 @@ for t=2:length(T)
     end
     x(3,t) = x(3,t-1) + w(t);
 
-    %% Map update
-    measL = zeros(M,N);
+    %% Map update;
     
 	% Call occupancy grid mapping function
-    [L, measL] = ogmap(map, x, meas_phi, rmax, 0);
-
+    [L, measL, meas_r] = ogmap(map, L, x(:, t), meas_phi, rmax, 0);
 
     % Calculate probabilities
     m = exp(L)./(1+exp(L));
