@@ -16,6 +16,7 @@ V1.3 - Added function handles for motion and measurement model
 V1,4 - General code cleanup
      - Replace for loop with find function in EKF
 V1.5 - Move multi-sensor EKF to dedicated function
+     - Updated to work with new EKF function
 
 INTRUCTIONS
 You can observe the effects of:
@@ -41,8 +42,6 @@ using randperm
 
 To do
 -Creative example that show concepts
--Feature selection methods into environment function
--Test
 %}
 clear;clc;
 
@@ -75,7 +74,7 @@ u(2,:)=0.3 * u(2,:);
 % Motion model
 motion_model = @ (x,u) [x(1) + u(1)*cos(x(3))*dt;
                         x(2) + u(1)*sin(x(3))*dt;
-                        x(3) + u(2)*dt]
+                        x(3) + u(2)*dt];
 linearized_motion_model = @ (mu,u)[ 1 0 -u(1)*sin(mu(3))*dt;
                                     0 1 u(1)*cos(mu(3))*dt;
                                     0 0 1];
@@ -130,8 +129,11 @@ for t=2:length(T)
     
     %% Extended Kalman Filter
     % Call EKF function
+    % Find first feature in view
     index = find(featureInViewFlag==1,1);
+    % Determine coordinates of feature used for localization
     selectedFeature = featureMap(index,:);
+    % Localize with respect to chosen feature
     [ mu, S, mup, K, I ] = multisensorekf(selectedFeature, MEASUREMENT_TYPE, ...
         index, mu,u(:,t), S, y(:,t), motion_model, linearized_motion_model, Q, R );
 
