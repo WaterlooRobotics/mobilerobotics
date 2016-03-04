@@ -1,9 +1,7 @@
 %{
 Extended Kalman Filter Localization
-
 Author: Rhyse
 Date: March 4, 2016
-
 VERSION HISTORY
 V1.0 - Provided by prof Waslander
 V1.1 - Improved readability
@@ -14,9 +12,6 @@ V1.1 - Improved readability
      - Added instructions
 V1.2 - Feature measurement moved to separate function
      - Removed old EKF_Localiztion
-V1.3 - Added error handling to get2dpointmeasurement
-     - Added funciton handles to main code
-
 INTRUCTIONS
 You can observe the effects of:
 -Bad prior
@@ -37,9 +32,6 @@ To do
 -Work with EKF guy
     -In:function handle, mup, prior S, h(x) function handle, Q, R
     -Out:x(k), S 
--Move inview and 2d fns to appropriate folder (see if closestobject is
-there)
--Delete unused functions
 -Feature selection methods into environment function
 -Test
 %}
@@ -72,23 +64,13 @@ S = 0.1 * eye(3);% covariance (Sigma)
 u = ones(2, length(T));
 u(2,:)=0.3 * u(2,:);
 
-% Motion model
+% Motion Disturbance model
 R = [1e-4 0 0; 
      0 1e-4 0; 
      0 0 1e-5];
 [eigenvectorR, eigenvalueR] = eig(R);
 
-% Measurement model
-Gt = [ 1 0 -u(1)*sin(mu(3))*dt;
-       0 1 u(1)*cos(mu(3))*dt;
-       0 0 1];
-% Update state with prediction
-motion_model = @ (x,u) [x(1) + u(1)*cos(x(3))*dt;
-                        x(2) + u(1)*sin(x(3))*dt;
-                        x(3) + u(2)*dt];
-linearized_motion_model = @ (x,u) [ 1 0 -u(1)*sin(mu(3))*dt;
-                                    0 1 u(1)*cos(mu(3))*dt;
-                                    0 0 1];
+% Measurement type and noise
 MEASUREMENT_TYPE = 1; % 1 - range, 2 - bearing, 3 - both
 switch(MEASUREMENT_TYPE)
     case 1
@@ -119,11 +101,7 @@ nStates = length(x0);
 x = zeros(nStates,length(T));   % Time history of states
 x(:,1) = x0;
 nMeasurements = length(Q(:,1));
-if (MEASUREMENT_TYPE==1 | MEASUREMENT_TYPE==2)
-    y = zeros(nFeatures,1);
-elseif (MEASUREMENT_TYPE==3)
-    y = zeros(2*nFeatures,1);
-end
+y = zeros(nMeasurements,length(T)); % Time history of measurements
 mup_S = zeros(nStates,length(T));
 mu_S = zeros(nStates,length(T));
 selectedFeature = zeros(2,1);
@@ -133,64 +111,38 @@ for t=2:length(T)
     %% Simulation
     % Select a motion disturbance
     motionDisturbance = eigenvectorR*sqrt(eigenvalueR)*randn(nStates,1);
-    % Calculate robot state
-    x(:,t)=motion_model(x(:,t-1),u(:,t)) + motionDisturbance;
-    % Take measurement
-    [y(:,t),featureInViewFlag] = get2dpointmeasurement(featureMap,x(:,t),RANGE_MAX,THETA_MAX,Q,MEASUREMENT_TYPE);
+    % Update state with prediction
+    x(:,t) = [x(1,t-1) + u(1,t)*cos(x(3,t-1))*dt;
+              x(2,t-1) + u(1,t)*sin(x(3,t-1))*dt;
+              x(3,t-1) + u(2,t)*dt]...
+              + motionDisturbance;
 
-    %% Extended Kalman Filter Estimation
+    % Take measurement
+    [p,featureInViewFlag] = get2dpointmeasurement(featureMap,x(:,t),RANGE_MAX,THETA_MAX,Q,MEASUREMENT_TYPE);
+    y(1:length(p),t)=p;
+
+    %% Extended Kalman Filter Estimation - To be replace by function
     % PREDICTION UPDATE
     % Predicted mean
-    mup = motion_model(mu,u(:,t));
+    mup =    [mu(1) + u(1,t)*cos(mu(3))*dt;
+              mu(2) + u(1,t)*sin(mu(3))*dt;
+              mu(3) + u(2,t)*dt];
     % Predicted covariance      
-    Gt = linearized_motion_model(mu,u(:,t));
+    Gt = [ 1 0 -u(1,t)*sin(mu(3))*dt;
+           0 1 u(1,t)*cos(mu(3))*dt;
+           0 0 1];
     Sp = Gt*S*Gt' + R;
     % Store results
     mup_S(:,t) = mup;
 
     
     % Linearization
-%{ Explain waste variables
-%}
     for i=1:nFeatures
         if (featureInViewFlag(i))
-%             ekf(mu, S, y, motion_model, measurement_model, linearized_motion_model, linearized_measurement_model, Q, R)
-%             Need: measurement_model
             selectedFeature = featureMap(i,:);
             featureRange = sqrt((selectedFeature(1)-mup(1))^2 + ...
                 (selectedFeature(2)-mup(2))^2);
-            % Prepare models for EKF function
-%             switch(MEASUREMENT_TYPE) 
-%                 case 1
-%                     measurement_model = @(mup) ...
-%                         sqrt((selectedFeature(1)-mup(1))^2 +...
-%                         (selectedFeature(2)-mup(2))^2)
-%                     linearized_measurement_model = @(mup) ...
-%                         [ -(selectedFeature(1)-mup(1))/featureRange ...
-%                           -(selectedFeature(2)-mup(2))/featureRange ...
-%                           0];
-%                     [mu, S, wasteMup, K] = ekf(mu,u(:,t),S,y(i,t),motion_model,measurement_model,linearized_motion_model,linearized_measurement_model,Q,R)
-%                 case 2
-%                     measurement_model = @(mup) ...
-%                         (atan2(selectedFeature(2)-mup(2),...
-%                         selectedFeature(1)-mup(1)) - mup(3))
-%                     linearized_measurement_model = @(mup) ...
-%                         [ (selectedFeature(2)-mup(2))/featureRange^2 ...
-%                         -(selectedFeature(1)-mup(1))/featureRange^2 ...
-%                         -1];
-%                 case 3
-%                     measurement_model = @(mup) ...
-%                         [sqrt((selectedFeature(1)-mup(1))^2 + (selectedFeature(2)-mup(2))^2);
-%                         (atan2(selectedFeature(2)-mup(2),selectedFeature(1)-mup(1)) - mup(3))]
-%                     linearized_measurement_model = @(mup) ...
-%                         [ -(selectedFeature(1)-mup(1))/featureRange ...
-%                         -(selectedFeature(2)-mup(2))/featureRange ...
-%                         0;
-%                         (selectedFeature(2)-mup(2))/featureRange^2 ...
-%                         -(selectedFeature(1)-mup(1))/featureRange^2 ...
-%                         -1]; ...
-%             end
-%             Linearize measurement matrix
+            % Linearize measurement matrix
             switch(MEASUREMENT_TYPE) 
                 case 1
                     Ht = [ -(selectedFeature(1)-mup(1))/featureRange ...
