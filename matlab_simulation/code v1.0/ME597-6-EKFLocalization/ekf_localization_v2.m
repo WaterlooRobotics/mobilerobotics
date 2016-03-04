@@ -65,6 +65,9 @@ u = ones(2, length(T));
 u(2,:)=0.3 * u(2,:);
 
 % Motion Disturbance model
+motion_model = @ (x,u) [x(1) + u(1)*cos(x(3))*dt;
+                        x(2) + u(1)*sin(x(3))*dt;
+                        x(3) + u(2)*dt]
 R = [1e-4 0 0; 
      0 1e-4 0; 
      0 0 1e-5];
@@ -105,6 +108,7 @@ y = zeros(nMeasurements,length(T)); % Time history of measurements
 mup_S = zeros(nStates,length(T));
 mu_S = zeros(nStates,length(T));
 selectedFeature = zeros(2,1);
+featureFoundFlag=0; %Switches to 1 when feature is found. Used to exit for loop
 
 %% Main loop
 for t=2:length(T)
@@ -112,11 +116,7 @@ for t=2:length(T)
     % Select a motion disturbance
     motionDisturbance = eigenvectorR*sqrt(eigenvalueR)*randn(nStates,1);
     % Update state with prediction
-    x(:,t) = [x(1,t-1) + u(1,t)*cos(x(3,t-1))*dt;
-              x(2,t-1) + u(1,t)*sin(x(3,t-1))*dt;
-              x(3,t-1) + u(2,t)*dt]...
-              + motionDisturbance;
-
+    x(:,t) = motion_model(x(:,t-1),u(:,t)) + motionDisturbance;
     % Take measurement
     [p,featureInViewFlag] = get2dpointmeasurement(featureMap,x(:,t),RANGE_MAX,THETA_MAX,Q,MEASUREMENT_TYPE);
     y(1:length(p),t)=p;
@@ -134,14 +134,15 @@ for t=2:length(T)
     Sp = Gt*S*Gt' + R;
     % Store results
     mup_S(:,t) = mup;
-
-    
     % Linearization
     for i=1:nFeatures
-        if (featureInViewFlag(i))
+        if (featureInViewFlag(i)&~featureFoundFlag)
+            featureFoundFlag=1;
             selectedFeature = featureMap(i,:);
             featureRange = sqrt((selectedFeature(1)-mup(1))^2 + ...
                 (selectedFeature(2)-mup(2))^2);
+            
+            [mu, S, mup, K] = ekf(mu,u,S,y,motion_model,measurement_model,linearized_motion_model,linearized_measurement_model,Q,R)
             % Linearize measurement matrix
             switch(MEASUREMENT_TYPE) 
                 case 1
@@ -195,6 +196,11 @@ for t=2:length(T)
             S = (eye(nStates) - K*Ht) * Sp;
         end
     end
+    % ADD ERROR CHECKING
+    
+    
+    
+    featureFoundFlag=0;
     % If no features in view no updated prediction
     if (sum(featureInViewFlag)==0) mu = mup; end
     
