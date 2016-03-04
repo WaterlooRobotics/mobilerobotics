@@ -13,7 +13,7 @@ end
 % Assume there is a room with four obstacles
 M = 50;
 N = 60;
-m = 0.5*ones(M,N); % map
+m = zeros(M,N); % map
 
 % Obstacles
 m(13:17,22:26)=0.6;  
