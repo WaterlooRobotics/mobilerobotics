@@ -1,4 +1,10 @@
 % Extended Kalman filter example
+%
+% Radar measurement of airplane position while flying at a constant
+% altitude and velocity. In this case the motion model is linear, but the
+% measurement model is nonlinear.
+%
+% This example can be found on slide 111 of Estimation-I in the notes.
 clear;clc;
 
 %% Create AVI object
