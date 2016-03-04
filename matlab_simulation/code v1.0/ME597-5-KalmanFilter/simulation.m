@@ -36,18 +36,20 @@ end
 
 if example == 3
     [RE, Re] = eig (R);
-    [QpE, Qpe] = eig (Qp);
+    [QpE, Qpe] = eig(Q.Qp);
+    [QvE, Qve] = eig(Q.Qv);
     Qp = Q.Qp;
     Qv = Q.Qv;
     Cp = C.Cp;
     Cv = C.Cv;
+    n = length(A(1,:));
     mp = length(Cp(:,1));
     mv = length(Cv(:,1));
     
     % Select a motion disturbance
     e = RE*sqrt(Re)*randn(n,1);
     % Update state
-    x = A*x+ B*u(:,t) + e;
+    x = A*x+ B*u + e;
 
     % Take measurement
     % Select a measurement disturbance and determine measurement

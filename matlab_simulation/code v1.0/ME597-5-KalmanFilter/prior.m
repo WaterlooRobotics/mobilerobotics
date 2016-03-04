@@ -26,5 +26,5 @@ if example == 3
     mu = zeros(4,1); % mean (mu)
     S = 0.01*eye(4);% covariance (Sigma)
     dt = 0.01;
-    Tf = 10;
+    Tf = 1;
 end

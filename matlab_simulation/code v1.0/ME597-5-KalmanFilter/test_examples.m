@@ -5,6 +5,11 @@ clear all
 clc
 close all
 
+% Test Example 1,2 or 3 by changing number 
+% example = 1;
+% example = 2;
+ example = 3;
+
 % Create AVI object
 makemovie = 1;
 if(makemovie)
@@ -13,11 +18,6 @@ if(makemovie)
     vidObj.FrameRate = 8;
     open(vidObj);
 end
-
-% Test Example 1,2 or 3 by changing number
-% example = 1;
- example = 2;
-% example = 3;
 
 % Get Prior, motion model and measurement model
 [mu,S,dt,Tf] = prior(example);
@@ -37,7 +37,7 @@ T_len = length(T);
 % Get first control
 t = 1;
 u(:,1) = control_input(example, mu, T(t), u(:,t));
-
+%%
 for t=2:length(T)
     
     % Apply control
@@ -51,7 +51,7 @@ for t=2:length(T)
     % S_old = S;
     
     % Save old mean and covariance
-    [mu,S,mup,K] = kalman_filter(A,B,C,D,mu,S,R,u(:,t),y(:,t),Q);
+    [mu,S,mup,K] = kalman_filter(A,B,C,D,mu,S,R,u(:,t),y(:,t),Q,example,t);
     
     mu_S(:,t) = mu;
     mup_S(:,t) = mup;
@@ -60,8 +60,14 @@ for t=2:length(T)
     K_S(:,t) = [K(:,1); K(:,2)];
     
     % Test plot
-    plot_filter(x,y,t,mu_S,mu,S,example)
+    plot_filter(x,y,t,mu_S,mu,S,example,makemovie,vidObj);
+    
 end
+
+if makemovie
+    close(vidObj);
+end
+
 figure(2);clf;
 plot(T,K_S');
 title('Kalman gains as a function of time')

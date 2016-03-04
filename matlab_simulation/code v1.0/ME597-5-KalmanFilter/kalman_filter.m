@@ -1,4 +1,4 @@
-function [mu,S,mup, K] = kalman_filter(A,B,C,D,mu,S,R,u,y,Q)
+function [mu,S,mup, K] = kalman_filter(A,B,C,D,mu,S,R,u,y,Q,example,t)
 
 % Performs one iteration of Kalman Filtering
 
@@ -30,12 +30,29 @@ mup = A*mu + B*u;
 Sp = A*S*A' + R;
 
 % Measurement Step:
+if example == 3
+    % Measurement update
+    Qp = Q.Qp;
+    Qv = Q.Qv;
+    Cp = C.Cp;
+    Cv = C.Cv;
+    if (mod(t,10) == 0)
+        K = Sp*Cp'*inv(Cp*Sp*Cp'+Qp);
+        mu = mup + K*(y-Cp*mup);
+        S = (eye(n)-K*Cp)*Sp;
+    else
+        K = Sp*Cv'*inv(Cv*Sp*Cv'+Qv);
+        mu = mup + K*(y([2 4])-Cv*mup);
+        S = (eye(n)-K*Cv)*Sp;
+    end
+    
+else % for example 1 and 2
+    % Calculate kalman gain
+    K = Sp*C'*inv(C*Sp*C'+Q.Q);
 
-% Calculate kalman gain
-K = Sp*C'*inv(C*Sp*C'+Q.Q);
+    % Get new mean of state after measurement
+    mu = mup + K*(y-C*mup);
 
-% Get new mean of state after measurement
-mu = mup + K*(y-C*mup);
-
-% Get new covaraince of state after measurement
-S = (eye(n)-K*C)*Sp;
+    % Get new covaraince of state after measurement
+    S = (eye(n)-K*C)*Sp;
+end

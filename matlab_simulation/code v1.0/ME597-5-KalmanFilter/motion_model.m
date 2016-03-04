@@ -42,7 +42,8 @@ if example == 3
     R = [.0001 0 0 0; 0 .0001 0 0; 0 0 .0001 0; 0 0 0 .0001];
     
     n = length(A(1,:));
-    
+    C = [];
+    D = [];
     % Form continuous system
     sysc=ss(A,B,C,D);
 
