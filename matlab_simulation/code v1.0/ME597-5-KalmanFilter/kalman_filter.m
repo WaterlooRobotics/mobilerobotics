@@ -18,24 +18,27 @@ function [mean_,covariance,mean_predicted, kalman_gain] = kalman_filter(motion_m
 %       covariance         : Final estimated covariance after iteration 
 
 % Prediction Step:
+% Get A and B matrices for motion prediction
+[A, B] = motion_model();
+
+% Get dimension of state
+n = length(A(1,:));
+
+% Predict new mean based on motion
+mup = A*mean_ + B*control;
+
+% Predict new covariance based on motion
+Sp = A*covariance*A' + R;
 
 % Measurement Step:
+% Get C matrix for measurement prediction
+[C] = measurement_model();
 
-% Initialize
-n = length(Ad(1,:));
+% Calculate kalman gain
+kalman_gain = Sp*C'*inv(C*Sp*C'+Q);
 
-% Update State
-x_new = Ad*x+ Bd*u + e;
+% Get new mean of state after measurement
+mean_ = mup + kalman_gain*(measurement-C*mup);
 
-% Determine measurement
-y = Cd*x_new + d;
-
-% Kalman filter estimation
-% Prediction Update
-mup = Ad*mu + Bd*u;
-Sp = Ad*S*Ad' + R;
-
-% Measurement Update
-K = Sp*Cd'*inv(Cd*Sp*Cd'+Q);
-mu = mup + K*(y-Cd*mup);
-S = (eye(n)-K*Cd)*Sp;
+% Get new covaraince of state after measurement
+covariance = (eye(n)-kalman_gain*C)*Sp;
