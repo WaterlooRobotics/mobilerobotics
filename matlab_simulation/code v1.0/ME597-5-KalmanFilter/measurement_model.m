@@ -1,11 +1,12 @@
-function [C,D,Q] = measurement_model(example)
+function [C,D,Q,m] = measurement_model(example)
 
-% This function provides the C and Q matrices for the measurement model
+% This function provides the C,D and Q matrices for the measurement model
 
 if example == 1
     C = 1;
-    Q = 4;
     D = 0;
+    Q = 4;
+    m = length(C(:,1));
 end
 
 if example == 2
@@ -13,17 +14,21 @@ if example == 2
     C(1,1) = 1;
     C(2,3) = 1;
     D = zeros(2,2);
-    Q = [.04 -0.01; -0.01 .01];
-    %Q = [.004 -0.001; -0.001 .001];
-    %Q = [.0004 -0.0001; -0.0001 .0001];
+    Q.QR = [.4 -0.1; -0.1 .1];
+    Q.Q = [.04 -0.01; -0.01 .01];
+    %Q.Q = [.004 -0.001; -0.001 .001];
+    %Q.Q = [.0004 -0.0001; -0.0001 .0001];
+    m = length(C(:,1));
 end
 
 if example ==3
-    Cp = eye(4);
-    Cv = zeros(2,4);
-    Cv(1,2) = 1;
-    Cv(2,4) = 1;
+    C.Cp = eye(4);
+    C.Cv = zeros(2,4);
+    C.Cv(1,2) = 1;
+    C.Cv(2,4) = 1;
+    m.mp = length(C.Cp(:,1));
+    m.mv = length(C.Cv(:,1));
     D = zeros(2,2);
-    Qp = [.004 0 -0.001 0 ; 0 0.1 0 -0.01;  -0.001 0 .001 0; 0 -0.01 0 0.05];
-    Qv = [.1 -0.01; -0.01 .05];
+    Q.Qp = [.004 0 -0.001 0 ; 0 0.1 0 -0.01;  -0.001 0 .001 0; 0 -0.01 0 0.05];
+    Q.Qv = [.1 -0.01; -0.01 .05];
 end

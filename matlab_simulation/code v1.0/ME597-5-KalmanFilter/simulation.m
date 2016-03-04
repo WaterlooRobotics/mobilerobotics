@@ -6,7 +6,7 @@ if example == 1
     % Select a motion disturbance
     e = sqrt(R)*randn(1);
     % Update state
-    x = A*x+ B*u(t) + e;
+    x = A*x+ B*u + e;
 
     % Take measurement
     % Select a motion disturbance
@@ -17,18 +17,21 @@ end
 
 if example == 2
     [RE, Re] = eig (R);
-    [QRE, QRe] = eig (Q);
+    [QRE, QRe] = eig (Q.QR);
+    
+    n = length(A(1,:));
+    m = length(C(:,1));
     
     % Select a motion disturbance
     e = RE*sqrt(Re)*randn(n,1);
     % Update state
-    x = Ad*x+ Bd*u + e;
+    x = A*x+ B*u + e;
 
     % Take measurement
     % Select a motion disturbance
     d = QRE*sqrt(QRe)*randn(m,1);
     % Determine measurement
-    y = Cd*x + d;
+    y = C*x + d;
 end
 
 if example == 3
@@ -44,7 +47,7 @@ if example == 3
     % Select a motion disturbance
     e = RE*sqrt(Re)*randn(n,1);
     % Update state
-    x = Ad*x+ Bd*u(:,t) + e;
+    x = A*x+ B*u(:,t) + e;
 
     % Take measurement
     % Select a measurement disturbance and determine measurement

@@ -5,60 +5,66 @@ clear all
 clc
 close all
 
+% Create AVI object
+makemovie = 1;
+if(makemovie)
+    vidObj = VideoWriter('multiratekf.avi');
+    vidObj.Quality = 100;
+    vidObj.FrameRate = 8;
+    open(vidObj);
+end
+
 % Test Example 1,2 or 3 by changing number
-example = 1;
-% example = 2;
+% example = 1;
+ example = 2;
 % example = 3;
 
-% Discrete time step and simulation runtime
-dt = 0.1;
-Tf = 3;
-T = 0:dt:Tf;
-
 % Get Prior, motion model and measurement model
-[mu, S] = prior(example);
-[A,B,R] = motion_model(example,dt);
-[C,D,Q] = measurement_model(example);
+[mu,S,dt,Tf] = prior(example);
+[A,B,R,n] = motion_model(example,dt);
+[C,D,Q,m] = measurement_model(example);
 
-I
+% Simulation runtime
+T = 0:dt:Tf;
+T_len = length(T);
 
 % Simulation Initializations
-x = zeros(1,length(T)+1);
-x(1) = mu+sqrt(S)*randn(1);
-y = zeros(1,length(T));
-u = y;
-n = length(A(1,:));
-m = length(C(:,1));
+[x,y,u,mup_S,mu_S] = initialization(example,T_len,n,m,S);
 
 % Clear unwanted variables before iteration
-%clear sysc A B C D Tf dt
+% clear sysc A B C D Tf dt
 
-%%
+% Get first control
+t = 1;
+u(:,1) = control_input(example, mu, T(t), u(:,t));
+
 for t=2:length(T)
     
     % Apply control
-    u(:,t) = control_input(example, mu, t, u(:,t-1));
+    u(:,t) = control_input(example, mu, T(t), u(:,t-1));
     
-    % Motion disturbance
-    e = sqrt(R)*randn(n,1);
-    
-    % Update State
-    x(:,t) = Ad*x(:,t-1)+ Bd*u(:,t) + e;
-    
-    % Take measurement
-    % Select a measurement disturbance
-    d = sqrt(Q)*randn(m,1);
-    
-    % Determine measurement
-    y(:,t) = Cd*x(:,t) + d;
+    % Simulation
+    [x(:,t), y(:,t)] = simulation(A,B,C,D,R,Q,x(:,t-1),t,u(:,t),example);
     
     % Store prior
-    mu_old = mu;
-    S_old = S;
+    % mu_old = mu;
+    % S_old = S;
     
     % Save old mean and covariance
-    [mu_S(:,t),cov_S(:,t),mup_S(:,t),K(:,t)] = kalman_filter(sysd,mu,S,R,u(:,t),y(:,t),Q);
+    [mu,S,mup,K] = kalman_filter(A,B,C,D,mu,S,R,u(:,t),y(:,t),Q);
+    
+    mu_S(:,t) = mu;
+    mup_S(:,t) = mup;
     
     % Store estimates
     K_S(:,t) = [K(:,1); K(:,2)];
+    
+    % Test plot
+    plot_filter(x,y,t,mu_S,mu,S,example)
 end
+figure(2);clf;
+plot(T,K_S');
+title('Kalman gains as a function of time')
+
+figure(3);clf;
+plot(T(2:t),x(:,2:t)-mu_S(:,2:t))
