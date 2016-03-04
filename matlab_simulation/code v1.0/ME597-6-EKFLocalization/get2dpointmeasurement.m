@@ -1,7 +1,7 @@
 function [ measurement,featureInViewFlag ] = get2dpointmeasurement( featureMap,state,RANGE_MAX,THETA_MAX,Q,MEASUREMENT_TYPE )
 %get2dpointmeasurement Generate range&|bearing measurement to point object
 % Uses a robot with bearing and range measurement to take a
-% reading with intruded disturbances.
+% reading with included disturbances.
 % Inputs:   featureMap: 2D array holding [x position, y position ; ...]
 %           state: True robot state at considered time step [x position, y position, theta]
 %           RANGE_MAX: Maximum range of scanner
@@ -24,7 +24,15 @@ featureInViewFlag = zeros(nFeatures,1);
 
 % Calculating number of measurement
 nMeasurements = length(Q(:,1));
-measurement = zeros(nMeasurements,1);
+
+if (MEASUREMENT_TYPE==1 | MEASUREMENT_TYPE==2)
+    measurement = zeros(nFeatures,1);
+elseif (MEASUREMENT_TYPE==3)
+    measurement = zeros(2*nFeatures,1);
+else
+    'Error: Invalid Measurement Type. Choose 1,2 or 3'
+    return
+end
 
 %% Main Calculations
 for i=1:nFeatures
@@ -36,7 +44,7 @@ for i=1:nFeatures
             measurementDisturbance = eigenvectorQ * sqrt(eigenvalueQ) * randn(nMeasurements,1);
             % Determine measurement
             switch(MEASUREMENT_TYPE)
-                case 1'
+                case 1
                     measurement(i,1) = max(0.001,sqrt((selectedFeature(1)-state(1))^2 +...
                         (selectedFeature(2)-state(2))^2) +...
                         measurementDisturbance);

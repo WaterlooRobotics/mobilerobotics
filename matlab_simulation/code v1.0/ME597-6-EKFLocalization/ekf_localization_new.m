@@ -14,6 +14,8 @@ V1.1 - Improved readability
      - Added instructions
 V1.2 - Feature measurement moved to separate function
      - Removed old EKF_Localiztion
+V1.3 - Added error handling to get2dpointmeasurement
+     - Added funciton handles to main code
 
 INTRUCTIONS
 You can observe the effects of:
@@ -30,19 +32,14 @@ You can observe the effects of:
 -Feature density
     -Add/remove features from featureMap
 
-%TEMPORARY
-Guidelines
--Make modular
--Comment well
--Robust to error
--Organized
--Use MATLAB style guide
-
 To do
 -Creative example that show concepts
 -Work with EKF guy
     -In:function handle, mup, prior S, h(x) function handle, Q, R
     -Out:x(k), S 
+-Move inview and 2d fns to appropriate folder (see if closestobject is
+there)
+-Delete unused functions
 -Feature selection methods into environment function
 -Test
 %}
@@ -75,13 +72,23 @@ S = 0.1 * eye(3);% covariance (Sigma)
 u = ones(2, length(T));
 u(2,:)=0.3 * u(2,:);
 
-% Motion Disturbance model
+% Motion model
 R = [1e-4 0 0; 
      0 1e-4 0; 
      0 0 1e-5];
 [eigenvectorR, eigenvalueR] = eig(R);
 
-% Measurement type and noise
+% Measurement model
+Gt = [ 1 0 -u(1)*sin(mu(3))*dt;
+       0 1 u(1)*cos(mu(3))*dt;
+       0 0 1];
+% Update state with prediction
+motion_model = @ (x,u) [x(1) + u(1)*cos(x(3))*dt;
+                        x(2) + u(1)*sin(x(3))*dt;
+                        x(3) + u(2)*dt];
+linearized_motion_model = @ (x,u) [ 1 0 -u(1)*sin(mu(3))*dt;
+                                    0 1 u(1)*cos(mu(3))*dt;
+                                    0 0 1];
 MEASUREMENT_TYPE = 3; % 1 - range, 2 - bearing, 3 - both
 switch(MEASUREMENT_TYPE)
     case 1
@@ -112,7 +119,14 @@ nStates = length(x0);
 x = zeros(nStates,length(T));   % Time history of states
 x(:,1) = x0;
 nMeasurements = length(Q(:,1));
-y = zeros(nMeasurements,length(T)); % Time history of measurements
+if (MEASUREMENT_TYPE==1 | MEASUREMENT_TYPE==2)
+    y = zeros(nFeatures,1);
+elseif (MEASUREMENT_TYPE==3)
+    y = zeros(2*nFeatures,1);
+else
+    'Error: Invalid Measurement Type. Choose 1,2 or 3'
+    return
+end
 mup_S = zeros(nStates,length(T));
 mu_S = zeros(nStates,length(T));
 selectedFeature = zeros(2,1);
@@ -122,26 +136,17 @@ for t=2:length(T)
     %% Simulation
     % Select a motion disturbance
     motionDisturbance = eigenvectorR*sqrt(eigenvalueR)*randn(nStates,1);
-    % Update state with prediction
-    x(:,t) = [x(1,t-1) + u(1,t)*cos(x(3,t-1))*dt;
-              x(2,t-1) + u(1,t)*sin(x(3,t-1))*dt;
-              x(3,t-1) + u(2,t)*dt]...
-              + motionDisturbance;
-
+    % Calculate robot state
+    x(:,t)=motion_model(x(:,t-1),u(:,t)) + motionDisturbance;
     % Take measurement
-    [p,featureInViewFlag] = get2dpointmeasurement(featureMap,x(:,t),RANGE_MAX,THETA_MAX,Q,MEASUREMENT_TYPE);
-    y(1:length(p),t)=p;
+    [y(:,t),featureInViewFlag] = get2dpointmeasurement(featureMap,x(:,t),RANGE_MAX,THETA_MAX,Q,MEASUREMENT_TYPE);
 
-    %% Extended Kalman Filter Estimation - To be replace by function
+    %% Extended Kalman Filter Estimation
     % PREDICTION UPDATE
     % Predicted mean
-    mup =    [mu(1) + u(1,t)*cos(mu(3))*dt;
-              mu(2) + u(1,t)*sin(mu(3))*dt;
-              mu(3) + u(2,t)*dt];
+    mup = motion_model(mu,u(:,t));
     % Predicted covariance      
-    Gt = [ 1 0 -u(1,t)*sin(mu(3))*dt;
-           0 1 u(1,t)*cos(mu(3))*dt;
-           0 0 1];
+    Gt = linearized_motion_model(mu,u(:,t));
     Sp = Gt*S*Gt' + R;
     % Store results
     mup_S(:,t) = mup;
