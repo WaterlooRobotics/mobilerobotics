@@ -5,7 +5,7 @@
 % sensors used, and then runs a simulation loop. The mapping algorithm 
 % function is called from within the simulation loop.
 
-%% Occupancy grid mapping example 1
+%% Occupancy grid mapping example 3
 % Uses a 100 x 100 cell map with a laser scanner, map is updated using
 % Bresenham ray trace mode.
 
@@ -17,14 +17,14 @@ clear; clc;
 %% Create AVI object
 makemovie1 = 1; % Inverse Measurement Model Video
 if(makemovie1)
-    vidObj1 = VideoWriter('ex1_measurement_model.avi');
+    vidObj1 = VideoWriter('ex3_measurement_model.avi');
     vidObj1.Quality = 100;
     vidObj1.FrameRate = 4;
     open(vidObj1);
 end
 makemovie2 = 1; % Inverse Measurement Model Video
 if(makemovie2)
-    vidObj2 = VideoWriter('ex1_occupancy_grid.avi');
+    vidObj2 = VideoWriter('ex3_occupancy_grid.avi');
     vidObj2.Quality = 100;
     vidObj2.FrameRate = 4;
     open(vidObj2);
@@ -88,7 +88,7 @@ for t=2:length(T)
     plot_robot_path(x, t, 1);
 
     % Inverse measurement model
-    plot_inverse_mm(og_mm, M, N, x(:, t), r_m, phi_m, 2);
+    plot_inverse_mm(og_mm, M, N, x(:, t), phi_m, r_m, 2);
     if (makemovie1) writeVideo(vidObj1, getframe(gca)); end
 
     % Belief map

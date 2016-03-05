@@ -14,3 +14,4 @@ hold on;
 image(100*(1-map));
 colormap(gray);
 axis([0 N 0 M])
+title('Cell Map');
