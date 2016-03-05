@@ -1,9 +1,8 @@
-function [m] = inversescannerbres(M,N,x,y,theta,r,rmax)
+function [m] = inversescannerbres(M, N, x, y, theta, r, rmax)
 % Calculates the inverse measurement model for a laser scanner through
 % raytracing with Bresenham's algorithm, assigns low probability of object
 % on ray, high probability at end.  Returns cells and probabilities.
-% Format:
-%   [m] = inversescannerbres(M,N,x,y,theta,r,rmax)
+%
 % Input:
 %   M = Total Height of map
 %   N = Total Width of map
@@ -12,8 +11,8 @@ function [m] = inversescannerbres(M,N,x,y,theta,r,rmax)
 %   theta = Angle of laser
 %   r = Range to measured object
 %   rmax = Max range of laser
-
-% Range finder inverse measurement model
+% Output:
+%   m = Matrix representing the inverse measurement model
 
 % Bound the robot within the map dimensions
 x1 = max(1,min(M,round(x)));

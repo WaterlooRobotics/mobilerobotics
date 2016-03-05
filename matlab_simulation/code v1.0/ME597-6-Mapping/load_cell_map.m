@@ -1,5 +1,6 @@
 function [map, M, N, x] = load_cell_map(mapNum)
 % Creates and returns a 2D map used for robotic simulations
+%
 % Input:
 % 	mapNum = Number of map to return
 % 		1 = Default map, smaller map with mostly empty space and some blocks, 
@@ -12,7 +13,6 @@ function [map, M, N, x] = load_cell_map(mapNum)
 %   M = The height of the map
 %   N = The width of the map
 %	[x] = The inital state of the robot in vector form
-
 
 % Map features to be used in different size maps
 submap = zeros(50, 50);
@@ -40,7 +40,6 @@ switch (mapNum)
 		M = 100;
 		N = 100;
 		map = zeros(M,N);
-
 		map(1:50, 1:50) = submap;
 		map(51:100, 1:50) = submap;
 		map(1:50, 51:100) = submap;
@@ -48,7 +47,6 @@ switch (mapNum)
 		
 		% Initial Robot location
 		x = [25; 10; 1.5];
-        
     case 3
 		% Map size and contents
 		M = 1000;
