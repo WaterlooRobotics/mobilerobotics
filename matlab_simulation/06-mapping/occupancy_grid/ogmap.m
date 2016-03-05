@@ -11,8 +11,9 @@ function [og, imml, r_m] = ogmap(map, og, x, phi_m, r_max, alpha, beta, mode)
 %   alpha = Width of an obstacle (Distance about measurement to fill in)
 %   beta = Width of a beam (Angle beyond which to exclude) 
 %   mode = Occupancy grid update mode
-%       0 = Bresenham ray trace mode (default)
-%       1 = Windowed block update mode
+%       0 = Laser scanner using Bresenham ray trace mode (default)
+%       1 = Laser scanner using windowed block update mode
+%       2 = Sonar using windowed block update mode
 % Output:
 % 	[og] = Updated (o)ccupancy (g)rid in log odds form
 % 	[imml] = Log odds of the (i)nverse (m)easurement (m)odel
@@ -25,8 +26,9 @@ function [og, imml, r_m] = ogmap(map, og, x, phi_m, r_max, alpha, beta, mode)
 m = 0.5*ones(M,N);
 L0 = log(m./(1-m));
 
-% Generate a measurement data set
-r_m = getranges(map, x, phi_m, r_max);
+% Probabilites of cells
+p_occ = 0.7;
+p_free = 0.3;
 
 % The cells affected by this specific measurement in log odds (only used
 % in Bresenham ray trace mode)
@@ -36,27 +38,34 @@ if (mode == 1)
     % -Windowed block update mode (could be optimized further based on FOV
     % and angle of sensor)
     
-    % Bound the update window within the map dimensions
-    w_Mi = max(1,min(M,round(x(1) - r_max)));
-    w_Mf = max(1,min(M,round(x(1) + r_max)));
-    w_Ni = max(1,min(N,round(x(2) - r_max)));  
-    w_Nf = max(1,min(N,round(x(2) + r_max)));  
-    w_M = w_Mf - w_Mi + 1;
-    w_N = w_Nf - w_Ni + 1;
-    win_pos(1) = x(1) - w_Mi + 1;
-    win_pos(2) = x(2) - w_Ni + 1;
+    % Generate a measurement data set
+    r_m = getranges(map, x, phi_m, r_max);
     
     % Get inverse measurement model
-    invmod = inverse_scanner_window(w_M, w_N, x, win_pos, phi_m, r_m, ...
-        r_max, alpha, beta, 0.7, 0.3);
+    invmod = inverse_scanner_window(M, N, x, phi_m, r_m, r_max, alpha, ...
+        beta, p_occ, p_free);
     
     % Calculate updated log odds
-    og(w_Mi:w_Mf, w_Ni:w_Nf) = og(w_Mi:w_Mf, w_Ni:w_Nf) + ...
-        log(invmod./(1-invmod))-L0(w_Mi:w_Mf, w_Ni:w_Nf);
-    imml(w_Mi:w_Mf, w_Ni:w_Nf) = imml(w_Mi:w_Mf, w_Ni:w_Nf) + ...
-        log(invmod./(1-invmod))-L0(w_Mi:w_Mf, w_Ni:w_Nf);
+    og = og + log(invmod./(1-invmod)) - L0;
+    imml = imml + log(invmod./(1-invmod)) - L0;	
+elseif (mode == 2)
+    % -Windowed block update mode with sonar
+    
+    % Generate a measurement data set
+    r_m = get_sonar_range(map, x, beta, r_max);
+
+    % Get inverse measurement model
+    invmod = inverse_scanner_window(M, N, x, phi_m, r_m, r_max, alpha, ...
+        beta, p_occ, p_free);
+    
+    % Calculate updated log odds
+    og = og + log(invmod./(1-invmod)) - L0;
+    imml = imml + log(invmod./(1-invmod)) - L0;	
 else
     % -Bresenham ray trace mode
+    
+    % Generate a measurement data set
+    r_m = getranges(map, x, phi_m, r_max);
     
     % Loop through each laser measurement
     for i = 1:length(phi_m)

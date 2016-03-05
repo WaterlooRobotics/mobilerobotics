@@ -48,10 +48,10 @@ ogl0 = log(og./(1-og));
 ogl=ogl0;
 
 % Sensor model parameters - this example uses a lidar
-phi_m = 0; % Measurement bearings
+phi_m = 0; % Measurement bearings (dictates FOV for sonar)
 r_max = 30; % Max range
 alpha = 1; % Width of an obstacle (Distance about measurement to fill in)
-beta = 1.4; % Width of a beam (Angle beyond which to exclude) 
+beta = 0.8; % Width of a beam (Angle beyond which to exclude) 
 
 % State Initialization
 x = zeros(3, length(T) + 1);
@@ -72,7 +72,7 @@ for t = 2:length(T)
 
     %% Map update;
 	% Call occupancy grid mapping function
-    [ogl, imml, r_m] = ogmap(map, ogl, x(:, t), phi_m, r_max, alpha, beta, 1);
+    [ogl, imml, r_m] = ogmap(map, ogl, x(:, t), phi_m, r_max, alpha, beta, 2);
 
     % Calculate probabilities
     og = exp(ogl)./(1+exp(ogl));

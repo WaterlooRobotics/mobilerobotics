@@ -1,4 +1,4 @@
-function [m] = inversescannerbres(M, N, x, y, theta, r, rmax)
+function [m] = inverse_scanner_bres(M, N, x, y, theta, r, rmax)
 % Calculates the inverse measurement model for a laser scanner through
 % raytracing with Bresenham's algorithm, assigns low probability of object
 % on ray, high probability at end.  Returns cells and probabilities.
