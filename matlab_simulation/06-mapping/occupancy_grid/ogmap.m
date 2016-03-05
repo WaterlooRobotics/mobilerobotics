@@ -61,7 +61,7 @@ else
     % Loop through each laser measurement
     for i = 1:length(phi_m)
         % Get inverse measurement model
-        invmod = inversescannerbres(M, N, x(1), x(2), phi_m(i)+x(3), ...
+        invmod = inverse_scanner_bres(M, N, x(1), x(2), phi_m(i)+x(3), ...
             r_m(i), r_max);
 
         % Loop through each cell from measurement model		
