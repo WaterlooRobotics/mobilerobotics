@@ -18,7 +18,7 @@ hold on;
 image(100*(og_mm));
 colormap(gray);
 for i=1:length(r_m)
-    plot(x(2) + r_m(i)*sin(phi_m(i) + x(3)), x(1)+r_m(i)*cos(phi_m(i) + x(3)), 'ko')
+%    plot(x(2) + r_m(i)*sin(phi_m(i) + x(3)), x(1)+r_m(i)*cos(phi_m(i) + x(3)), 'ko')
 end
 axis([0 N 0 M])
 %F2(t-1) = getframe;

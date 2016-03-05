@@ -1,4 +1,4 @@
-function [m] = inversescanner(M,N,x,y,theta,meas_phi,meas_r,rmax,alpha,beta,p_occ,p_free)
+function [m] = inverse_scanner_window(M,N,x,y, x_w, y_w, theta,meas_phi,meas_r,rmax,alpha,beta,p_occ,p_free)
 % Calculates the inverse measurement model for a laser scanner based on
 % model in Probabilistic Robotics - note: slow but easy to understand
 % Identifies three regions, the first where no new information is
@@ -16,9 +16,13 @@ m = 0.5*ones(M, N);
 % Range finder inverse measurement model
 for i = 1:M
     for j = 1:N
+        
+        x_wi = x - x_w + i;
+        y_wj = y - y_w + j;
+        
         % Find range and bearing to the current cell
-        r = sqrt((i-x)^2+(j-y)^2);
-        phi = mod(atan2(j-y,i-x)-theta+pi,2*pi)-pi;
+        r = sqrt((x_wi-x)^2+(y_wj-y)^2);
+        phi = mod(atan2(y_wj-y,x_wi-x)-theta+pi,2*pi)-pi;
         
         % Find the applicable range measurement 
         [meas_cur,k] = min(abs(phi-meas_phi));

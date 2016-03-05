@@ -17,25 +17,25 @@ addpath('../../04-sensor');
 %% Create AVI object
 makemovie1 = 1; % Inverse Measurement Model Video
 if(makemovie1)
-    vidObj1 = VideoWriter('inversemeasbres.avi');
+    vidObj1 = VideoWriter('example2_imm.avi');
     vidObj1.Quality = 100;
     vidObj1.FrameRate = 4;
     open(vidObj1);
 end
 makemovie2 = 1; % Inverse Measurement Model Video
 if(makemovie2)
-    vidObj2 = VideoWriter('mapbres.avi');
+    vidObj2 = VideoWriter('example2_map.avi');
     vidObj2.Quality = 100;
     vidObj2.FrameRate = 4;
     open(vidObj2);
 end
 
 % Simulation time
-Tmax = 50;
+Tmax = 150;
 T = 0:Tmax;
 
 % Load map
-[map, M, N, x0] = load_cell_map(2);
+[map, M, N, x0] = load_cell_map(1);
 
 % Robot motions
 u = [3 0 -3 0;
@@ -50,11 +50,11 @@ og = 0.5*ones(M,N);
 ogl0 = log(og./(1-og));
 ogl=ogl0;
 
-% Sensor model parameters - this example uses a lidar
-phi_m = -.4:0.01:.4; % Measurement bearings
-r_max = 30; % Max range
+% Sensor model parameters - this example uses a sonar sensor
+phi_m = 0; % Measurement bearings
+r_max = 20; % Max range
 alpha = 1; % Width of an obstacle (Distance about measurement to fill in)
-beta = 0.05; % Width of a beam (Angle beyond which to exclude) 
+beta = 1.5; % Width of a beam (Angle beyond which to exclude) 
 
 % State Initialization
 x = zeros(3,length(T)+1);
@@ -89,14 +89,11 @@ for t=2:length(T)
 
     % Inverse measurement model
     plot_inverse_mm(og_mm, M, N, x(:, t), r_m, phi_m, 2);
-    plot_robot_path(x, t, 2);
     if (makemovie1) writeVideo(vidObj1, getframe(gca)); end
 
     % Belief map
     plot_occupancy_grid(og, M, N, 3);
-    plot_robot_path(x, t, 3);
     if (makemovie2) writeVideo(vidObj2, getframe(gca)); end
-    
     
 end
 if (makemovie1) close(vidObj1); end
