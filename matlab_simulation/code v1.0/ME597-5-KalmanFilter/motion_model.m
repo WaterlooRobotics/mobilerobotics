@@ -7,7 +7,7 @@ if example == 1
     Ad = 0.8;
     Bd = 3;
     R = 2;
-    n = length(A(1,:));
+    n = length(Ad(1,:));
 end
 
 % For exmaple 2

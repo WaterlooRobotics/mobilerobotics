@@ -5,7 +5,8 @@ function [C,D,Q,m] = measurement_model(example)
 if example == 1
     C = 1;
     D = 0;
-    Q = 4;
+    Q.Q = 4;
+    Q.QR = 4;
     m = length(C(:,1));
 end
 

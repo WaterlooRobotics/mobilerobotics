@@ -1,6 +1,19 @@
-function plot_filter(x,y,t,mu_S,mu,S,example,makemovie,vidObj)
+function plot_filter(x,y,u,t,mu_S,mup_S,mu,S,example,makemovie,vidObj)
 
 % This function plots each time step
+
+if example == 1
+    figure(1);clf;hold on;
+    plot(T,x,'b')
+    plot(T,y,'rx')
+    plot(T,mup_S,'c--')
+    plot(T,mu_S,'r--')
+    plot(T,u,'g');
+    plot(T,2*ones(size(T)),'m--');
+    plot(T,10*ones(size(T)),'m--');
+    title('State and estimates')
+    legend('State','Measurement', 'Prediction', 'Estimate', 'Input')
+end
 
 if example == 2
     % Plot results

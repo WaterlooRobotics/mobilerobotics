@@ -1,6 +1,14 @@
-function [x, y] = simulation(A,B,C,D,R,Q,x,t,u,example)
+function [x, y] = simulation(model_params,x,t,u,example)
 
 % This function simulates a movement and measurement
+A = model_params.A;
+B = model_params.B;
+C = model_params.C;
+D = model_params.D;
+R = model_params.R;
+Q = model_params.Q;
+n = model_params.n;
+m = model_params.m;
 
 if example == 1
     % Select a motion disturbance
@@ -10,7 +18,7 @@ if example == 1
 
     % Take measurement
     % Select a motion disturbance
-    d = sqrt(Q)*randn(1);
+    d = sqrt(Q.Q)*randn(1);
     % Determine measurement
     y = C*x + d;
 end
