@@ -5,26 +5,23 @@
 % sensors used, and then runs a simulation loop. The mapping algorithm 
 % function is called from within the simulation loop.
 
-%% Occupancy grid mapping example 3
-% Uses a 100 x 100 cell map with a laser scanner, map is updated using
-% Bresenham ray trace mode.
+%% Occupancy grid mapping example 2
+% Uses a 50 x 60 cell map with a laser scanner, map is updated using
+% windowed block update mode.
 
 clear; clc;
-
-% Add libraries
-%addpath('../../04-sensor');
 
 %% Create AVI object
 makemovie1 = 1; % Inverse Measurement Model Video
 if(makemovie1)
-    vidObj1 = VideoWriter('ex3_measurement_model.avi');
+    vidObj1 = VideoWriter('ex2_measurement_model.avi');
     vidObj1.Quality = 100;
     vidObj1.FrameRate = 4;
     open(vidObj1);
 end
-makemovie2 = 1; % Inverse Measurement Model Video
-if(makemovie2)
-    vidObj2 = VideoWriter('ex3_occupancy_grid.avi');
+makemovie2 = 1; % Occupancy Grid Video
+if (makemovie2)
+    vidObj2 = VideoWriter('ex2_occupancy_grid.avi');
     vidObj2.Quality = 100;
     vidObj2.FrameRate = 4;
     open(vidObj2);
@@ -35,7 +32,7 @@ Tmax = 150;
 T = 0:Tmax;
 
 % Load map
-[map, M, N, x0] = load_cell_map(2);
+[map, M, N, x0] = load_cell_map(1);
 
 % Robot motions
 u = [3 0 -3 0;
@@ -43,7 +40,7 @@ u = [3 0 -3 0;
 ui=1;
 
 % Robot sensor rotation command
-w = 0.3*ones(length(T));
+w = 0.3 * ones(length(T));
 
 % Occupancy grid in both probablity and log odds form
 og = 0.5*ones(M,N);
@@ -57,15 +54,15 @@ alpha = 1; % Width of an obstacle (Distance about measurement to fill in)
 beta = 0.05; % Width of a beam (Angle beyond which to exclude) 
 
 % State Initialization
-x = zeros(3,length(T)+1);
-x(:,1) = x0;
+x = zeros(3, length(T) + 1);
+x(:, 1) = x0;
 
 %% Main simulation
-for t=2:length(T)
+for t = 2:length(T)
     % Robot motion
     move = x(1:2,t-1) + u(:,ui)
 	% If the robot hits a wall or obstacle, change direction
-    if ((move(1)>M||move(2)>N||move(1)<1||move(2)<1) || (map(move(1),move(2))==1))
+    if ((move(1)>M || move(2)>N || move(1)<1 || move(2)<1) || (map(move(1),move(2)) == 1))
         x(:,t) = x(:,t-1);
         ui = mod(ui,4)+1;
     else
@@ -75,7 +72,7 @@ for t=2:length(T)
 
     %% Map update;
 	% Call occupancy grid mapping function
-    [ogl, imml, r_m] = ogmap(map, ogl, x(:, t), phi_m, r_max, alpha, beta, 0);
+    [ogl, imml, r_m] = ogmap(map, ogl, x(:, t), phi_m, r_max, alpha, beta, 1);
 
     % Calculate probabilities
     og = exp(ogl)./(1+exp(ogl));
