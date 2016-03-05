@@ -8,6 +8,9 @@
 % Occupancy Grid Mapping
 clear; clc;
 
+% Add libraries
+addpath('../../04-sensor');
+
 %% Create AVI object
 makemovie1 = 1; % Inverse Measurement Model Video
 if(makemovie1)
@@ -29,7 +32,7 @@ Tmax = 150;
 T = 0:Tmax;
 
 % Load map
-[map, M, N, x0] = loadmap(2);
+[map, M, N, x0] = load_cell_map(2);
 
 % Robot motions
 u = [3 0 -3 0;
@@ -39,19 +42,18 @@ ui=1;
 % Robot sensor rotation command
 w = 0.3*ones(length(T));
 
-% Belief map
-m = 0.5*ones(M,N);
-L0 = log(m./(1-m));
-L=L0;
+% Occupancy grid in both probablity and log odds form
+og = 0.5*ones(M,N);
+ogl0 = log(og./(1-og));
+ogl=ogl0;
 
 % Sensor model parameters
-meas_phi = [-.4:0.01:.4]; % Measurement bearings
+phi_m = -.4:0.01:.4; % Measurement bearings
 rmax = 30; % Max range
-% --- alpha and beta never used????
 alpha = 1; % Width of an obstacle (Distance about measurement to fill in)
 beta = 0.05; % Width of a beam (Angle beyond which to exclude) 
 
-%State Initialization
+% State Initialization
 x = zeros(3,length(T)+1);
 x(:,1) = x0;
 
@@ -69,46 +71,27 @@ for t=2:length(T)
     x(3,t) = x(3,t-1) + w(t);
 
     %% Map update;
-    
 	% Call occupancy grid mapping function
-    [L, measL, meas_r] = ogmap(map, L, x(:, t), meas_phi, rmax, 0);
+    [ogl, imml, r_m] = ogmap(map, ogl, x(:, t), phi_m, rmax, alpha, beta, 1);
 
     % Calculate probabilities
-    m = exp(L)./(1+exp(L));
-    invmod_T = exp(measL)./(1+exp(measL));
+    og = exp(ogl)./(1+exp(ogl));
+    og_mm = exp(imml)./(1+exp(imml));
 
     %% Plot results
     
     % Map and vehicle path
-    figure(1);clf; hold on;
-    image(100*(1-map));
-    colormap(gray);
-    plot(x(2,1:t),x(1,1:t),'bx-')
-    axis([0 N 0 M])
+    plot_cell_map(map, M, N, 1);
+    plot_robot_path(x, t, 1);
 
     % Inverse measurement model
-    figure(2);clf; hold on;
-    image(100*(invmod_T));
-    colormap(gray);
-    plot(x(2,t),x(1,t),'bx')
-    for i=1:length(meas_r)
-        plot( x(2,t)+meas_r(i)*sin(meas_phi(i) + x(3,t)),x(1,t)+meas_r(i)*cos(meas_phi(i)+ x(3,t)),'ko')
-    end
-    axis([0 N 0 M])
-    %F2(t-1) = getframe;
-    title('Measurements and inverse measurement model');
+    plot_inverse_mm(og_mm, M, N, x(:, t), r_m, phi_m, 2);
     if (makemovie1) writeVideo(vidObj1, getframe(gca)); end
 
     % Belief map
-    figure(3);clf; hold on;
-    image(100*(m));
-    colormap(gray);
-    plot(x(2,max(1,t-10):t),x(1,max(1,t-10):t),'bx-')
-    axis([0 N 0 M])
-    %F3(t-1) = getframe;
-    title('Current occupancy grid map')
+    plot_occupancy_grid(og, M, N, 3);
     if (makemovie2) writeVideo(vidObj2, getframe(gca)); end
-
+    
 end
 if (makemovie1) close(vidObj1); end
 if (makemovie2) close(vidObj2); end
