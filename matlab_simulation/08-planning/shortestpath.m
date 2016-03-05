@@ -116,7 +116,7 @@ while (~done)
                 % Move best to closed set
                 C = [C; bestnode];                
                 continue;
-            end 
+            end           
 
             
          case 2 %Breadth-First
@@ -128,7 +128,12 @@ while (~done)
              bestnode = OpenSet(best,:);
             % remove best node from open set
             OpenSet = OpenSet([best+1:end],:);                 
-          
+            % Check end condition
+            if (bestnode(1)==finish)
+               % Move best to closed set
+                C = [C; bestnode];
+                continue;
+            end            
          case 3 %Depth-First
             if (length(OpenSet(:,1))==0)
                 done = 1;
@@ -138,6 +143,12 @@ while (~done)
             bestnode = OpenSet(best,:);
             % remove best node from open set
             OpenSet = OpenSet([best+1:end],:);            
+            % Check end condition
+            if (bestnode(1)==finish)
+               % Move best to closed set
+                C = [C;bestnode];
+                continue;
+            end  
 
      end
    
@@ -165,7 +176,7 @@ while (~done)
             case 1 % Astart
                 dtogo = norm(nodes(neigh(i),:)-nodes(finish,:));
                 % If neighbour is not in open set, add it   
-                if (length(found)==0)
+                if (isempty(found))
                    OpenSet = [OpenSet; neigh(i) bestnode(1) dtogo+dcur dcur];             
                 else
                    if (dcur < OpenSet(found,4))
@@ -175,7 +186,7 @@ while (~done)
               
             case 2 %Breadth-First   (QUEUE)
                 % If neighbour is not in open set, add it
-                if (length(found)==0)
+                if (isempty(found))
                    OpenSet = [OpenSet; neigh(i) bestnode(1) dcur dcur];     
         
                 else % If in open set, update cost if better    
@@ -186,7 +197,7 @@ while (~done)
             
             case 3 %Depth-First  (STACK)
                 % If neighbour is not in open set, add it
-                if (length(found)==0)
+                if (isempty(found))
                    OpenSet = [neigh(i) bestnode(1) dcur dcur; OpenSet];
                 else % If in open set, update cost if better    
                    if (dcur < OpenSet(found,4))
@@ -196,7 +207,7 @@ while (~done)
 
             case 4 %Dijkstra's 
                 % If neighbour is not in open set, add it
-                if (length(found)==0) 
+                if (isempty(found)) 
                    OpenSet = [OpenSet; neigh(i) bestnode(1) dcur dcur]; 
                 
                 else % If neighbour is in open set, check if new route is better
