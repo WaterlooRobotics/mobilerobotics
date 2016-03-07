@@ -13,13 +13,11 @@
 clear all; close all; clc;
 RAD2DEG=180/pi;
 
-dataset_path='gyro.mat'; %Put the dataset path in here.
-
 tmin = 10; % Put Start_time here in seconds
 tmax = 20; % Put Stop_time here in seconds
 
 %% Load Data and Initial Calculations
-load(dataset_path); % Load the Gyro Dataset.
+load('gyroData.mat'); % Load the Gyro Dataset.
 G_data=[gx gy gz]; % Vectorize the Dataset. G(:,1)=gx,G(:,2)=gy;G(:,3)=gz;
 G_data=G_data*RAD2DEG; % Convert the Dataset to degrees.
 dataSet_length=length(G_data(:,1));
