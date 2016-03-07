@@ -77,6 +77,8 @@ x0(5:N:end) = 0;
 % Receding horizon goal
 xd = xdT(1:T,:)
 
+ii=1;                                % figure name
+
 % Repeat optimization at each timestep
 for i=1:TTot-T
 
@@ -106,7 +108,7 @@ for i=1:TTot-T
 %     plot(1:T,v)
 %     plot(1:T,w)
 
-    figure(i); clf; hold on;
+    figure(ii); clf; hold on;
     plot(x,y,'bx-');
     if (~endonly)
         plot(xdT(1:end-1,1), xdT(1:end-1,2), 'ro--')
@@ -116,7 +118,7 @@ for i=1:TTot-T
     if (withobs)
         for j=1:numObsts
             plot(obs(j,1), obs(j,2),'bx');
-            circle(i, obs(j,:), radius(j));
+            circle(ii, obs(j,:), radius(j));
         end
         axis equal
     end
