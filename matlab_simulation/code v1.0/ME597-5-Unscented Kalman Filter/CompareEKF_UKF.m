@@ -1,6 +1,5 @@
 function CompareEKF_UKF(T,x,mu_S,mu_Su )
-%UNTITLED5 Summary of this function goes here
-%   Detailed explanation goes here
+%Plot the error for EKF and UKF on the same graph
     figure(2);clf; hold on;
     e = sqrt((x(1,2:end)-mu_S(1,2:end)).^2+(x(2,2:end)-mu_S(2,2:end)).^2);
     plot(T(2:end),e,'b', 'LineWidth', 1.5);
