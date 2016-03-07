@@ -34,7 +34,7 @@ mu0r = [0 0 0]'; % mean (mu)
 S0rr = 0.00000000001*eye(3);% covariance (Sigma)
 
 % Feature Map
-map=[-1:1:8,8:-1:-1; 2*ones(1,10),-2*ones(1,10)]
+map=[-1:1:8,8:-1:-1; 2*ones(1,10),-2*ones(1,10)];
 M = length(map);
 
 % Prior over feature map
