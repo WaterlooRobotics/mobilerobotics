@@ -77,12 +77,8 @@ x0(5:N:end) = 0;
 % Receding horizon goal
 xd = xdT(1:T,:)
 
-
-ii=1;                               % figure name: Creating animation in one figure
-filename = 'NLP_Animation.gif';     % saving animation file in .gif file
-
 % Repeat optimization at each timestep
-or i=1:TTot-T
+for i=1:TTot-T
 
     % Solve nonlinear program
     options = optimset('maxfunevals',50000);
@@ -110,7 +106,7 @@ or i=1:TTot-T
 %     plot(1:T,v)
 %     plot(1:T,w)
 
-    figure(ii); clf; hold on;
+    figure(i); clf; hold on;
     plot(x,y,'bx-');
     if (~endonly)
         plot(xdT(1:end-1,1), xdT(1:end-1,2), 'ro--')
@@ -120,19 +116,10 @@ or i=1:TTot-T
     if (withobs)
         for j=1:numObsts
             plot(obs(j,1), obs(j,2),'bx');
-            circle(ii, obs(j,:), radius(j));
+            circle(i, obs(j,:), radius(j));
         end
         axis equal
     end
-    %drawnow();
+    drawnow();
     F(i) = getframe;
-    
-    % saving final animation file as a .gif file
-      im = frame2im(getframe(1));
-      [imind,cm] = rgb2ind(im,256);
-      if i == 1;
-          imwrite(imind,cm,filename,'gif', 'Loopcount',inf);
-      else
-          imwrite(imind,cm,filename,'gif','WriteMode','append');
-      end
 end
