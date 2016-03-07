@@ -1,17 +1,13 @@
-function []=fastSLAM_func(PoseInitial,MotionNoise,MeasurementNoise,MapSize,FinalTime,dt,ParticleSize)
+function [pose,map,y,muFeat,particleSet,t,meas_ind,newfeature,centroid_particles]=fastSLAM_func(PoseInitial,MotionNoise,MeasurementNoise,MapSize,FinalTime,dt,ParticleSize)
 totalFeatures=MapSize;R=MeasurementNoise;Q=MotionNoise;
 
-
+%initialize the Fast Slam parameters
 [timeInterval,finalTime,noFeatures,map,pose,totalParticles,muFeat,muFeatPred,covFeat,covFeatPred,newfeature,w,u,timeStamp,rmax,thmax]...
             =initializeFastSLAM(PoseInitial,MotionNoise,MeasurementNoise,MapSize,FinalTime,dt,ParticleSize);
-%% Fast SLAM 
-figure(1); 
-%Plot the Map
-
+%% Fast SLAM LOOP
 for t=2:finalTime/timeInterval
     timeStamp(t)=timeStamp(t-1)+timeInterval;
     pose(:,t)=motionUpdate_fs(pose(:,t-1),u,Q,timeInterval);
-    
     meas_ind=featureSearch_fs(noFeatures,map,pose(:,t),rmax,thmax); 
     y=[];
     for feature_index = meas_ind       
@@ -25,7 +21,7 @@ for t=2:finalTime/timeInterval
        for j=1:length(meas_ind)
            i = meas_ind(j);
            [muFeatPred(:,i,particle),covFeatPred(:,:,i,particle),Hmu]=...
-               ekf_FS1(particleSetP(:,particle),y(:,j),muFeat(:,i,particle),...
+               ekf_fs(particleSetP(:,particle),y(:,j),muFeat(:,i,particle),...
                covFeat(:,:,i,particle),R,newfeature(i));
            yw(2*(j-1)+1:2*j) = y(:,j);
            hmuw(2*(j-1)+1:2*j) = Hmu;
@@ -36,18 +32,16 @@ for t=2:finalTime/timeInterval
        end
     end
         newfeature(meas_ind) = 0; 
-        [muParticle,particleSet,muFeat,covFeat]=raoBlackwellFilter_fs(totalParticles...
+        [muAllParticles,particleSet,muFeat,covFeat]=raoBlackwellFilter_fs(totalParticles...
             ,w,particleSetP,muFeatPred,covFeatPred);
-        mu_S(:,t) = muParticle;
-        
-        
-        
-     plot_fs(pose,map,y,muFeat,particleSet,t,meas_ind,totalParticles,noFeatures,newfeature);
-       pause(0.1);
+        centroid_particles(:,t) = muAllParticles;
+    
+     plot_fs(pose,map,y,muFeat,particleSet,t,meas_ind,totalParticles,noFeatures,newfeature,centroid_particles);
+       
 end
 
 
-
+    %% Individual Function Definations
     %% Initialization Function   
     function[timeInterval,finalTime,noFeatures,map,pose,totalParticles,muFeat,muFeatPred,covFeat,covFeatPred,newfeature,w,u,timeStamp,rmax,thmax]...
             =initializeFastSLAM(PoseInitial,MotionNoise,MeasurementNoise,MapSize,FinalTime,dt,ParticleSize)
@@ -59,8 +53,6 @@ end
         map(1,:) = map(1,:)-5; 
         map(2,:) = map(2,:)-2; 
         Q=MeasurementNoise;R=MotionNoise;
-%         Q=[0.001 0 0;0 0.001 0;0 0 0.0001];
-%         R=[0.02 0;0 0.02];
         rmax = 10;
         thmax = pi/4;
         pose(:,1)=poseInitial;
@@ -75,44 +67,43 @@ end
         newfeature = ones(totalParticles,1);
         w_initial=1/totalParticles;
         w=w_initial*ones(1,totalParticles);
-        u=[2;0.3];
+        u=[1;0.3];
         timeStamp(1)=timeInterval; 
     end
 
     %% Motion Model
-    function xr=motionUpdate_fs(xr,u,Q,dt)
-    [QE, Qe] = eig(Q);n = length(Q(:,1)); 
+    function newPose=motionUpdate_fs(oldPose,controlInput,MotionNoise,dt)
+    [QE, Qe] = eig(MotionNoise);n = length(MotionNoise(:,1)); 
      e = QE*sqrt(Qe)*randn(n,1);
-    % Upda1e robot state
-        xr = [xr(1,1)+u(1,1)*cos(xr(3,1))*dt;% This means U is just a transla1ion and rotation
-                  xr(2,1)+u(1,1)*sin(xr(3,1))*dt;
-                  xr(3,1)+u(2,1)*dt] + e;
+    % Update robot state
+        newPose = [oldPose(1,1)+controlInput(1,1)*cos(oldPose(3,1))*dt;% This means U is just a transla1ion and rotation
+                  oldPose(2,1)+controlInput(1,1)*sin(oldPose(3,1))*dt;
+                  oldPose(3,1)+controlInput(2,1)*dt] + e;
     end
 
     %% Measurement Model
-    function y_meas=measurementUpdate_fs(map,xr,Qi);
-     [QiE, Qie] = eig(Qi);
-     m = length(Qi(:,1)); % Number of measurements per feature 
+    function obsFeat=measurementUpdate_fs(map,poseRobot,MeasNoise)
+     [QiE, Qie] = eig(MeasNoise);
+     m = length(MeasNoise(:,1)); % Number of measurements per feature 
      delta = QiE*sqrt(Qie)*randn(m,1);
-     y_meas=[sqrt((map(1,1)-xr(1,1))^2 + (map(2,1)-xr(2,1))^2);
-                mod(atan2(map(2,1)-xr(2,1),map(1,1)-xr(1,1))-xr(3,1)+pi,2*pi)-pi] + delta;
+     obsFeat=[sqrt((map(1,1)-poseRobot(1,1))^2 + (map(2,1)-poseRobot(2,1))^2);
+                mod(atan2(map(2,1)-poseRobot(2,1),map(1,1)-poseRobot(1,1))-poseRobot(3,1)+pi,2*pi)-pi] + delta;
 
     end
 
     %% Rao Blackwellization
-    function [muParticle,X,mu,S]=raoBlackwellFilter_fs(D,w,Xp,mup,Sp)
-     % Resampling
-        W = cumsum(w);
+    function [muAllParticles,newParticleSet,newMeanParticle,newCovParticle]=raoBlackwellFilter_fs(totalParticles,weights,particleSet,meanFeatP,covaFeatP)
+        W = cumsum(weights);% Form the PDF and calculate the final cumulitive sum of all weights.
         % Resample and copy all data to new particle set
-        for d=1:D
+        for particle=1:totalParticles
             seed = W(end)*rand(1);
             cur = find(W>seed,1);
-            X(:,d) = Xp(:,cur);
-            mu(:,:,d) = mup(:,:,cur);
-            S(:,:,:,d) = Sp(:,:,:,cur);
+            newParticleSet(:,particle) = particleSet(:,cur);
+            newMeanParticle(:,:,particle) = meanFeatP(:,:,cur);
+            newCovParticle(:,:,:,particle) = covaFeatP(:,:,:,cur);
         end
 
-        muParticle = mean(X');
+        muAllParticles = mean(newParticleSet');
     end
     
     %% Feature Search
@@ -125,18 +116,15 @@ end
         end
 
             function yes = inview(f,x, rmax, thmax)
-            % Checks if a feature is in view
+            % Checks for features currently in robot's view
             yes = 0;
-
             dx = f(1)-x(1);
             dy = f(2)-x(2);
-
             r = sqrt(dx^2+dy^2);
             th = mod(atan2(dy,dx)-x(3),2*pi);
             if (th > pi)
                 th = th-2*pi;
             end
-
             if ((r<rmax) && (abs(th)<thmax))
                 yes = 1;
             end
@@ -144,17 +132,17 @@ end
     end
 
     %% Plot for FastSLAM
-    function[]=plot_fs(pose,map,y,muFeat,particleSet,t,meas_ind,totalParticles,noFeatures,newfeature)
+    function[]=plot_fs(pose,map,y,muFeat,particleSet,t,meas_ind,totalParticles,noFeatures,newfeature,centroid_particles)
         %Color Map Intialization
         cmap = colormap('jet');
         cmap = cmap(1:3:end,:);
         cn = length(cmap(:,1));
         figure(1);clf; hold on;
-%         %Plot the Robot Pose
-         plot(pose(1,1:t),pose(2,1:t), 'ro--')
-        % Draw the Laser Line
+        %Plot the Robot Pose
+        plot(pose(1,1:t),pose(2,1:t), 'ro--')
+        % Draw the Heading
         plot([pose(1,t) pose(1,t)+1*cos(pose(3,t))],[pose(2,t) pose(2,t)+1*sin(pose(3,t))], 'r-')
-        %Differentiate the Observed Features
+        %Differentiate the currently Observed Features by drawing a line
         for j=1:length(meas_ind)
             plot([pose(1,t) pose(1,t)+y(1,j)*cos(y(2,j)+pose(3,t))], [pose(2,t) pose(2,t)+y(1,j)*sin(y(2,j)+pose(3,t))], 'Color', cmap(mod(meas_ind(j),cn)+1,:) );
         end
@@ -171,10 +159,14 @@ end
                 end
             end
         end
+        %Plot Centroid of Particles
+        plot(centroid_particles(1,1:t),centroid_particles(2,1:t), 'g*');
+
         %Define Axes
         axis equal
         axis([-8 8 -2 10])
         title('FastSLAM with Range & Bearing Measurements')
+    pause(0.01);%Pause to let MATLAB plot and display the results
     end
-
+    
 end
