@@ -12,6 +12,15 @@ close all
 % Example number
 example = 2;
 
+% Create AVI object
+makemovie = 1;
+if(makemovie)
+    vidObj = VideoWriter('example2kf.avi');
+    vidObj.Quality = 100;
+    vidObj.FrameRate = 8;
+    open(vidObj);
+end
+
 % Discrete time step
 dt = 0.1;
 
@@ -88,7 +97,10 @@ for t=2:length(T)
     legend('State', 'Measurement','Estimate')
     axis equal
     axis([-10 10 -5 15])
+    if (makemovie) writeVideo(vidObj, getframe(gca)); end
 end
+
+if (makemovie) close(vidObj); end
 
 figure(2);clf;
 plot(T,K_S');
