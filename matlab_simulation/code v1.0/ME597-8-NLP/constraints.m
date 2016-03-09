@@ -1,6 +1,6 @@
 function [C, Ceq] = constraints(x)
 
-global n N T dt obs withobs
+global n N T dt obs withobs vd_cnst
 
 C = [];
 Ceq = zeros(n*(T-1),1);
@@ -22,3 +22,7 @@ if (withobs)
         end
     end
 end
+
+% Velocity constraints
+ind_end=length(C);
+C(ind_end+1,1)=x(4)-vd_cnst;

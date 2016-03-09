@@ -1,7 +1,7 @@
 % Nonlinear programming receding horizon examples
 clear all; close all; clc
 
-global n m N T dt xd obs pF withobs endonly
+global n m N T dt xd obs pF withobs endonly vd_cnst
 
 %% Optimization problem definition
 % Number of optimization variables per timestep: n states and m inputs
@@ -13,17 +13,22 @@ N = (n+m);
 % Time steps
 TTot = 20;
 dt = .3;
-% Desired trajectory
-xdT = [0:dt:(TTot-1)*dt; sin(0.3*[0:dt:(TTot-1)*dt]);zeros(size(0:dt:(TTot-1)*dt))]';
-%Initial position
-p0 = [0 2 0];
+
+
+
+% Example #2 Generating random desired trajectory (using Bezier curves)
+xd_start=[0, 1];
+xd_end=[5.5,2];
+xdT=Trajectory_bazier(xd_start,xd_end,dt,TTot);
+p0 = [0 2 0];           %Initial position
+
 % Set up environment
 posMinBound = [0 -1];
 posMaxBound = [6 3];
 numObsts = 6;
 withobs = 1;
 
-% Example #2 Navigating to a destination 
+% Example #3 Navigating to a destination 
 endonly = 0;
 if (endonly)
     TTot = 10;
@@ -34,12 +39,14 @@ end
 % Receding Horizon
 T = 5;
 
-% Constraints
+% Example #4 Constraints (velocity constraint is added)
 A = [];
 B = [];
 Aeq = zeros(3,N*T);
 Aeq(1:3,1:3) = eye(3);
 Beq = p0';
+vd_cnst=1;                  %speed constraint
+
 
 % State and input bounds
 LB = -100*ones(N*T,1);
@@ -75,59 +82,52 @@ x0(4:N:end) = 0;
 x0(5:N:end) = 0;
 
 % Receding horizon goal
-xd = xdT(1:T,:)
-
-
-ii=1;                               % figure name: Creating animation in one figure
-filename = 'NLP_Animation.gif';     % saving animation file in .gif file
+xd = xdT(1:T,:);
+ii=1;                                % figure name
+filename = 'NLP_Animation.gif';      % saving animation file in .gif file
 
 % Repeat optimization at each timestep
-or i=1:TTot-T
+for i=1:TTot-T
 
     % Solve nonlinear program
-    options = optimset('maxfunevals',50000);
-    tic;
+    options = optimset('maxfunevals',50000,'display','off');
     [X,FVAL,EXITFLAG,OUTPUT,LAMBDA] = fmincon(@(x) cost(x),x0,A,B,Aeq,Beq,LB,UB,@(x) constraints(x), options);
-    toc;
+   
     % Move and Update problem for next timestep
     x0(1:N*(T-1)) = X(N+1:N*T,1);
-    x0(N*(T-1)+1:N*T) = X(N*(T-1)+1:N*T); % should be propagating dynamics here.
+    x0(N*(T-1)+1:N*T) = X(N*(T-1)+1:N*T);   % should be propagating dynamics here.
     xd = xdT(i+1:i+T,:);
     Beq = X(N+1:N+n)';
 
     % Rename results
-    x = X(1:N:end);
-    y = X(2:N:end);
-    th = X(3:N:end);
-    v = X(4:N:end);
-    w = X(5:N:end);
+    x = X(1:N:end);     % position on x-axis
+    y = X(2:N:end);     % position on y-axis
+    th = X(3:N:end);    % orientation
+    v = X(4:N:end);     % translational velocity
+    w = X(5:N:end);     % angular velocity
 
     % Plot results
-%     figure(2);clf; hold all;
-%     plot(1:T,x)
-%     plot(1:T,y)
-%     plot(1:T,th)
-%     plot(1:T,v)
-%     plot(1:T,w)
-
     figure(ii); clf; hold on;
     plot(x,y,'bx-');
+    % draw vehicle as a two-wheeled car
+    drawcar(x(end),y(end),th(end),.15,ii)   
     if (~endonly)
         plot(xdT(1:end-1,1), xdT(1:end-1,2), 'ro--')
     else
         plot(pF(1),pF(2),'ro')
     end
+    % draw obstacles
     if (withobs)
         for j=1:numObsts
-            plot(obs(j,1), obs(j,2),'bx');
+            plot(obs(j,1), obs(j,2),'kx');
             circle(ii, obs(j,:), radius(j));
         end
         axis equal
     end
-    %drawnow();
     F(i) = getframe;
     
-    % saving final animation file as a .gif file
+    
+    % saving animation file in .gif file
       im = frame2im(getframe(1));
       [imind,cm] = rgb2ind(im,256);
       if i == 1;
@@ -135,4 +135,16 @@ or i=1:TTot-T
       else
           imwrite(imind,cm,filename,'gif','WriteMode','append');
       end
-end
+      
+    % exitflag shows if the problem has feasible solustion
+    Vi(i)=v(end);       % velocitiy of vehicle 
+    ei(i)=EXITFLAG;     % exit flag
+    if EXITFLAG<0
+        display('----------------------------------------------------------------');
+        display('Non-feasible solution: Some of the constraints are not satisfied.');break;
+    end
+    
+    end
+
+    
+
