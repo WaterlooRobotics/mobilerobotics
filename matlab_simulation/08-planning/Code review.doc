@@ -1,0 +1,20 @@
+The review for Graph Search 
+
+ •"clear;clc" may be added at the beginning of "example_search_graph.m" for a clear and successful start.
+
+ •Plottings of four methods might be displayed with separate figures instead of overlapping the previous one with the current.
+
+ •Line 35~39 in "example_search_graph.m" might be relocated between line 17~18 so that a loop can be reduced 
+ (memory saver & time saver).
+
+ •The sequence of cases in "shortestpath.m" is messed up at line 104.
+
+ •I find there are three sets of switch used, maybe an explanation by using %% at the previous line of the switch line a good 
+ way to tell the meaning. 
+
+ •It does not require so much time reading the codes but detailed explanations behind most lines (as more as possible) might 
+ be added because if the reviewer have little knowledge of how the algorithms in the codes take effect, they will have to consider the purposes of every functions in the codes. This can cost a lot of time compared with the situation that reviewers skip thinking over a big number of lines due to the brief and concise annotations at the end of lines.
+
+Above are some suggestions that may be helpful to the codes. A decent code of the graph research for someone to understand the 
+workflow.
+
