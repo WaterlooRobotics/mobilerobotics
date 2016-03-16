@@ -27,7 +27,8 @@ function[newPose,map,y,muParticleNew,covParticleNew,newParticleSet,meas_ind,newf
            %Accumulate the weights for the Particle Filter Update
            yw(2*(j-1)+1:2*j) = y(:,j);
            hmuw(2*(j-1)+1:2*j) = Hmu;
-           Qw(2*(j-1)+1:2*j,2*(j-1)+1:2*j) = 2*covFeatPred(:,:,i,particle);
+%            Qw(2*(j-1)+1:2*j,2*(j-1)+1:2*j) = 2*covFeatPred(:,:,i,particle);
+       Qw(2*(j-1)+1:2*j,2*(j-1)+1:2*j) = Hmu'*covFeatPred(:,:,i,particle)*Hmu+R;
        end
        %Ensure that weights are not too low. 
        if (exist('Qw'))
