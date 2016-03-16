@@ -1,4 +1,4 @@
-function [meanFeatP,covaFeatP,Hmu]=ekf_fs(predFeatPrior,obsFeat,meanFeat,covaFeat,measUncertainty,checkNewFeat)
+function [meanFeatP,covaFeatP,Hmu,Ht]=ekf_fs(predFeatPrior,obsFeat,meanFeat,covaFeat,measUncertainty,checkNewFeat)
   if (checkNewFeat == 1) %nonobserved features are all 1;old features are 0;
                 % If new feature, initialize the features.
                 meanFeatP(1,1) = predFeatPrior(1,1)+obsFeat(1,1)*cos(obsFeat(2,1)+predFeatPrior(3,1));

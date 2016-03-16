@@ -19,7 +19,7 @@ function[newPose,map,y,muParticleNew,covParticleNew,newParticleSet,meas_ind,newf
        %Run Individual EKFs for each particles to predict features
        for j=1:length(meas_ind)
            i = meas_ind(j);
-           [mu,cov,Hmu]=...
+           [mu,cov,Hmu,Ht]=...
                ekf_fs(particleSetP(:,particle),y(:,j),muFeatOld(:,i,particle),...
                covFeatOld(:,:,i,particle),R,newfeature(i));
                muFeatPred(:,i,particle)=mu;covFeatPred(:,:,i,particle)=cov;
@@ -28,7 +28,7 @@ function[newPose,map,y,muParticleNew,covParticleNew,newParticleSet,meas_ind,newf
            yw(2*(j-1)+1:2*j) = y(:,j);
            hmuw(2*(j-1)+1:2*j) = Hmu;
 %            Qw(2*(j-1)+1:2*j,2*(j-1)+1:2*j) = 2*covFeatPred(:,:,i,particle);
-       Qw(2*(j-1)+1:2*j,2*(j-1)+1:2*j) = Hmu'*covFeatPred(:,:,i,particle)*Hmu+R;
+       Qw(2*(j-1)+1:2*j,2*(j-1)+1:2*j) = Ht*covFeatPred(:,:,i,particle)*Ht'+R;
        end
        %Ensure that weights are not too low. 
        if (exist('Qw'))
