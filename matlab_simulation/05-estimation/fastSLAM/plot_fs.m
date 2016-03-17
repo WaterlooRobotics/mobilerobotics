@@ -25,9 +25,9 @@ function[]=plot_fs(pose,map,y,muFeatNew,particleSet,t,meas_ind,totalParticles,no
         cn = length(cmap(:,1));
         figure(1);clf; hold on;
         %Plot the Robot Pose
-        plot(pose(1,1:t),pose(2,1:t), 'ro--')
+        l(1)=plot(pose(1,1:t),pose(2,1:t), 'ro--');
         %Plot the Robot Pose
-        plot(truePose(1,1:t),truePose(2,1:t),'k','LineWidth',3)
+        l(2)=plot(truePose(1,1:t),truePose(2,1:t),'k','LineWidth',3);
         % Draw the Heading
         plot([pose(1,t) pose(1,t)+1*cos(pose(3,t))],[pose(2,t) pose(2,t)+1*sin(pose(3,t))], 'r-')
         %Differentiate the currently Observed Features by drawing a line
@@ -46,11 +46,12 @@ function[]=plot_fs(pose,map,y,muFeatNew,particleSet,t,meas_ind,totalParticles,no
             end
         end
         %Plot Centroid of Particles
-        plot(centroid_particles(1,1:t),centroid_particles(2,1:t), 'g*');
+        l(3)=plot(centroid_particles(1,1:t),centroid_particles(2,1:t), 'g*');
 
         %Define Axes
         axis equal
         axis([-8 8 -2 10])
-        title('FastSLAM with Range & Bearing Measurements')
+        title('FastSLAM with Range & Bearing Measurements');
+        legend(l(1:3),'Robot Motion','True Motion','CentroidParticle','Location','southoutside','Orientation','horizontal');
         pause(0.001);%Pause to let MATLAB plot and display the results
     end
