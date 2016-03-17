@@ -41,7 +41,7 @@ for t=2:finalTime/timeInterval
     end
     %call the fast slam function
     [newPose,map,y,muParticleNew,covParticleNew,newParticleSet,meas_ind,newfeature,centroid_particles,w_new]...
-        =fastSLAM2(oldPose,u,MotionNoise,MeasurementNoise,map,oldParticleSet,muFeatOld,covFeatOld,w_old,rmax,thmax,timeInterval,totalParticles,newfeature);
+        =func_fastSLAM2(oldPose,u,MotionNoise,MeasurementNoise,map,oldParticleSet,muFeatOld,covFeatOld,w_old,rmax,thmax,timeInterval,totalParticles,newfeature);
     
 % % %     UNCOMMENT to call the fast2.0 slam function
 %     [newPose,map,y,muParticleNew,covParticleNew,newParticleSet,meas_ind,newfeature,centroid_particles,w_new]...
