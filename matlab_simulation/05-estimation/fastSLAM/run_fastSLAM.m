@@ -42,7 +42,7 @@ newfeature = ones(noFeatures,1);
 w_initial=1/totalParticles;
 w=w_initial*ones(1,totalParticles);
 timeStamp(1)=timeInterval; 
-
+truePose(:,1)=poseInitial;
 %Map Initializations
 map = 10*rand(2,noFeatures);
 map(1,:) = map(1,:)-5; 
@@ -56,10 +56,10 @@ for t=2:finalTime/timeInterval
         w_old=w;
         muFeatOld=muFeat;
         covFeatOld=covFeat;
-    end
+     end
 %% % %     UNCOMMENT to call the fast slam1.0 function
     [newPose,y,muParticleNew,covParticleNew,newParticleSet,meas_ind,newfeature,w_new]...
-        =func_fastSLAM2(oldPose,u,MotionNoise,MeasurementNoise,map,oldParticleSet,muFeatOld,covFeatOld,rmax,thmax,timeInterval,totalParticles,newfeature,w_old);
+        =func_fastSLAM(oldPose,u,MotionNoise,MeasurementNoise,map,oldParticleSet,muFeatOld,covFeatOld,rmax,thmax,timeInterval,totalParticles,newfeature,w_old);
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %     
 
 %% % %     UNCOMMENT to call the fast2.0 slam function
@@ -72,8 +72,10 @@ for t=2:finalTime/timeInterval
     pose(:,t)=newPose;
     centroid(:,t)=mean(newParticleSet');
     
+    %Updates the true pose of the robot
+    truePose(:,t)=motionUpdate_fs(truePose(:,t-1),u,zeros(3),timeInterval);
     %Plot the Results
-    plot_fs(pose,map,y,muParticleNew,newParticleSet,t,meas_ind,totalParticles,noFeatures,centroid);
+    plot_fs(pose,map,y,muParticleNew,newParticleSet,t,meas_ind,totalParticles,noFeatures,centroid,truePose);
     
     % Swap for the next iteration        
     oldParticleSet=newParticleSet;

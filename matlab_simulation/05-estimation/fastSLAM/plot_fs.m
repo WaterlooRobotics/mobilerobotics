@@ -11,13 +11,14 @@
 % Total no of particles
 % Total no of features
 % centroid Loacations of the Particles
+% True Pose of the robot
 % OUTPUTS:(in order of call)
 % --------
 % None
 % % AUTHOR: BISMAYA SAHOO, EMAIL:bsahoo@uwaterloo.ca
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function[]=plot_fs(pose,map,y,muFeatNew,particleSet,t,meas_ind,totalParticles,noFeatures,centroid_particles)
+function[]=plot_fs(pose,map,y,muFeatNew,particleSet,t,meas_ind,totalParticles,noFeatures,centroid_particles,truePose)
         %Color Map Intialization
         cmap = colormap('jet');
         cmap = cmap(1:3:end,:);
@@ -25,6 +26,8 @@ function[]=plot_fs(pose,map,y,muFeatNew,particleSet,t,meas_ind,totalParticles,no
         figure(1);clf; hold on;
         %Plot the Robot Pose
         plot(pose(1,1:t),pose(2,1:t), 'ro--')
+        %Plot the Robot Pose
+        plot(truePose(1,1:t),truePose(2,1:t),'k','LineWidth',3)
         % Draw the Heading
         plot([pose(1,t) pose(1,t)+1*cos(pose(3,t))],[pose(2,t) pose(2,t)+1*sin(pose(3,t))], 'r-')
         %Differentiate the currently Observed Features by drawing a line
