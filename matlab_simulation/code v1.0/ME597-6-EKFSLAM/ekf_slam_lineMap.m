@@ -155,9 +155,9 @@ for t=2:length(T)
                 S=temp;
 
                 newfeature(i) = 0;
-                % rearrange map, newfeature, y, and flist so that the
+                % rearrange map, newfeature, y, and flist so that they
                 % follow the same order as mu
-                [map newfeature y flist]=rearrangeMap(map,newfeature,y,flist,i,count);
+                [map, newfeature, y, flist]=rearrangeMap(map,newfeature,y,flist,i,count);
                 j=1;
                 disp([num2str(count) ' of the ' num2str(M) ' features have been detected'])
             end
