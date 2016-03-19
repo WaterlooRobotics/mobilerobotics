@@ -12,6 +12,12 @@ function [spath,sdist] = shortestpath_new(nodes, edges, start, finish, method, h
 % Outputs:
 %   spath: all path nodes
 %   sdist: total distance
+%---------------------------------------
+% Revision
+%  V0.0.1 
+%       2016/03/19 -- CSL -- clean up the code and udpate some issues based
+%       on feedback.
+%%======================================
 
 switch method
     case 1 
@@ -73,9 +79,8 @@ end
 %% Find shortest path
 
 % Initialize open set (node, backtrack, lower bound cost, current cost)
-tic; 
+tic;  % start timer tick
 dmax = dists(min(start,finish),max(start,finish));
-
 
 OpenSet = [start 0 dmax 0];
 % Initialize closed set (same as open set)
@@ -89,7 +94,7 @@ bestnode = OpenSet(best,:);
 %%======================================================== MAIN
 % Main algorithm
 while (~done)
-    t=t+1; 
+     t=t+1; 
      switch method
          case 1 % Astart
             % Check if open set is empty
@@ -98,7 +103,12 @@ while (~done)
                 sdist = 0;
                 return;
             end             
-            [val, best] = min(OpenSet(:,3));
+            %--------------------------------
+            % Reminder: OpenSet(:,3)= distance to finish + distance to neighbours
+            % The idea here is to grap the neighbour node which is closer
+            % to the finish. This is the major differece from Dijkstra's in case 4.
+            [val, best] = min(OpenSet(:,3)); 
+            %--------------------------------
             bestnode = OpenSet(best,:);
             % Check end condition
             if (bestnode(1)==finish)
@@ -115,7 +125,10 @@ while (~done)
                 sdist = 0;
                 return;
             end             
+            %--------------------------------
+            % Reminder: OpenSet(:,4)= distance to neighbours;
             [val, best] = min(OpenSet(:,4));
+            %--------------------------------
             bestnode = OpenSet(best,:);
             % Check end condition
             if (bestnode(1)==finish)
@@ -124,14 +137,15 @@ while (~done)
                 C = [C; bestnode];                
                 continue;
             end           
-
             
          case 2 %Breadth-First
             if (isempty(OpenSet(:,1)))
                 done = 1;
                 continue;
             end
-             best = 1;  % Grap next node in the open set
+            %--------------------------------
+             best = 1;  % Grap next node from the top of the open set
+             %--------------------------------
              bestnode = OpenSet(best,:);
             % remove best node from open set
             OpenSet = OpenSet([best+1:end],:);                 
@@ -140,13 +154,16 @@ while (~done)
                % Move best to closed set
                 C = [C; bestnode];
                 continue;
-            end            
+            end
+            
          case 3 %Depth-First
             if (isempty(OpenSet(:,1)))
                 done = 1;
                 continue;
             end
-            best = 1;  % Grap next node in the open set
+            %--------------------------------
+            best = 1;  % Grap next node from the top of the open set
+            %--------------------------------
             bestnode = OpenSet(best,:);
             % remove best node from open set
             OpenSet = OpenSet([best+1:end],:);            
@@ -155,20 +172,17 @@ while (~done)
                % Move best to closed set
                 C = [C;bestnode];
                 continue;
-            end  
-
+            end
      end
    
      % Move best to closed set
      C = [C; bestnode];
 
+     % Get all neighbours of best node
+     neigh = find(edges(bestnode(1),:)==1);
     
-
-    % Get all neighbours of best node
-    neigh = find(edges(bestnode(1),:)==1);
-    
-    % Process each neighbour
-    for i=1:length(neigh)
+     % Process each neighbour
+     for i=1:length(neigh)
         % If neighbour is in closed set, skip        
         found = find(C(:,1)==neigh(i),1);
         if (length(found)==1)
@@ -177,14 +191,11 @@ while (~done)
             end
         end
         
-        %dcur = bestnode(4)+dists(bestnode(1),neigh(i));
         dcur = bestnode(4)+dists(min(bestnode(1),neigh(i)),max(bestnode(1),neigh(i)));
         found = find(OpenSet(:,1)==neigh(i),1);
         switch method
             case 1 % Astart
                 dtogo = dists(min(neigh(i),finish),max(neigh(i),finish));
-                %dtogo = norm(nodes(neigh(i),:)-nodes(finish,:));
-                
                 % If neighbour is not in open set, add it   
                 if (isempty(found))
                    OpenSet = [OpenSet; neigh(i) bestnode(1) dtogo+dcur dcur];             
@@ -198,7 +209,6 @@ while (~done)
                 % If neighbour is not in open set, add it
                 if (isempty(found))
                    OpenSet = [OpenSet; neigh(i) bestnode(1) dcur dcur];     
-        
                 else % If in open set, update cost if better    
                    if (dcur < OpenSet(found,4))
                       OpenSet(found,:) = [neigh(i) bestnode(1) dcur dcur];
@@ -219,38 +229,34 @@ while (~done)
                 % If neighbour is not in open set, add it
                 if (isempty(found)) 
                    OpenSet = [OpenSet; neigh(i) bestnode(1) dcur dcur]; 
-                
                 else % If neighbour is in open set, check if new route is better
                     if (dcur < OpenSet(found,4))
                        OpenSet(found,:) = [neigh(i) bestnode(1) dcur dcur];
                     end
                 end                    
-            end     
-        
-        
-    end
+        end     
+     end
     
-    switch method
+     switch method
         case 1 % Astart
                OpenSet = OpenSet([1:best-1 best+1:end],:); % remove best node from open set                            
         case 4 %Dijkstra's     
                OpenSet = OpenSet([1:best-1 best+1:end],:); % remove best node from open set                
-    end
+     end
     
-    % Plot active nodes for this step
-    hold on;
-    plot(nodes(C(:,1),1),nodes(C(:,1),2), 'ko','MarkerSize',6,'LineWidth',2);
-    plot(nodes(bestnode(1),1),nodes(bestnode(1),2), 'go','MarkerSize',6,'LineWidth',2);
-    for i=1:length(neigh)
-        plot(nodes(neigh(i),1),nodes(neigh(i),2), 'mo');
-        plot([nodes(bestnode(1),1) nodes(neigh(i),1)],[nodes(bestnode(1),2) nodes(neigh(i),2)], 'm');
-    end
-    if ((createVideo >0) && (createVideo <=1))
-        writeVideo(vidObj, getframe(gcf));
-        %writeVideo(vidObj, getframe(fig));
-    end
+     % Plot active nodes for this step
+     hold on;
+     plot(nodes(C(:,1),1),nodes(C(:,1),2), 'ko','MarkerSize',6,'LineWidth',2);
+     plot(nodes(bestnode(1),1),nodes(bestnode(1),2), 'go','MarkerSize',6,'LineWidth',2);
+     for i=1:length(neigh)
+         plot(nodes(neigh(i),1),nodes(neigh(i),2), 'mo');
+         plot([nodes(bestnode(1),1) nodes(neigh(i),1)],[nodes(bestnode(1),2) nodes(neigh(i),2)], 'm');
+     end
+     if ((createVideo >0) && (createVideo <=1))
+         writeVideo(vidObj, getframe(gcf));
+     end
 end
-execTime = toc;
+execTime = toc; % stop timer tick
 %%======================================================== END OF MAIN
 % Find final path through back tracing
 done = 0;
