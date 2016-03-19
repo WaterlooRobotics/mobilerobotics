@@ -18,7 +18,7 @@
 % % AUTHOR: BISMAYA SAHOO, EMAIL:bsahoo@uwaterloo.ca
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function[]=plot_fs(pose,map,y,muFeatNew,particleSet,t,meas_ind,totalParticles,noFeatures,centroid_particles,truePose)
+function[]=plot_fs(pose,map,y,muFeatNew,particleSet,t,meas_ind,totalParticles,noFeatures,centroid_particles,truePose,tf)
         %Color Map Intialization
         cmap = colormap('jet');
         cmap = cmap(1:3:end,:);
@@ -50,8 +50,23 @@ function[]=plot_fs(pose,map,y,muFeatNew,particleSet,t,meas_ind,totalParticles,no
 
         %Define Axes
         axis equal
-        axis([-8 8 -2 10])
+        axis([-10 10 -3 10])
         title('FastSLAM with Range & Bearing Measurements');
-        legend(l(1:3),'Robot Motion','True Motion','CentroidParticle','Location','southoutside','Orientation','horizontal');
+        legend(l(1:3),'Actual','No Noise','CentroidPose','Location','southoutside','Orientation','horizontal');
         pause(0.001);%Pause to let MATLAB plot and display the results
-    end
+        
+        if(t==tf)
+            err_p=centroid_particles-pose;
+            %Error Between true pose and fast slam prediction
+            figure(2);
+            subplot(3,1,1);
+            plot(err_p(1,:));hold on;title('Error Plots');xlabel('time');ylabel('X_{err}');
+            subplot(3,1,2);
+            plot(err_p(2,:));hold on;xlabel('time');ylabel('Y_{err}');
+            subplot(3,1,3);
+            plot(err_p(3,:));hold on;xlabel('time');ylabel('\theta_{err}');
+            fprintf('RMS error in X_pos: %f \n',rms(err_p(1,:)));
+            fprintf('RMS error in Y_pos: %f \n',rms(err_p(2,:)));
+            fprintf('RMS error in Orientation: %f \n',rms(err_p(3,:)));
+        end
+end

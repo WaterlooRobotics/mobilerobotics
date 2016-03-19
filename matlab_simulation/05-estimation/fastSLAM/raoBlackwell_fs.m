@@ -16,7 +16,7 @@
 
 
 %% Rao Blackwellization
-    function [newParticleSet,muParticleNew,covParticleNew]=RB_fs(totalParticles,w_new,particleSetP,muFeatPred,covFeatPred)
+    function [newParticleSet,muParticleNew,covParticleNew]=raoBlackwell_fs(totalParticles,w_new,particleSetP,muFeatPred,covFeatPred)
         W = cumsum(w_new);% Form the PDF and calculate the final cumulitive sum of all weights.
         % Resample and copy all data to new particle set
         for particle=1:totalParticles

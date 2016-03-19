@@ -72,7 +72,7 @@ function[newPose,y,muParticleNew,covParticleNew,newParticleSet,meas_ind,newfeatu
         %Take note for all observed features.0:observed 1:New
         newfeature(meas_ind) = 0; 
         %Run the RaoBlackwellization resampling step
-        [newParticleSet,muParticleNew,covParticleNew]=RB_fs(totalParticles,w,particleSetP,muFeatPred,covFeatPred);
+        [newParticleSet,muParticleNew,covParticleNew]=raoBlackwell_fs(totalParticles,w,particleSetP,muFeatPred,covFeatPred);
        
         w_new=w;        
 end
