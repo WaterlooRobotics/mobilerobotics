@@ -27,4 +27,3 @@ plot(x, I,'g', 'LineWidth',2);
 plot(x, fx.*I, 'r', 'LineWidth', 2);
 title('E_f[I(x \in A)]');
 legend('f(x)', 'I(x \in A)', 'f(x)I(x \in A)');
-pause
