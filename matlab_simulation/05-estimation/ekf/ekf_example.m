@@ -19,7 +19,7 @@ end
 % Discrete time step
 dt = 0.1;
 
-% Initial State
+% Initial State [horizontal distance, horizontal velocity, height]
 x0 = [20 -2 3]';
 
 % Prior
@@ -29,6 +29,7 @@ S = 1*eye(3);% covariance (Sigma)
 % Discrete motion model
 Ad = [ 1 dt 0 ; 0 1 0; 0 0 1];
 
+% Disturbance model
 R = [.0001 0 0; 0 .0001 0 ; 0 0 .0001];
 [RE, Re] = eig (R);
 
@@ -88,11 +89,16 @@ for t=2:length(T)
     S_pos = [S(1,1) S(1,3); S(3,1) S(3,3)];
     error_ellipse(S_pos,mu_pos,0.75);
     error_ellipse(S_pos,mu_pos,0.95);
+
     title('True state and belief')
+
     axis equal
     axis([-1 20 -10 10])
     if (makemovie) writeVideo(vidObj, getframe(gca)); end
 
 end
+xlabel('ground distance');
+ylabel('height');
+legend('True State', 'Belief');
 if (makemovie) close(vidObj); end
 
