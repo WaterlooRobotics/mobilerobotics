@@ -30,7 +30,7 @@ if (MEASUREMENT_TYPE==1 | MEASUREMENT_TYPE==2)
 elseif (MEASUREMENT_TYPE==3)
     measurement = zeros(2*nFeatures,1);
 else
-    'Error: Invalid Measurement Type. Choose 1,2 or 3'
+    disp('Error: Invalid Measurement Type. Choose 1,2 or 3')
     return
 end
 

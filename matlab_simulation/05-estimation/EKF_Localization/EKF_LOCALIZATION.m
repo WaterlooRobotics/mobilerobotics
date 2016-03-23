@@ -1,23 +1,6 @@
 %{
 EXTENDED KALMAN FILTER LOCALIZATION
 
-VERSION HISTORY
-V1.0 - Provided by prof Waslander
-V1.1 - Improved readability
-        - Spacing, comments, plot labels
-        - Constant and variables more meaningful and agree with citation style
-     - Added circle() function for plotting functionality
-     - Removed predicted mean from figure(2) due to unseen benefit
-     - Added instructions
-V1.2 - Feature measurement moved to separate function
-     - Removed old EKF_Localiztion
-V1.3 - Added function handles for motion and measurement model
-     - Integrated EKF function code
-V1,4 - General code cleanup
-     - Replace for loop with find function in EKF
-V1.5 - Move multi-sensor EKF to dedicated function
-     - Updated to work with new EKF function
-
 INTRUCTIONS
 You can observe the effects of:
 -Bad prior
@@ -32,16 +15,8 @@ You can observe the effects of:
     -Change RANGE_MAX or THETA_MAX
 -Feature density
     -Add/remove features from featureMap
+    -Change map generation to random (can add instabilities)
 
-EXPLAIN WHY ONLY USE ONE MEASUREMENT 
--EKF not programmed to use multiple measurments if they are available
--further away objects seems to improve bearning uncertainty, but whether or
-not they are used depend on where they are in the featuresMap. Consider
-using randperm
--Can change find argument if want to consider additional measurements
-
-To do
--Creative example that show concepts
 %}
 clear;clc;
 
@@ -68,16 +43,10 @@ mu = [0 0 0]'; % mean (mu) [X position, Y position, Angle(rad)]'
 S = 0.1 * eye(3);% covariance (Sigma)
 
 % Control inputs
-u = ones(2, length(T));
-u(2,:)=0.3 * u(2,:);
+u = [1 ; 0.3];
 
 % Motion model
-motion_model = @ (x,u) [x(1) + u(1)*cos(x(3))*dt;
-                        x(2) + u(1)*sin(x(3))*dt;
-                        x(3) + u(2)*dt];
-linearized_motion_model = @ (mu,u)[ 1 0 -u(1)*sin(mu(3))*dt;
-                                    0 1 u(1)*cos(mu(3))*dt;
-                                    0 0 1];
+% Motion models are imported from seperate functions                         
 R = [1e-4 0    0; 
      0    1e-4 0; 
      0    0    1e-5];
@@ -98,23 +67,31 @@ end
 
 % Sensor footprint
 RANGE_MAX = 10 ; % meters
-THETA_MAX = pi / 4; % rads
+THETA_MAX = pi / 4; % rads (Note: Half the total field of view)
 
 % Feature Map
-% Position of features on map [X Position, Y Position ; ...]
-featureMap = [ 5 5 ; 3  1 ; -4  5 ; -2  3 ; 0  4 ];
-nFeatures = length(featureMap(:,1));
+randMapFlag=0;% Set=1:to randomize Map. 0:to load static map
+if(randMapFlag==1)
+    % Set the number of random features
+    nFeatures = 10;
+    featureMap = 10*rand(nFeatures,2);
+    featureMap(:,1) = featureMap(:,1)-5; 
+    featureMap(:,2) = featureMap(:,2)-2; 
+else
+    % Position of features on map [X Position, Y Position ; ...]
+    featureMap = [ 5 5 ; 3  1 ; -4  5 ; -2  3 ; 0  4 ];
+    nFeatures = length(featureMap(:,1));
+end
 
 % Simulation Initializations
-nStates = length(x0);
+nStates = length(x0);   % Number of states in model
 x = zeros(nStates,length(T));   % Time history of states
-x(:,1) = x0;
-nMeasurements = length(Q(:,1));
+x(:,1) = x0;    % Assigning intial conditions to state array
+nMeasurements = length(Q(:,1)); % Number of measurements in model
 y = zeros(nMeasurements,length(T)); % Time history of measurements
-mup_S = zeros(nStates,length(T));
-mu_S = zeros(nStates,length(T));
-selectedFeature = zeros(2,1);
-featureFoundFlag=0; %Switches to 1 when feature is found. Used to exit for loop
+mup_S = zeros(nStates,length(T));   % Predicted states of Kalman filter
+mu_S = zeros(nStates,length(T));    % Updated prediction of kalman filter states
+selectedFeature = zeros(2,1);   % Array holds coordinates of considered feature
 
 %% Main loop
 for t=2:length(T)
@@ -122,30 +99,34 @@ for t=2:length(T)
     % Select a motion disturbance
     motionDisturbance = eigenvectorR*sqrt(eigenvalueR)*randn(nStates,1);
     % Update state with prediction
-    x(:,t) = motion_model(x(:,t-1),u(:,t)) + motionDisturbance;
+    x(:,t) = simpleRobotMotionModel(x(:,t-1),u) + motionDisturbance;
     % Take measurement
-    [p,featureInViewFlag] = get2dpointmeasurement(featureMap,x(:,t),RANGE_MAX,THETA_MAX,Q,MEASUREMENT_TYPE);
-    y(1:length(p),t)=p;
+    [tempMeasurement,featureInViewFlag] = get2dpointmeasurement(featureMap,x(:,t),RANGE_MAX,THETA_MAX,Q,MEASUREMENT_TYPE);
+    y(1:length(tempMeasurement),t)=tempMeasurement;
     
     %% Extended Kalman Filter
     % Call EKF function
     % Find first feature in view
+        %-Currently, EKF not programmed to use multiple measurments if they are available
+        %-further away objects seems to improve bearning uncertainty, but whether or
+        %   not they are used depend on where they are in the featuresMap.
+        %-Can change find argument if want to consider additional measurements
     index = find(featureInViewFlag==1,1);
     % Determine coordinates of feature used for localization
     selectedFeature = featureMap(index,:);
     % Localize with respect to chosen feature
-    [ mu, S, mup, K, I ] = multisensorekf(selectedFeature, MEASUREMENT_TYPE, ...
-        index, mu,u(:,t), S, y(:,t), motion_model, linearized_motion_model, Q, R );
+    [ mu, S, mup, K, measurementError ] = multisensorekf(selectedFeature, MEASUREMENT_TYPE, ...
+        index, mu,u, S, y(:,t), Q, R );
 
     % Store results
     mup_S(:,t) = mup;
     mu_S(:,t) = mu;
-    Inn(:,t) = I;
+    Innovation(:,t) = measurementError;
     %% Plot results
     %Plotting initializations
     figure(1);clf; hold on;
     axis equal
-    axis([-4 6 -1 7]) % Set to maximum of robot trajectory and map features
+    axis([-5 5 -2 8]) % Set to maximum of robot trajectory and map features
     
     % Plot states
     plot(x(1,1:t),x(2,1:t), 'ro--')
@@ -194,10 +175,10 @@ legend('Robot State','Map Feature','Initial State Prediction',...
 
 %Plot measurement vs prediction error time series
 figure(2);clf; hold on;
-plot(T,Inn)
+plot(T,Innovation)
 title('Error Between Measurement and Prediction')
 xlabel('Time [s]')
-ylabel('Error')
+ylabel('Innovation')
 switch (MEASUREMENT_TYPE)
     case 1
         legend('Range Error')
