@@ -1,6 +1,6 @@
 function [ mode ] = collision_pred( t, X, x_vel, y_vel, map)
 % This function can judge whether the robot will hit the map boundaries or
-% obstacles and returens a strategy (the output "mode") to avoid the
+% obstacles and returns a strategy (the output "mode") to avoid the
 % collision.
 
 % Encode each hitting situation into a binary code [a,b,c,d], in which 
@@ -10,11 +10,12 @@ function [ mode ] = collision_pred( t, X, x_vel, y_vel, map)
 % the element "d" represents the coordinate under of the predictied robot position,
 
 % Size of the real map
-[M N] = size(map);
-% Predition of robot positions
-    pred_x = X(1,t-1) + x_vel; % X-axis position at next time step (t)
-    pred_y = X(2,t-1) + y_vel; % Y-axis position at next time step (t)
+ [M N] = size(map);
 
+% Predition of robot positions
+ pred_x = X(1,t-1) + x_vel; % X-axis position at next time step (t)
+ pred_y = X(2,t-1) + y_vel; % Y-axis position at next time step (t)
+    
 % Combination of comparision vector (coordinate)
     if ((pred_x == 1) || (pred_x == N)) % If the robot hit the vertical boundaries
         if x_vel<0
@@ -22,15 +23,12 @@ function [ mode ] = collision_pred( t, X, x_vel, y_vel, map)
         else x_vel>0
           coordinate = [ map( pred_x-1,pred_y), map( pred_x,pred_y+1), 1, map( pred_x, pred_y-1) ]; % Right boundary
         end
-        
     elseif ((pred_y == 1) || (pred_y == M)) % If the robot hit the horizontal boundaries
-        
         if y_vel>0
           coordinate = [ map( pred_x-1,pred_y), 1, map( pred_x+1, pred_y), map( pred_x, pred_y-1) ]; % Upper boundary
         else y_vel<0
           coordinate = [ map( pred_x-1,pred_y), map( pred_x,pred_y+1), map( pred_x+1, pred_y), 1 ]; % lower boundary
         end
-        
     else
           coordinate = [ map( pred_x-1, pred_y), map( pred_x,pred_y+1), map( pred_x+1, pred_y), map( pred_x, pred_y-1) ]; % Not going to hit map boundaries
     end
@@ -69,6 +67,4 @@ function [ mode ] = collision_pred( t, X, x_vel, y_vel, map)
             else
                 mode = 5;
             end
-
 end
-
