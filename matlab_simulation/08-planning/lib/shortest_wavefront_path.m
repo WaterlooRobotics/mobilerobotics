@@ -1,12 +1,16 @@
 function [ path ] = shortest_wavefront_path(wavefrontmap, starting_position)
-%shortest_path: takes in a wavefront map from the wavefron function and
-%returns the shortest path
-%   Only one path is returned even in the case of a tie. This can be fixed
-%   if you want to.
+% shortest_path: takes in a wavefront map from the wavefront function and
+% returns the shortest path
+
+% input: wavefront_map is the matrix produced by the wavefront function
+% input: starting_position: the starting location the robot for this
+% iteration. If you want to change the endpoint the wavefront map must be
+% updated
+
+%  Note that only one path is returned even in the case of a tie. 
 
 %initilize a java linked list in order to simulate a stack data structure.
-import java.util.LinkedList
-stack = LinkedList();
+stack = javaObject('java.util.LinkedList');
 
 
 %search locations, see wavefront function for more details
@@ -21,8 +25,9 @@ test_locations = [[-1, 1];
                    ];
 curpos = starting_position;
 best_point = [curpos(1), curpos(2)];
+stack.addLast([best_point(1), best_point(2)])
 if(wavefrontmap(curpos(1), curpos(2)) < 0)    
-    error('Error. The start point is located in an obstical')
+    error('Error. The start point is located in an obstical or the endpoint is unreachable')
 end
 while wavefrontmap(curpos(1), curpos(2)) ~= 0 
     current_min = wavefrontmap(curpos(1), curpos(2))   ;
@@ -51,4 +56,3 @@ for i = 1:length(path)
     point = stack.removeLast();
     path(i, :) = [point(2), point(1)];
 end
-
