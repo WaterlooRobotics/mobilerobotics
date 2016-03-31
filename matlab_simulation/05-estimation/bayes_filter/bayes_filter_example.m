@@ -169,7 +169,7 @@ for t=1:T
     colormap(summer);
     title('True state and beliefs')
     if (makemovie) writeVideo(vidObj, getframe(gca)); end
-    pause(0.2);
+    pause(0.3);
 
 end
 if (makemovie) close(vidObj); end
