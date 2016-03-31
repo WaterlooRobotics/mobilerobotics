@@ -8,26 +8,29 @@ switch index
         scale = 0.05;
         title('Desired Trajectory: Spiral');
     case 2
-        for t=1:5:length(T)
-            drawcar(xd(1,t),xd(2,t),xd(3,t),.3,2);
-        end
         scale = .3;
         title('Desired Trajectory: Nudges');
     case 3
         scale = .3;
-        for t=1:5:length(T)
-            drawcar(xd(1,t),xd(2,t),xd(3,t),.3,3);
-        end
         title('Desired Trajectory: Swerves');
     case 4
         scale = .3;
-        for t=1:5:length(T)
-            drawcar(xd(1,t),xd(2,t),xd(3,t),.3,4);
-        end
         title('Desired Trajectory: Corner');
     case 5
+        scale = .3;
+        title('Desired Trajectory: A single lane change');
+    case 6
+        scale = .3;
+        title('Desired Trajectory: Get around an obstacle');
+        % Plot the obstacle
+        ang=0:0.01:2*pi; 
+        xp=1.5*cos(ang);
+        yp=1.5*sin(ang);
+        plot(7+xp,8.5+yp);
+        hold on;
+    case 7
         scale = 0.05;
-        title('Desired Trajectory: User defined');
+        title('Desired Trajectory: User defined trajectory');
 end
 
 plot(xd(1,:),xd(2,:));
