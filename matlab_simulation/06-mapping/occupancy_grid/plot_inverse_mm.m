@@ -14,10 +14,10 @@ function plot_inverse_mm(og_mm, M, N, x, phi_m, r_m, fig)
 figure(fig);
 clf;
 hold on;
-image(100*(og_mm));
+image(100 * (og_mm));
 colormap(gray);
 for i = 1:length(r_m)
-    plot(x(2) + r_m(i)*sin(phi_m(i) + x(3)), x(1) + r_m(i)*cos(phi_m(i) + x(3)), 'rx')
+    plot(x(2) + r_m(i)*sin(phi_m(i) + x(3)), x(1) + r_m(i)*cos(phi_m(i) + x(3)), 'r.')
 end
 axis([0 N 0 M])
 title('Measurements and inverse measurement model');

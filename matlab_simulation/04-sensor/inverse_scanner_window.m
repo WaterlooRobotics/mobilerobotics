@@ -2,7 +2,7 @@ function [imml] = inverse_scanner_window(M, N, x, phi_m, ...
                 r_m, r_max, alpha, beta, p_occ, p_free)
 % Calculates the inverse measurement model for a laser scanner based on
 % model in Probabilistic Robotics. The function only generates a specified 
-% window of cells. Note: slow but easy to understand Identifies three 
+% window of cells. Note: slow but easy to understand. Identifies three 
 % regions, the first where no new information is available, the second 
 % where objects are likely to exist and the third where objects are 
 % unlikely to exist. Returns an occupancy grid map of size M x N with 
@@ -24,10 +24,10 @@ function [imml] = inverse_scanner_window(M, N, x, phi_m, ...
 % 	[imml] = Log odds of the (i)nverse (m)easurement (m)odel
 
 % Bound the update window within the map dimensions
-w_Mi = max(1,min(M,round(x(1) - r_max)));
-w_Mf = max(1,min(M,round(x(1) + r_max)));
-w_Ni = max(1,min(N,round(x(2) - r_max)));  
-w_Nf = max(1,min(N,round(x(2) + r_max)));  
+w_Mi = max(1, min(M, round(x(1) - r_max)));
+w_Mf = max(1, min(M, round(x(1) + r_max)));
+w_Ni = max(1, min(N, round(x(2) - r_max)));  
+w_Nf = max(1, min(N, round(x(2) + r_max)));  
 w_M = w_Mf - w_Mi + 1;
 w_N = w_Nf - w_Ni + 1;
 win_pos(1) = x(1) - w_Mi + 1;
@@ -52,11 +52,11 @@ for i = 1:w_M
 
         % If out of range, or behind range measurement, or outside of field
         % of view, no new information is available
-        if (r > min(r_max, r_m(k)+alpha/2) || (abs(phi-phi_m(k)) > beta/2))
+        if (r > min(r_max, r_m(k) + alpha/2) || (abs(phi - phi_m(k)) > beta/2))
             imml(x_wi, y_wj) = 0.5;
 
         % If the range measurement was in this cell, likely to be an object
-        elseif ((r_m(k) < r_max) && (abs(r-r_m(k)) < alpha/2))
+        elseif ((r_m(k) < r_max) && (abs(r - r_m(k)) < alpha / 2))
              imml(x_wi, y_wj) = p_occ;
         
         % If the cell is in front of the range measurement, likely to be

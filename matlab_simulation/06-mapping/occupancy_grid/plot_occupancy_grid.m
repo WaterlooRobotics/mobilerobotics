@@ -11,7 +11,7 @@ function plot_occupancy_grid(og, M, N, fig)
 figure(fig);
 clf; 
 hold on;
-image(100*(og));
+image(100 * (og));
 colormap(gray);
 axis([0 N 0 M])
 title('Current occupancy grid map')

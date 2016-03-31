@@ -1,5 +1,5 @@
 function [map, M, N, x] = load_cell_map(mapNum)
-% Creates and returns a 2D map used for robotic simulations
+% Creates and returns a 2D cell map used for robotic simulations
 %
 % Input:
 % 	mapNum = Number of map to return
@@ -26,12 +26,12 @@ switch (mapNum)
 		% Map size and contents
 		M = 50;
 		N = 60;
-		map = zeros(M,N);
-		map(4:10,5:10) = 1;
-		map(30:35,40:45) = 1;
-		map(3:6,40:60) = 1;
-		map(20:30,25:29) = 1;
-		map(40:50,5:25) = 1;
+		map = zeros(M, N);
+		map(4:10, 5:10) = 1;
+		map(30:35, 40:45) = 1;
+		map(3:6, 40:60) = 1;
+		map(20:30, 25:29) = 1;
+		map(40:50, 5:25) = 1;
 		
 		% Initial Robot location
 		x = [25; 10; 0];
@@ -39,7 +39,7 @@ switch (mapNum)
 		% Map size and contents
 		M = 100;
 		N = 100;
-		map = zeros(M,N);
+		map = zeros(M, N);
 		map(1:50, 1:50) = submap;
 		map(51:100, 1:50) = submap;
 		map(1:50, 51:100) = submap;
@@ -51,10 +51,10 @@ switch (mapNum)
 		% Map size and contents
 		M = 1000;
 		N = 1000;
-		map = zeros(M,N);
+		map = zeros(M, N);
         for i = 1:M/20:M
             for j = 1:N/20:N
-                map(i:(i+49), j:(j+49)) = submap;
+                map(i:(i + 49), j:(j + 49)) = submap;
             end
         end
         
@@ -65,12 +65,12 @@ switch (mapNum)
 		% Map size and contents
 		M = 50;
 		N = 60;
-		map = zeros(M,N);
-		map(4:10,5:10) = 1;
-		map(30:35,40:45) = 1;
-		map(3:6,40:60) = 1;
-		map(20:30,25:29) = 1;
-		map(40:50,5:25) = 1;
+		map = zeros(M, N);
+		map(4:10, 5:10) = 1;
+		map(30:35, 40:45) = 1;
+		map(3:6, 40:60) = 1;
+		map(20:30, 25:29) = 1;
+		map(40:50, 5:25) = 1;
 		
 		% Initial Robot location
 		x = [25; 10; 0];

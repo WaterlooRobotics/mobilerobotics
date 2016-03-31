@@ -8,4 +8,4 @@ function plot_robot_path(x, t, fig)
 % 	Plot window showing robot path
 
 figure(fig);
-plot(x(2,1:t),x(1,1:t),'bx-')
+plot(x(2, 1:t), x(1, 1:t), 'bx-')

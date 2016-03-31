@@ -1,6 +1,6 @@
 function [og, imml, r_m] = ogmap(map, og, x, phi_m, r_max, alpha, beta, mode)
-% Takes a map, existing occupancy grid, and laser scan information and 
-% returns an updated occupancy grid
+% Takes a map, existing occupancy grid, and laser scan information then 
+% returns an updated occupancy grid.
 %
 % Input:
 %   [map] = True map of environment
@@ -49,8 +49,7 @@ if (mode == 1)
     og = og + log(invmod./(1-invmod)) - L0;
     imml = imml + log(invmod./(1-invmod)) - L0;	
 elseif (mode == 2)
-    % -Windowed block update mode with sonar
-    
+    % --- Windowed block update mode with sonar
     % Generate a measurement data set
     r_m = get_sonar_range(map, x, beta, r_max);
 
@@ -62,8 +61,7 @@ elseif (mode == 2)
     og = og + log(invmod./(1-invmod)) - L0;
     imml = imml + log(invmod./(1-invmod)) - L0;	
 else
-    % -Bresenham ray trace mode
-    
+    % --- Bresenham ray trace mode
     % Generate a measurement data set
     r_m = getranges(map, x, phi_m, r_max);
     
@@ -71,7 +69,7 @@ else
     for i = 1:length(phi_m)
         % Get inverse measurement model
         invmod = inverse_scanner_bres(M, N, x(1), x(2), phi_m(i)+x(3), ...
-            r_m(i), r_max);
+            r_m(i), r_max, p_occ, p_free);
 
         % Loop through each cell from measurement model		
         for j = 1:length(invmod(:, 1));
@@ -80,8 +78,8 @@ else
             il = invmod(j, 3);
             
             % Calculate updated log odds
-            og(ix, iy) = og(ix, iy) + log(il./(1-il)) - L0(ix,iy);
-            imml(ix, iy)= imml(ix, iy) + log(il./(1-il)) - L0(ix,iy);
+            og(ix, iy) = og(ix, iy) + log(il./(1-il)) - L0(ix, iy);
+            imml(ix, iy)= imml(ix, iy) + log(il./(1-il)) - L0(ix, iy);
         end
     end
 end

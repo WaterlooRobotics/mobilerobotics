@@ -43,9 +43,9 @@ ui=1;
 w = 0.3 * ones(length(T));
 
 % Occupancy grid in both probablity and log odds form
-og = 0.5*ones(M,N);
-ogl0 = log(og./(1-og));
-ogl=ogl0;
+og = 0.5 * ones(M, N);
+ogl0 = log(og./(1 - og));
+ogl = ogl0;
 
 % Sensor model parameters - this example uses a lidar
 phi_m = 0; % Measurement bearings (dictates FOV for sonar)
@@ -60,23 +60,23 @@ x(:, 1) = x0;
 %% Main simulation
 for t = 2:length(T)
     % Robot motion
-    move = x(1:2,t-1) + u(:,ui)
+    move = x(1:2, t-1) + u(:, ui)
 	% If the robot hits a wall or obstacle, change direction
     if ((move(1)>M || move(2)>N || move(1)<1 || move(2)<1) || (map(move(1),move(2)) == 1))
-        x(:,t) = x(:,t-1);
-        ui = mod(ui,4)+1;
+        x(:, t) = x(:, t-1);
+        ui = mod(ui, 4)+1;
     else
-        x(1:2,t) = move;
+        x(1:2, t) = move;
     end
-    x(3,t) = x(3,t-1) + w(t);
+    x(3, t) = x(3, t-1) + w(t);
 
     %% Map update;
 	% Call occupancy grid mapping function
     [ogl, imml, r_m] = ogmap(map, ogl, x(:, t), phi_m, r_max, alpha, beta, 2);
 
     % Calculate probabilities
-    og = exp(ogl)./(1+exp(ogl));
-    og_mm = exp(imml)./(1+exp(imml));
+    og = exp(ogl)./(1 + exp(ogl));
+    og_mm = exp(imml)./(1 + exp(imml));
 
     %% Plot results
     

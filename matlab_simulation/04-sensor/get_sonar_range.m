@@ -9,22 +9,29 @@ function r_m = get_sonar_range(map, x, fov, r_max)
 %   fov = Sonar field of view
 %   r_max = Max range of sonar
 % Output:
-%   r_m = Range of object
+%   r_m = Range of measured object
+
+% Pad the map to avoid checking map edges 
+map = padarray(map, [1 1], 1);
+
+% Adjust robot position due to the padding
+x(1) = x(1) + 1;
+x(2) = x(2) + 1;
 
 % Bound the update window within the map dimensions
 [M, N] = size(map);
-w_Mi = max(1,min(M,round(x(1) - r_max)));
-w_Mf = max(1,min(M,round(x(1) + r_max)));
-w_Ni = max(1,min(N,round(x(2) - r_max)));  
-w_Nf = max(1,min(N,round(x(2) + r_max)));  
+w_Mi = max(1, min(M, round(x(1) - r_max)));
+w_Mf = max(1, min(M, round(x(1) + r_max)));
+w_Ni = max(1, min(N, round(x(2) - r_max)));  
+w_Nf = max(1, min(N, round(x(2) + r_max)));  
 w_M = w_Mf - w_Mi + 1;
 w_N = w_Nf - w_Ni + 1;
 win_pos(1) = x(1) - w_Mi + 1;
 win_pos(2) = x(2) - w_Ni + 1;
 
 % FOV limits
-phi_min = -fov/2;
-phi_max = fov/2; 
+phi_min = -fov / 2;
+phi_max = fov / 2; 
 
 r_m = r_max;
 
@@ -35,17 +42,14 @@ for i = 1:w_M
         x_wi = x(1) - win_pos(1) + i;
         y_wj = x(2) - win_pos(2) + j;
         
-        % Check if cell is occupied 
+        % Check if cell is free 
         if (map(x_wi, y_wj) == 0)
-            % Check if edge map (edge of map is considered occupied)
-            if ~(x_wi == 1 || x_wi == M || y_wj == 1 || y_wj == N)
-                continue
-            end
+            continue;
         end
         
         % Find range and bearing to the current cell
         r = sqrt((x_wi - x(1))^2 + (y_wj - x(2))^2);
-        phi = mod(atan2(y_wj - x(2), x_wi - x(1)) - x(3) + pi, 2*pi) - pi;
+        phi = mod(atan2(y_wj - x(2), x_wi - x(1)) - x(3) + pi, 2 * pi) - pi;
         
         % If within fov and range
         if ((phi > phi_min && phi < phi_max) && (r < r_max))
