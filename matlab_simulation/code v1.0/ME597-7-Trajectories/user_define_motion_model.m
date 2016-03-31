@@ -1,5 +1,7 @@
 function [xddot, xd]=user_define_motion_model(T, dt, xd, xddot)
+% Define the input velocity
 v = sin(0.2*T);
+% Define the input angular velocity
 w = ones(size(T));
 
 for t=1:length(T)
