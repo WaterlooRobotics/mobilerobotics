@@ -1,6 +1,6 @@
 function index = input_check(index)
 % User input check
-% Input index should be between 1-5
+% Input index should be between 1-7
 if index<1 || index>7
     disp('Please choose a proper input trajectory (1-7).')
     disp('What is the input trajectory?')
