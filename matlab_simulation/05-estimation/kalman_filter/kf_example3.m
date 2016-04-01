@@ -37,7 +37,7 @@ S = 0.01*eye(4);% covariance (Sigma)
 [QvE, Qve] = eig(Q.Qv);
 [RE, Re] = eig (R);
 
-% Store in a structure
+% Store in a structure (State Space Model [ssm])
 ssm.A = A;
 ssm.B = B;
 ssm.C = C;
@@ -60,6 +60,9 @@ y = zeros(mp,length(T));
 mup_S = zeros(n,length(T));
 mu_S = zeros(n,length(T));
 
+% Multirate Kalman filter frequency update for position measurement
+freq = 10;
+
 %% Main loop
 for t=2:length(T)
     %% Simulation
@@ -79,7 +82,7 @@ for t=2:length(T)
     end
     
     %% Kalman Filter Estimation
-    [mu,S,mup,Sp,K] = kalman_filter(ssm,mu,S,u(:,t),y(:,t),example,t);
+    [mu,S,mup,Sp,K] = kalman_filter(ssm,mu,S,u(:,t),y(:,t),example,t,freq);
     
     % Store results
     mup_S(:,t) = mup;

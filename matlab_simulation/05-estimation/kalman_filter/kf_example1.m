@@ -23,7 +23,7 @@ S = 1;   % covariance (Sigma)
 [A,B,R,n] = motion_model(example,dt);
 [C,D,Q,m] = measurement_model(example);
 
-% Store in a structure
+% Store in a structure (State Space Model [ssm])
 ssm.A = A;
 ssm.B = B;
 ssm.C = C;
@@ -40,6 +40,10 @@ x = zeros(1,length(T)+1);
 x(1) = mu+sqrt(S)*randn(1);
 y = zeros(m,length(T));
 u = y;
+
+% Frequency variable used for multirate kalman filter(eg 3). 
+% Not used in eg 1 & 2
+freq = 0;
 
 %% Main loop
 for t=1:length(T)
@@ -72,7 +76,7 @@ for t=1:length(T)
     S_old = S;
     
     % Kalman Filter Estimation
-    [mu,S,mup,Sp,K] = kalman_filter(ssm,mu,S,u(:,t),y(:,t),example,t);
+    [mu,S,mup,Sp,K] = kalman_filter(ssm,mu,S,u(:,t),y(:,t),example,t,freq);
     
     % Store estimates
     mup_S(t)= mup;
@@ -84,8 +88,8 @@ for t=1:length(T)
         
         % Prior belief
         figure(1);clf; subplot(2,2,1); hold on;
-        z = [mu_old-L*sqrt(S_old):0.01:mu_old+L*sqrt(S_old)];
-        plot(z,normpdf(z,mu_old,S_old),'b');
+        temperature = [mu_old-L*sqrt(S_old):0.01:mu_old+L*sqrt(S_old)];
+        plot(temperature,normpdf(temperature,mu_old,S_old),'b');
         title('Prior')
         ylabel('Probability')
         xlabel('Temperature')
@@ -93,9 +97,9 @@ for t=1:length(T)
         % Prediction step
         %figure(2);clf; 
         subplot(2,2,2); hold on;
-        plot(z,normpdf(z,mu_old,S_old),'b');
-        z = [mup-L*sqrt(Sp):0.01:mup+L*sqrt(Sp)];
-        plot(z,normpdf(z,mup,Sp),'r');
+        plot(temperature,normpdf(temperature,mu_old,S_old),'b');
+        temperature = [mup-L*sqrt(Sp):0.01:mup+L*sqrt(Sp)];
+        plot(temperature,normpdf(temperature,mup,Sp),'r');
         title('Prior & Prediction')
         legend('Prior','Prediction')
         ylabel('Probability')
@@ -104,11 +108,11 @@ for t=1:length(T)
         % Measurement step
         %figure(3);clf; 
         subplot(2,2,3); hold on;
-        plot(z,normpdf(z,mup,Sp),'r');
-        z = [y(t)-L*sqrt(Q.Q):0.01:y(t)+L*sqrt(Q.Q)];
-        plot(z,normpdf(z,y(t),Q.Q),'g');
-        z = [mu-L*sqrt(S):0.01:mu+L*sqrt(S)];
-        plot(z,normpdf(z,mu,S), 'm');
+        plot(temperature,normpdf(temperature,mup,Sp),'r');
+        temperature = [y(t)-L*sqrt(Q.Q):0.01:y(t)+L*sqrt(Q.Q)];
+        plot(temperature,normpdf(temperature,y(t),Q.Q),'g');
+        temperature = [mu-L*sqrt(S):0.01:mu+L*sqrt(S)];
+        plot(temperature,normpdf(temperature,mu,S), 'm');
         axis([-10 20 0 .35]);
         title('Prediction, Measurement & Belief')
         legend('Prediction','Measurement', 'Belief' )

@@ -1,4 +1,4 @@
-function [mu,S,mup,Sp,K] = kalman_filter(ssm,mu,S,u,y,example,t)
+function [mu,S,mup,Sp,K] = kalman_filter(ssm,mu,S,u,y,example,t,freq)
 
 % Performs one iteration of Kalman Filtering
 
@@ -10,6 +10,7 @@ function [mu,S,mup,Sp,K] = kalman_filter(ssm,mu,S,u,y,example,t)
 %       y                   : Measurment of current time step
 %       example             : Example under consideration
 %       t                   : Current time step
+%       freq                : Multirate kalman filter frequency
 % Outputs:
 %       mu                  : Final estimated mean after iteration
 %       S                   : Final estimated covariance after iteration
@@ -34,12 +35,15 @@ mup = A*mu + B*u;
 Sp = A*S*A' + R;
 
 % Measurement Step: ------------------------------------------------
+% If/else statement added since example 3 is a multirate kalman filter and 
+% requires processing different measurement models at a certain frequency. 
+
 if example == 3 % exmaple 3 is a multirate kalman filter
     Qp = Q.Qp;
     Qv = Q.Qv;
     Cp = C.Cp;
     Cv = C.Cv;
-    if (mod(t,10) == 0)
+    if (mod(t,freq) == 0)
         % Calculate kalman gain
         K = Sp*Cp'*inv(Cp*Sp*Cp'+Qp);
         % Get new mean of state after measurement
