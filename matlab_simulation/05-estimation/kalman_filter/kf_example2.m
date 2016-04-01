@@ -92,8 +92,8 @@ for t=2:length(T)
     plot(y(2,2:t),y(1,2:t), 'gx')
     %plot(mup_S(3,1:t),mup_S(1,1:t), 'mx--')
     plot(mu_S(3,2:t),mu_S(1,2:t), 'bx--')
-    ylabel('World X location [m]')
-    xlabel('World Y location [m]')
+    xlabel('World X location [m]')
+    ylabel('World Y location [m]')
     mu_pos = [mu(3) mu(1)];
     S_pos = [S(3,3) S(3,1); S(1,3) S(1,1)];
     error_ellipse(S_pos,mu_pos,0.75);
@@ -107,8 +107,17 @@ end
 
 if (makemovie) close(vidObj); end
 
+% This plot shows convergence of the Kalman gains
 figure(2);clf;
 plot(T,K_S');
+title('Kalman gains as a function of time')
+ylabel('Kalman Gain')
+xlabel('Time')
+
+% This shows the change in Kalman gain (over a short period of time)
+figure(3);clf;
+num = 25;
+plot(T(1:num),K_S(:,1:num)');
 title('Kalman gains as a function of time')
 ylabel('Kalman Gain')
 xlabel('Time')
