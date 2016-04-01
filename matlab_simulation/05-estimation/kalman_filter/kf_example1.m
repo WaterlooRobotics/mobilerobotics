@@ -20,7 +20,7 @@ mu = 10; % mean (mu)
 S = 1;   % covariance (Sigma)
 
 % Get matrices for motion model and measurement model
-[A,B,R,n] = motion_model(example,dt);
+[A,B,R,numStates] = motion_model(example,dt);
 [C,D,Q,m] = measurement_model(example);
 
 % Store in a structure (State Space Model [ssm])
@@ -30,7 +30,7 @@ ssm.C = C;
 ssm.D = D;
 ssm.R = R;
 ssm.Q = Q;
-ssm.n = n;
+ssm.n = numStates;
 ssm.m = m;
 
 % Simulation Initializations
@@ -90,7 +90,7 @@ for t=1:length(T)
         figure(1);clf; subplot(2,2,1); hold on;
         temperature = [mu_old-L*sqrt(S_old):0.01:mu_old+L*sqrt(S_old)];
         plot(temperature,normpdf(temperature,mu_old,S_old),'b');
-        title('Prior')
+        title('Prior (1st time step)')
         ylabel('Probability')
         xlabel('Temperature')
         
@@ -100,7 +100,7 @@ for t=1:length(T)
         plot(temperature,normpdf(temperature,mu_old,S_old),'b');
         temperature = [mup-L*sqrt(Sp):0.01:mup+L*sqrt(Sp)];
         plot(temperature,normpdf(temperature,mup,Sp),'r');
-        title('Prior & Prediction')
+        title('Prior & Prediction (1st time step)')
         legend('Prior','Prediction')
         ylabel('Probability')
         xlabel('Temperature')
@@ -114,7 +114,7 @@ for t=1:length(T)
         temperature = [mu-L*sqrt(S):0.01:mu+L*sqrt(S)];
         plot(temperature,normpdf(temperature,mu,S), 'm');
         axis([-10 20 0 .35]);
-        title('Prediction, Measurement & Belief')
+        title('Prediction, Measurement & Belief (1st time step)')
         legend('Prediction','Measurement', 'Belief' )
         ylabel('Probability')
         xlabel('Temperature')

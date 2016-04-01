@@ -24,18 +24,17 @@ end
 % Discrete time step
 dt = 0.1;
 
-% Prior
-mu = zeros(4,1); % mean (mu)
-S = 1*eye(4);% covariance (Sigma)
-% S = 0.1*eye(4);% covariance (Sigma)
-% S = 0.01*eye(4);% covariance (Sigma)
-
 % Get motion model and measurement model
-[A,B,R,n] = motion_model(example,dt);
+[A,B,R,numStates] = motion_model(example,dt);
 [C,D,Q,m] = measurement_model(example);
 
+% Prior
+mu = zeros(numStates,1); % mean (mu)
+S = 1*eye(numStates);% covariance (Sigma)
+% S = 0.1*eye(numStates);% covariance (Sigma)
+% S = 0.01*eye(numStates);% covariance (Sigma)
+
 [QRE, QRe] = eig(Q.QR);
-[QE, Qe] = eig(Q.Q);
 [RE, Re] = eig (R);
 
 % Store in a structure (State Space Model [ssm])
@@ -45,20 +44,20 @@ ssm.C = C;
 ssm.D = D;
 ssm.R = R;
 ssm.Q = Q;
-ssm.n = n;
+ssm.n = numStates;
 ssm.m = m;
 
 % Simulation Initializations
 Tf = 10;
 T = 0:dt:Tf;
 u = 10*[sin(2*T);cos(T)];
-n = length(A(1,:));
-x = zeros(n,length(T));
-x(:,1) = zeros(n,1);
+numStates = length(A(1,:));
+x = zeros(numStates,length(T));
+x(:,1) = zeros(numStates,1);
 m = length(C(:,1));
 y = zeros(m,length(T));
-mup_S = zeros(n,length(T));
-mu_S = zeros(n,length(T));
+mup_S = zeros(numStates,length(T));
+mu_S = zeros(numStates,length(T));
 
 % Frequency variable used for multirate kalman filter(eg 3). 
 % Not used in eg 1 & 2
@@ -68,7 +67,7 @@ freq = 0;
 for t=2:length(T)
     %% Simulation
     % Select a motion disturbance
-    e = RE*sqrt(Re)*randn(n,1);
+    e = RE*sqrt(Re)*randn(numStates,1);
     % Update state
     x(:,t) = A*x(:,t-1)+ B*u(:,t) + e;
 
@@ -93,6 +92,8 @@ for t=2:length(T)
     plot(y(2,2:t),y(1,2:t), 'gx')
     %plot(mup_S(3,1:t),mup_S(1,1:t), 'mx--')
     plot(mu_S(3,2:t),mu_S(1,2:t), 'bx--')
+    ylabel('World X location [m]')
+    xlabel('World Y location [m]')
     mu_pos = [mu(3) mu(1)];
     S_pos = [S(3,3) S(3,1); S(1,3) S(1,1)];
     error_ellipse(S_pos,mu_pos,0.75);

@@ -25,13 +25,13 @@ end
 % Discrete time step
 dt = 0.01;
 
-% Prior
-mu = zeros(4,1); % mean (mu)
-S = 0.01*eye(4);% covariance (Sigma)
-
 % Get motion model and measurement model
-[A,B,R,n] = motion_model(example,dt);
+[A,B,R,numStates] = motion_model(example,dt);
 [C,D,Q,m] = measurement_model(example);
+
+% Prior
+mu = zeros(numStates,1); % mean (mu)
+S = 0.01*eye(numStates);% covariance (Sigma)
 
 [QpE, Qpe] = eig(Q.Qp);
 [QvE, Qve] = eig(Q.Qv);
@@ -44,30 +44,30 @@ ssm.C = C;
 ssm.D = D;
 ssm.R = R;
 ssm.Q = Q;
-ssm.n = n;
+ssm.n = numStates;
 ssm.m = m;
 
 % Simulation Initializations
 Tf = 1;
 T = 0:dt:Tf;
 u = 10*[sin(2*T);cos(T)];
-n = length(A(1,:));
-x = zeros(n,length(T));
-x(:,1) = zeros(n,1);
+numStates = length(A(1,:));
+x = zeros(numStates,length(T));
+x(:,1) = zeros(numStates,1);
 mp = length(ssm.C.Cp(:,1));
 mv = length(ssm.C.Cv(:,1));
 y = zeros(mp,length(T));
-mup_S = zeros(n,length(T));
-mu_S = zeros(n,length(T));
+mup_S = zeros(numStates,length(T));
+mu_S = zeros(numStates,length(T));
 
-% Multirate Kalman filter frequency update for position measurement
+% Multirate Kalman filter frequency (Hz) update for position measurement
 freq = 10;
 
 %% Main loop
 for t=2:length(T)
     %% Simulation
     % Select a motion disturbance
-    e = RE*sqrt(Re)*randn(n,1);
+    e = RE*sqrt(Re)*randn(numStates,1);
     % Update state
     x(:,t) = A*x(:,t-1)+ B*u(:,t) + e;
 
