@@ -10,7 +10,7 @@
 % ----Contributions in Ver.3.0
 % -1. Vectorized the Gyro Data.
 % -2. More Compact Code.
-% -3. Removed repeatations
+% -3. Removed repetitions
 % -4. Completed the Error Distribution Comparison at the bottom.
 % -5. Comments/Description wherever possible
 % -6. All Plots in the same subplot for ease of viewing
@@ -45,6 +45,7 @@ t_stop = find(time_Stamp>tmax,1);% Find the stop location in the dataset
 %% Run the process/simulation
 % STEP1: Simulate Gyro Data that includes vehicle motions
 % The reproduction would have the same cov but corrupted by noise.
+G_sim_pure=S_vect*sqrt(S_val);
 G_sim = S_vect*sqrt(S_val)*randn(3,dataSet_length);
 
 % STEP2: Filter the Gyro Sensor on our robot with a moving avg filter.
@@ -90,7 +91,7 @@ axis([tmin tmax -60 60]);title('1.Original Data');xlabel('Time(s)');ylabel('Gyro
 %Plot the Simulated Data with vehicle motions
 subplot(2,2,2); hold on;grid on;
 plot(tg(t_start:t_stop), G_sim(:,(t_start:t_stop)));
-axis([tmin tmax -60 60]);title('2.Unfiltered Data');xlabel('Time(s)');ylabel('Gyro Rate (deg/s)');legend('Gx_{Sim}','Gy_{Sim}','Gz_{Sim}');
+axis([tmin tmax -60 60]);title('2.Simulated Data');xlabel('Time(s)');ylabel('Gyro Rate (deg/s)');legend('Gx_{Sim}','Gy_{Sim}','Gz_{Sim}');
 % Plot the Filtered Data
 subplot(2,2,3); hold on;grid on;
 plot(time_Stamp(t_start:t_stop), G_filtered(t_start:t_stop,:));
@@ -99,6 +100,7 @@ axis([tmin tmax -60 60]);title('3.Filtered Data');xlabel('Time(s)');ylabel('Gyro
 subplot(2,2,4); hold on;grid on;
 plot(time_Stamp(t_start:t_stop), G_out(:,t_start:t_stop));
 axis([tmin tmax -60 60]);title('4.Estimated Data');xlabel('Time(s)');ylabel('Gyro Rate (deg/s)');legend('Gx_{pred}','Gy_{pred}','Gz_{pred}');
+
 % Plot the Error Distribution
 figure(2); clf; hold on
 subplot(3,1,1);bar(Xex,Nex);hold on;plot(xvec,Gex,'r','LineWidth',2);
