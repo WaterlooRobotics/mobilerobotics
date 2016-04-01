@@ -101,8 +101,9 @@ for t=2:length(T)
     figure(1);clf; hold on;
     plot(x(3,2:t),x(1,2:t), 'ro--')
     if (mod(t,10)==0) plot(y(3,t),y(1,t), 'gx'); end
-    %plot(mup_S(3,1:t),mup_S(1,1:t), 'mx--')
     plot(mu_S(3,2:t),mu_S(1,2:t), 'bx--')
+    xlabel('World X location [m]')
+    ylabel('World Y location [m]')
     mu_pos = [mu(3) mu(1)];
     S_pos = [S(3,3) S(3,1); S(1,3) S(1,1)];
     error_ellipse(S_pos,mu_pos,0.75);

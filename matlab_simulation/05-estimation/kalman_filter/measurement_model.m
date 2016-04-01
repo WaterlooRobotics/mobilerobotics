@@ -13,6 +13,7 @@ function [C,D,Q,m] = measurement_model(example)
 %       m         : Measurement dimension
 
 % Example 1: Temperature
+% Measures Tempearture
 if example == 1
     C = 1;
     D = 0;
@@ -21,6 +22,7 @@ if example == 1
 end
 
 % Example 2: 2D Omnidirectional AUV
+% Measures position in x and y 
 if example == 2
     numStates = 4;
     C = zeros(2,numStates);
