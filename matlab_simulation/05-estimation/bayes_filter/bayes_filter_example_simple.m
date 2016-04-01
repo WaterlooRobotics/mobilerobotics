@@ -1,9 +1,14 @@
 %% Simple Bayesian Filtering Example
 % Rickey Wang
 % A door opening robot with a very noisy sensor tries to open a door
+% Asume that the door can be in one of two possible states, open
+%   or closed, and that only the robot can change the state of the door.
+% Assume that the robot does not know the state of the door initially. 
+%   -> there is equally 50% chance for both open and close at the start
 
-% This example uses the MATLAB command window. 
-% See Thrun's textboook on Bayes Filters for explanation
+% This example uses the MATLAB command window. You generate
+% your own input.
+% See Thrun's textboook on Bayes Filters for detailed explanation
 clear; clc; 
 
 %% Parameters
@@ -79,7 +84,7 @@ while(true)
     %disp(prompt)
     
     fprintf('%3s %3s %10s\r\n','u','y','bel_open');
-    fprintf('%3i %3i %10.5f\r\n',u,y,bel_open(2:end));
+    fprintf('%3i %3i %10.5f\r\n',[u y bel_open(2:end)]'); % Yes, this printing is a bit unintuitive. 
 end
 
 

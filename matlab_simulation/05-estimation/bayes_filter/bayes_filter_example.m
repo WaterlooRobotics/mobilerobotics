@@ -4,6 +4,12 @@
 % location, attempting to localize itself as it moves.  To keep things simple, the
 % vehicle does not avoid obstacles, follows a fixed route and receives 
 % full/empty measurements of the 8 cells around it.  
+
+% LEGEND
+% Each cell is colour-mapped: Bright Yellow is highest belief, and green is lowest
+% "O" - state
+% "X" - measurement
+
 clear; clc; 
 
 %% Create AVI object
@@ -168,11 +174,15 @@ for t=1:T
     plot(yj,yi,'bx','MarkerSize',4,'LineWidth',1)
     colormap(summer);
     title('True state and beliefs')
-    if (makemovie) writeVideo(vidObj, getframe(gca)); end
+    if (makemovie) 
+        writeVideo(vidObj, getframe(gca)); 
+    end
     pause(0.3);
 
 end
-if (makemovie) close(vidObj); end
+if (makemovie) 
+    close(vidObj); 
+end
 
 figure(2);clf; hold on;
 plot(xt);
