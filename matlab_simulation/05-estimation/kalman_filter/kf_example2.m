@@ -34,7 +34,7 @@ S = 1*eye(numStates);% covariance (Sigma)
 % S = 0.1*eye(numStates);% covariance (Sigma)
 % S = 0.01*eye(numStates);% covariance (Sigma)
 
-[QRE, QRe] = eig(Q.QR);
+[QE, Qe] = eig(Q);
 [RE, Re] = eig (R);
 
 % Store in a structure (State Space Model [ssm])
@@ -73,7 +73,7 @@ for t=2:length(T)
 
     % Take measurement
     % Select a motion disturbance
-    d = QRE*sqrt(QRe)*randn(m,1);
+    d = QE*sqrt(Qe)*randn(m,1);
     % Determine measurement
     y(:,t) = C*x(:,t) + d;
 

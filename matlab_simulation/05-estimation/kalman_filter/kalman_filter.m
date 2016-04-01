@@ -57,7 +57,7 @@ if example == 3 % exmaple 3 is a multirate kalman filter
     end
     
 else % for example 1 and 2
-    K = Sp*C'*inv(C*Sp*C'+Q.Q);
+    K = Sp*C'*inv(C*Sp*C'+Q);
     mu = mup + K*(y-C*mup);
     S = (eye(n)-K*C)*Sp;
 end

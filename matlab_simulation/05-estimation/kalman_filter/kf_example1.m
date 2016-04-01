@@ -66,7 +66,7 @@ for t=1:length(T)
 
     % Take measurement
     % Select a measurement disturbance
-    d = sqrt(Q.Q)*randn(1);
+    d = sqrt(Q)*randn(1);
     
     % Determine measurement
     y(t) = C*x(t+1) + d;
@@ -109,8 +109,8 @@ for t=1:length(T)
         %figure(3);clf; 
         subplot(2,2,3); hold on;
         plot(temperature,normpdf(temperature,mup,Sp),'r');
-        temperature = [y(t)-L*sqrt(Q.Q):0.01:y(t)+L*sqrt(Q.Q)];
-        plot(temperature,normpdf(temperature,y(t),Q.Q),'g');
+        temperature = [y(t)-L*sqrt(Q):0.01:y(t)+L*sqrt(Q)];
+        plot(temperature,normpdf(temperature,y(t),Q),'g');
         temperature = [mu-L*sqrt(S):0.01:mu+L*sqrt(S)];
         plot(temperature,normpdf(temperature,mu,S), 'm');
         axis([-10 20 0 .35]);
