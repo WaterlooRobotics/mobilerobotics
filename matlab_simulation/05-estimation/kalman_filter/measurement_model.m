@@ -23,7 +23,8 @@ end
 
 % Example 2: 2D Omnidirectional AUV
 if example == 2
-    C = zeros(2,4);
+    numStates = 4;
+    C = zeros(2,numStates);
     C(1,1) = 1;
     C(2,3) = 1;
     D = zeros(2,2);
@@ -41,8 +42,9 @@ end
 % Qp : Disturbances in position and velocity
 % Qv : Disturbances in velocity
 if example ==3
-    C.Cp = eye(4);
-    C.Cv = zeros(2,4);
+    numStates = 4;
+    C.Cp = eye(numStates);
+    C.Cv = zeros(2,numStates);
     C.Cv(1,2) = 1;
     C.Cv(2,4) = 1;
     m.mp = length(C.Cp(:,1));

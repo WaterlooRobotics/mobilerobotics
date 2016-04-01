@@ -18,6 +18,10 @@ function [mu,S,mup,Sp,K] = kalman_filter(ssm,mu,S,u,y,example,t,freq)
 %       Sp                  : Predicted covariance after motion update
 %       K                   : Kalman gain for current time step 
 
+% State space model structure
+% x[n+1] = A*x[n] + B*u[n+1] + R
+% y[n+1] = C*x[n+1] + D*u[n+1] +Q
+
 % Unwrap state space model
 A = ssm.A; 
 B = ssm.B;
@@ -39,21 +43,17 @@ Sp = A*S*A' + R;
 % requires processing different measurement models at a certain frequency. 
 
 if example == 3 % exmaple 3 is a multirate kalman filter
-    Qp = Q.Qp;
-    Qv = Q.Qv;
-    Cp = C.Cp;
-    Cv = C.Cv;
     if (mod(t,freq) == 0)
         % Calculate kalman gain
-        K = Sp*Cp'*inv(Cp*Sp*Cp'+Qp);
+        K = Sp*C'*inv(C*Sp*C'+Q);
         % Get new mean of state after measurement
-        mu = mup + K*(y-Cp*mup);
+        mu = mup + K*(y-C*mup);
         % Get new covaraince of state after measurement
-        S = (eye(n)-K*Cp)*Sp;
+        S = (eye(n)-K*C)*Sp;
     else
-        K = Sp*Cv'*inv(Cv*Sp*Cv'+Qv);
-        mu = mup + K*(y([2 4],:)-Cv*mup);
-        S = (eye(n)-K*Cv)*Sp;
+        K = Sp*C'*inv(C*Sp*C'+Q);
+        mu = mup + K*(y([2 4],:)-C*mup);
+        S = (eye(n)-K*C)*Sp;
     end
     
 else % for example 1 and 2

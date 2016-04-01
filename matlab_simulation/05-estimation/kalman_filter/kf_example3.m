@@ -47,6 +47,10 @@ ssm.Q = Q;
 ssm.n = numStates;
 ssm.m = m;
 
+% Temp strucutre used for switching in multirate filter
+ssm_temp.Q = Q;
+ssm_temp.C = C;
+
 % Simulation Initializations
 Tf = 1;
 T = 0:dt:Tf;
@@ -73,12 +77,16 @@ for t=2:length(T)
 
     % Take measurement
     % Select a measurement disturbance and determine measurement
-    if (mod(t,10)==0)
+    if (mod(t,freq)==0)
+        ssm.Q = ssm_temp.Q.Qp;
+        ssm.C = ssm_temp.C.Cp;
         d = QpE*sqrt(Qpe)*randn(mp,1);
-        y(:,t) = C.Cp*x(:,t) + d;
+        y(:,t) = ssm.C*x(:,t) + d;
     else
+        ssm.Q = ssm_temp.Q.Qv;
+        ssm.C = ssm_temp.C.Cv;
         d = QvE*sqrt(Qve)*randn(mv,1);
-        y([2 4],t) = C.Cv*x(:,t) + d;
+        y([2 4],t) = ssm.C*x(:,t) + d;
     end
     
     %% Kalman Filter Estimation
