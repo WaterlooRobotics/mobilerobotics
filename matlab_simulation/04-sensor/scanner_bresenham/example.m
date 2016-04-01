@@ -36,7 +36,6 @@ map_bel_logodds = log(map_bel./(1-map_bel)); % Transform the belief map into log
 map_initial = map_bel_logodds; % Initial belif map
 
 %% Robot Motion
-% Time of simulation
 T = 1000; % 1000[sec] simulation time
 
 % Robot State Initialization
@@ -74,7 +73,7 @@ for i = 1 : length(X) % Each robot motion step
       end
    end
    
-   % Transform inverse measurement model & map from log-odds form to pobability
+   % Transform inverse measurement model & map from log-odds to pobability
      inv_mm_probability = exp(inv_mm_logodds) ./ (1+exp(inv_mm_logodds));
      map_bel_probability = exp(map_bel_logodds) ./ (1+exp(map_bel_logodds));
      
@@ -106,7 +105,7 @@ for i = 1 : length(X) % Each robot motion step
        writeVideo(vidObj2, getframe(gca)); 
      end
    
-   % Plot real map and robot position
+   % Plot occupancy grid map and robot position
      figure(3);clf;hold on;
      image(100 * (map_bel_probability));
      colormap('gray');
