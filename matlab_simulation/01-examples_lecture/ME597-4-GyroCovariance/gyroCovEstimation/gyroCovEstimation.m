@@ -45,7 +45,6 @@ t_stop = find(time_Stamp>tmax,1);% Find the stop location in the dataset
 %% Run the process/simulation
 % STEP1: Simulate Gyro Data that includes vehicle motions
 % The reproduction would have the same cov but corrupted by noise.
-G_sim_pure=S_vect*sqrt(S_val);
 G_sim = S_vect*sqrt(S_val)*randn(3,dataSet_length);
 
 % STEP2: Filter the Gyro Sensor on our robot with a moving avg filter.
