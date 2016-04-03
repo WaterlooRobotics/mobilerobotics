@@ -1,7 +1,11 @@
 % Nonlinear programming receding horizon examples
 clear all; close all; clc
 
-global n m N T dt xd obs pF withobs endonly vd_cnst
+global n m N T dt xd obs pF withobs endonly vd_cnst safety_radius
+
+% The safety distane for the robot moving in the environment
+% to prevent the collidng between edge of the car and obstacle. 
+safety_radius= 0.08;       
 
 %% Optimization problem definition
 % Number of optimization variables per timestep: n states and m inputs
@@ -14,13 +18,13 @@ N = (n+m);
 TTot = 20;
 dt = .3;
 
+% Example #2 Generating random desired trajectory: using Bezier function
+xd_start=[0,1];             % Bezier path start point.
+xd_end=[5.5,2];             % Bezier path final point.
+xd_midpoint=[1,4;3,-1];     % Bezier path control points.
 
-
-% Example #2 Generating random desired trajectory (using Bezier curves)
-xd_start=[0, 1];
-xd_end=[5.5,2];
-xdT=Trajectory_bazier(xd_start,xd_end,dt,TTot);
-p0 = [0 2 0];           %Initial position
+xdT=Trajectory_bezier(xd_start,xd_midpoint,xd_end,dt,TTot);
+p0 = [0 2 0];               %Initial position
 
 % Set up environment
 posMinBound = [0 -1];
@@ -45,7 +49,7 @@ B = [];
 Aeq = zeros(3,N*T);
 Aeq(1:3,1:3) = eye(3);
 Beq = p0';
-vd_cnst=1;                  %speed constraint
+vd_cnst=1;                  % speed constraint
 
 
 % State and input bounds
@@ -82,13 +86,8 @@ x0(4:N:end) = 0;
 x0(5:N:end) = 0;
 
 % Receding horizon goal
-<<<<<<< HEAD
-xd = xdT(1:T,:)
-=======
 xd = xdT(1:T,:);
 ii=1;                                % figure name
-filename = 'NLP_Animation.gif';      % saving animation file in .gif file
->>>>>>> origin/i23-nonlinear_programming
 
 % Repeat optimization at each timestep
 for i=1:TTot-T
@@ -111,56 +110,29 @@ for i=1:TTot-T
     w = X(5:N:end);     % angular velocity
 
     % Plot results
-<<<<<<< HEAD
-%     figure(2);clf; hold all;
-%     plot(1:T,x)
-%     plot(1:T,y)
-%     plot(1:T,th)
-%     plot(1:T,v)
-%     plot(1:T,w)
-
-    figure(i); clf; hold on;
-=======
     figure(ii); clf; hold on;
->>>>>>> origin/i23-nonlinear_programming
     plot(x,y,'bx-');
+    
     % draw vehicle as a two-wheeled car
-    drawcar(x(end),y(end),th(end),.15,ii)   
+    drawcar(x(1),y(1),th(1),.1,ii)   
     if (~endonly)
         plot(xdT(1:end-1,1), xdT(1:end-1,2), 'ro--')
     else
         plot(pF(1),pF(2),'ro')
     end
+    
     % draw obstacles
     if (withobs)
         for j=1:numObsts
-<<<<<<< HEAD
-            plot(obs(j,1), obs(j,2),'bx');
-            circle(i, obs(j,:), radius(j));
-        end
-        axis equal
-    end
-    drawnow();
-    F(i) = getframe;
-end
-=======
             plot(obs(j,1), obs(j,2),'kx');
             circle(ii, obs(j,:), radius(j));
         end
         axis equal
     end
-    F(i) = getframe;
     
+    % Generating animation and save it as .gif file
+    getframe;
     
-    % saving animation file in .gif file
-      im = frame2im(getframe(1));
-      [imind,cm] = rgb2ind(im,256);
-      if i == 1;
-          imwrite(imind,cm,filename,'gif', 'Loopcount',inf);
-      else
-          imwrite(imind,cm,filename,'gif','WriteMode','append');
-      end
-      
     % exitflag shows if the problem has feasible solustion
     Vi(i)=v(end);       % velocitiy of vehicle 
     ei(i)=EXITFLAG;     % exit flag
@@ -173,4 +145,3 @@ end
 
     
 
->>>>>>> origin/i23-nonlinear_programming
