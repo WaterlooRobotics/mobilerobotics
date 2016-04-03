@@ -83,12 +83,18 @@ x0(5:N:end) = 0;
 
 % Receding horizon goal
 <<<<<<< HEAD
+<<<<<<< HEAD
 xd = xdT(1:T,:)
 =======
 xd = xdT(1:T,:);
 ii=1;                                % figure name
 filename = 'NLP_Animation.gif';      % saving animation file in .gif file
 >>>>>>> origin/i23-nonlinear_programming
+=======
+xd = xdT(1:T,:);
+ii=1;                                % figure name
+filename = 'NLP_Animation.gif';      % saving animation file in .gif file
+>>>>>>> i23-nonlinear_programming
 
 % Repeat optimization at each timestep
 for i=1:TTot-T
@@ -112,6 +118,7 @@ for i=1:TTot-T
 
     % Plot results
 <<<<<<< HEAD
+<<<<<<< HEAD
 %     figure(2);clf; hold all;
 %     plot(1:T,x)
 %     plot(1:T,y)
@@ -121,6 +128,8 @@ for i=1:TTot-T
 
     figure(i); clf; hold on;
 =======
+=======
+>>>>>>> i23-nonlinear_programming
     figure(ii); clf; hold on;
 >>>>>>> origin/i23-nonlinear_programming
     plot(x,y,'bx-');
@@ -135,6 +144,7 @@ for i=1:TTot-T
     if (withobs)
         for j=1:numObsts
 <<<<<<< HEAD
+<<<<<<< HEAD
             plot(obs(j,1), obs(j,2),'bx');
             circle(i, obs(j,:), radius(j));
         end
@@ -144,6 +154,8 @@ for i=1:TTot-T
     F(i) = getframe;
 end
 =======
+=======
+>>>>>>> i23-nonlinear_programming
             plot(obs(j,1), obs(j,2),'kx');
             circle(ii, obs(j,:), radius(j));
         end
@@ -173,4 +185,7 @@ end
 
     
 
+<<<<<<< HEAD
 >>>>>>> origin/i23-nonlinear_programming
+=======
+>>>>>>> i23-nonlinear_programming
