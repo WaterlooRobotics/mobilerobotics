@@ -6,9 +6,13 @@ function [wavefrontmap, path] = wavefront(curmap, startpos, endpos, varargin)
 % optional input: empty_cell value = 0
 % optional input: occupied_cell value = 1
 
-%output: wave - array with with BFS values
-%output: path - vector of cells or points the robot should pass through 
+% output: wavefrontmap - array with the resulting wavefront map
+% output: path - vector of points that contain the shortest path between
+% the start and end goals
 
+% if the user has differnt values for occupied and unoccupied cells check
+% that they have provided 2 arguments, and then assign the arguments
+% accordingly
 if ~isempty(varargin) > 0
     if length(varargin) == 2
         empty_cell = varargin{1};
@@ -21,11 +25,17 @@ else
     occupied_cell = 1;
 end
 
-% use a java linked list as an effiecient queue
+% The wavefront planner is essentially a Breadth First Search (BFS) over
+% the entire map. An ideal data struture to use for this problem is a queue
+% which can be easily imported into matlab by using Java's linked list. You
+% can actually import a number of data strutures from Java that greatly
+% improve Matlab's performance at some tasks.
 queue = javaObject('java.util.LinkedList');
 
-%add a occupied padding around the current map to ensure the environment is closed.
-%also means you do not need to check for boundary conditions. 
+% To save on checks during the breadth first search, I can avoid checking
+% for boundardy conditions (ie checking that index of the cell I am
+% searching for is located within the map) by padding the cell with a layer
+% of obstical cells. 
 curmap = padarray(curmap, 1, occupied_cell);
 
 % make an output map that is initilized to all -10, which encodes unexplored cells;
@@ -44,7 +54,7 @@ test_locations = [ [0, 1];
                    [0, -1];                  
                    ];
 
-% Initilize the que with the end point and do a BFS to label all reachable points.
+% Initilize the queue with the end point and do a BFS to label all reachable points.
 queue.push([endpos(1)+1, endpos(2)+1]);
 while queue.size() ~= 0 
     % pop the first entry of the que, set it to the current position
@@ -54,7 +64,7 @@ while queue.size() ~= 0
     % within 1 distance of this
     current_dist = wavefrontmap(curpos(1), curpos(2));
     
-    % add the test kernel, which is the 
+    % update the vector of test points for the current cell;
     wavefrontpnts(:,1) = test_locations(:,1) + curpos(1);
     wavefrontpnts(:,2) = test_locations(:,2) + curpos(2);
 
