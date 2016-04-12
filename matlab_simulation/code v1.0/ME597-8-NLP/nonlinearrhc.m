@@ -109,8 +109,8 @@ for i=1:TTot-T
     % Plot results
     figure(ii); clf; hold on;
     plot(x,y,'bx-');
-    % draw vehicle as a two-wheeled car
-    drawcar(x(end),y(end),th(end),.15,ii)   
+    % draw vehicle as a two-wheeled robot
+    drawbot(x(i),y(i),th(i),.15,ii)   
     if (~endonly)
         plot(xdT(1:end-1,1), xdT(1:end-1,2), 'ro--')
     else
@@ -147,4 +147,3 @@ for i=1:TTot-T
     end
 
     
-
