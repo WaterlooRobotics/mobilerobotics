@@ -11,7 +11,7 @@ N = (n+m);
 
 % Example #1 Basic tracking of sinusoidal desired trajectory
 % Time steps
-T = 10;
+T = 20;
 dt = 1;
 % Desired trajectory
 xd = [0:dt:(T-1)*dt; sin(0.3*[0:dt:(T-1)*dt]);zeros(size(0:dt:(T-1)*dt))]';
@@ -22,7 +22,7 @@ p0 = [0 2 0];
 % Time steps
 withobs = 1;
 if (withobs)
-    T = 40;
+    T = 20;
     dt = 0.2;
     % Desired trajectory
     xd = [0:dt:(T-1)*dt; sin(0.3*[0:dt:(T-1)*dt]);zeros(size(0:dt:(T-1)*dt))]';
@@ -102,7 +102,7 @@ drawnow();
 % Solve nonlinear program
 options = optimset('display', 'off','maxfunevals',50000);
 tic;
-[X,FVAL,EXITFLAG,OUTPUT,LAMBDA] = FMINCON(@(x) cost(x),x0,A,B,Aeq,Beq,LB,UB,@(x) constraints(x), options);
+[X,FVAL,EXITFLAG,OUTPUT,LAMBDA] = fmincon(@(x) cost(x),x0,A,B,Aeq,Beq,LB,UB,@(x) constraints(x), options);
 toc;
 % Rename results
 x = X(1:N:end);
@@ -110,14 +110,6 @@ y = X(2:N:end);
 th = X(3:N:end);
 v = X(4:N:end);
 w = X(5:N:end);
-
-% Plot results
-figure(2);clf; hold all;
-plot(1:T,x)
-plot(1:T,y)
-plot(1:T,th)
-plot(1:T,v)
-plot(1:T,w)
 
 figure(1); hold on;
 plot(x,y,'bx-');
