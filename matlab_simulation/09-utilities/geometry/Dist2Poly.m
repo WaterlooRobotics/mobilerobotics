@@ -1,12 +1,12 @@
 %*******************************************************************************
 % function:	Dist2Poly
-% Description:	distance from pont to polygon whose vertices are specified by the
+% Description:	distance from point to polygon whose vertices are specified by the
 %              vectors xv and yv
 % Input:  
 %    x - point's x coordinate
 %    y - point's y coordinate
 %    xv - vector of polygon vertices x coordinates
-%    yv - vector of polygon vertices x coordinates
+%    yv - vector of polygon vertices y coordinates
 % Output: 
 %    d - distance from point to polygon (defined as a minimal distance from 
 %        point to any of polygon's ribs, positive if the point is outside the
