@@ -1,11 +1,5 @@
 %% Plot fucntion for Gyrro Data Estimation.
-% AUTHOR: Bismaya Sahoo EMAIL:bsahoo@uwaterloo.ca
-% COMMENTS: Non parametric function. No arguments. No returns.
-% Didn't make sense to functionalize the whole thing because the fucntion
-% would essentially result in as much clutter and wouldnt help in a cleaner
-% code. Moving everything related to plot to a new file made more sense.
-%----------------------------------------------------------------------
-%% Plot Zone
+
 % Plot the Original data
 figure(1);clf;
 subplot(2,2,1); hold on;grid on;

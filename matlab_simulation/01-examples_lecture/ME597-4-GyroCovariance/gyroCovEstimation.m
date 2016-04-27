@@ -6,17 +6,6 @@
 % -3. Estimate the noise in the filtered data by comparing with original.
 % -4. Add this noise to filtered data to verify it matches the original
 % -5. Approximates the noise distribution 
-% ---------------------------------------------------------------------
-% ----Contributions in Ver.3.0
-% -1. Vectorized the Gyro Data.
-% -2. More Compact Code.
-% -3. Removed repetitions
-% -4. Completed the Error Distribution Comparison at the bottom.
-% -5. Comments/Description wherever possible
-% -6. All Plots in the same subplot for ease of viewing
-% -7. Seprate ALGO and PLOT section for neatness
-% -8. Clear explanation of all the steps
-% Author: Bismaya Sahoo EMAIL:bsahoo@uwaterloo.ca
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Initializations
@@ -50,6 +39,7 @@ G_sim = S_vect*sqrt(S_val)*randn(3,dataSet_length);
 % STEP2: Filter the Gyro Sensor on our robot with a moving avg filter.
 filter_length = 3; % size of the moving avg filter.
 G_filtered=filter(ones(1,filter_length)/filter_length,1,G_data); %Filter the Data.
+
 % STEP3: Calculate the error of our filtered estimate from the original data.
 % This error when added to our estimate should give estimated gyro data.
 G_err = G_data-G_filtered; %Calculate the error
@@ -72,6 +62,7 @@ xvec = -50:.1:50;
 binsizeX = Xex(2)-Xex(1);
 binsizeY = Xey(2)-Xey(1);
 binsizeZ = Xez(2)-Xez(1);
+
 % Compare to pdf, by multiplying by number of samples and by bin size
 % Num samples to convert to frequency distribution and bin size as smaller
 % bins will have fewer samples.
