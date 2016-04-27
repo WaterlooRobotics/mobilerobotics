@@ -87,14 +87,13 @@ x0(5:N:end) = 0;
 
 % Receding horizon goal
 xd = xdT(1:T,:);
-ii=1;                                % figure name
 
 % Repeat optimization at each timestep
-for i=1:TTot-T
+for i=1:TTot-T+1
 
     % Solve nonlinear program
     options = optimset('maxfunevals',50000,'display','off');
-    [X,FVAL,EXITFLAG,OUTPUT,LAMBDA] = fmincon(@(x) cost(x),x0,A,B,Aeq,Beq,LB,UB,@(x) constraints(x), options);
+    [X,FVAL,EXITFLAG,OUTPUT,LAMBDA] = fmincon(@(x) nlpcost(x),x0,A,B,Aeq,Beq,LB,UB,@(x) nlpconstraints(x), options);
    
     % Move and Update problem for next timestep
     x0(1:N*(T-1)) = X(N+1:N*T,1);
@@ -110,11 +109,11 @@ for i=1:TTot-T
     w = X(5:N:end);     % angular velocity
 
     % Plot results
-    figure(ii); clf; hold on;
+    figure(1); clf; hold on;
     plot(x,y,'bx-');
     
-    % draw vehicle as a two-wheeled car
-    drawcar(x(1),y(1),th(1),.1,ii)   
+    % draw vehicle as a two-wheeled robot
+    drawbot(x(1),y(1),th(1),.1,1)   
     if (~endonly)
         plot(xdT(1:end-1,1), xdT(1:end-1,2), 'ro--')
     else
@@ -125,7 +124,7 @@ for i=1:TTot-T
     if (withobs)
         for j=1:numObsts
             plot(obs(j,1), obs(j,2),'kx');
-            circle(ii, obs(j,:), radius(j));
+            circle(1, obs(j,:), radius(j));
         end
         axis equal
     end
