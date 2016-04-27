@@ -1,7 +1,11 @@
 % Nonlinear programming receding horizon examples
 clear all; close all; clc
 
-global n m N T dt xd obs pF withobs endonly vd_cnst
+global n m N T dt xd obs pF withobs endonly vd_cnst safety_radius
+
+% The safety distane for the robot moving in the environment
+% to prevent the collidng between edge of the car and obstacle. 
+safety_radius= 0.08;       
 
 %% Optimization problem definition
 % Number of optimization variables per timestep: n states and m inputs
@@ -14,12 +18,13 @@ N = (n+m);
 TTot = 20;
 dt = .3;
 
-% Example #2 Generating random desired trajectory (using Bezier curves)
-xd_start=[0, 1];
-xd_mid=[2, 1.5];
-xd_end=[5.5,2];
-xdT=Trajectory_bezier(xd_start,xd_mid,xd_end,dt,TTot);
-p0 = [0 2 0];           %Initial position
+% Example #2 Generating random desired trajectory: using Bezier function
+xd_start=[0,1];             % Bezier path start point.
+xd_end=[5.5,2];             % Bezier path final point.
+xd_midpoint=[1,4;3,-1];     % Bezier path control points.
+
+xdT=Trajectory_bezier(xd_start,xd_midpoint,xd_end,dt,TTot);
+p0 = [0 2 0];               %Initial position
 
 % Set up environment
 posMinBound = [0 -1];
@@ -28,9 +33,9 @@ numObsts = 6;
 withobs = 1;
 
 % Example #3 Navigating to a destination 
-endonly = 1;
+endonly = 0;
 if (endonly)
-    TTot = 20;
+    TTot = 10;
     dt = 1;
     pF = [ 4 0 0.5];
 end 
@@ -44,7 +49,7 @@ B = [];
 Aeq = zeros(3,N*T);
 Aeq(1:3,1:3) = eye(3);
 Beq = p0';
-vd_cnst=1;                  %speed constraint
+vd_cnst=1; % speed constraint
 
 
 % State and input bounds
@@ -72,7 +77,6 @@ if (withobs)
     end
     obs = [obs radius'];
 end
-
 % Initial solution
 x0 = zeros(N*T,1);
 x0(1:N:end) = p0(1);
@@ -84,14 +88,12 @@ x0(5:N:end) = 0;
 % Receding horizon goal
 xd = xdT(1:T,:);
 
-filename = 'NLP_Animation.gif';      % saving animation file in .gif file
-
 % Repeat optimization at each timestep
 for i=1:TTot-T+1
 
     % Solve nonlinear program
     options = optimset('maxfunevals',50000,'display','off');
-    [X,FVAL,EXITFLAG,OUTPUT,LAMBDA] = fmincon(@(x) cost(x),x0,A,B,Aeq,Beq,LB,UB,@(x) constraints(x), options);
+    [X,FVAL,EXITFLAG,OUTPUT,LAMBDA] = fmincon(@(x) nlpcost(x),x0,A,B,Aeq,Beq,LB,UB,@(x) nlpconstraints(x), options);
    
     % Move and Update problem for next timestep
     x0(1:N*(T-1)) = X(N+1:N*T,1);
@@ -109,31 +111,27 @@ for i=1:TTot-T+1
     % Plot results
     figure(1); clf; hold on;
     plot(x,y,'bx-');
-    title('Receding Horizon Planning')
-    % draw vehicle as a two-wheeled car
-    drawcar(x(1),y(1),th(1),.15,1)   
+    
+    % draw vehicle as a two-wheeled robot
+    drawbot(x(1),y(1),th(1),.1,1)   
     if (~endonly)
         plot(xdT(1:end-1,1), xdT(1:end-1,2), 'ro--')
     else
         plot(pF(1),pF(2),'ro')
     end
+    
     % draw obstacles
     if (withobs)
         for j=1:numObsts
-            plot(obs(j,1), obs(j,2),'bx');
+            plot(obs(j,1), obs(j,2),'kx');
             circle(1, obs(j,:), radius(j));
         end
         axis equal
     end
-    % saving animation file in .gif file
-      im = frame2im(getframe(1));
-      [imind,cm] = rgb2ind(im,256);
-      if i == 1;
-          imwrite(imind,cm,filename,'gif', 'Loopcount',inf);
-      else
-          imwrite(imind,cm,filename,'gif','WriteMode','append');
-      end
-      
+    
+    % Generating animation and save it as .gif file
+    getframe;
+    
     % exitflag shows if the problem has feasible solustion
     Vi(i)=v(end);       % velocitiy of vehicle 
     ei(i)=EXITFLAG;     % exit flag
@@ -141,6 +139,8 @@ for i=1:TTot-T+1
         display('----------------------------------------------------------------');
         display('Non-feasible solution: Some of the constraints are not satisfied.');break;
     end
+    
 end
+
     
-    
+

@@ -105,7 +105,7 @@ drawnow();
 % Solve nonlinear program
 options = optimset('display', 'off','maxfunevals',50000);
 tic;
-[X,FVAL,EXITFLAG,OUTPUT,LAMBDA] = fmincon(@(x) cost(x),x0,A,B,Aeq,Beq,LB,UB,@(x) constraints(x), options);
+[X,FVAL,EXITFLAG,OUTPUT,LAMBDA] = fmincon(@(x) nlpcost(x),x0,A,B,Aeq,Beq,LB,UB,@(x) nlpconstraints(x), options);
 toc;
 % Rename results
 x = X(1:N:end);
