@@ -14,12 +14,11 @@ N = (n+m);
 TTot = 20;
 dt = .3;
 
-
-
 % Example #2 Generating random desired trajectory (using Bezier curves)
 xd_start=[0, 1];
+xd_mid=[2, 1.5];
 xd_end=[5.5,2];
-xdT=Trajectory_bazier(xd_start,xd_end,dt,TTot);
+xdT=Trajectory_bezier(xd_start,xd_mid,xd_end,dt,TTot);
 p0 = [0 2 0];           %Initial position
 
 % Set up environment
@@ -29,9 +28,9 @@ numObsts = 6;
 withobs = 1;
 
 % Example #3 Navigating to a destination 
-endonly = 0;
+endonly = 1;
 if (endonly)
-    TTot = 10;
+    TTot = 20;
     dt = 1;
     pF = [ 4 0 0.5];
 end 
@@ -73,6 +72,7 @@ if (withobs)
     end
     obs = [obs radius'];
 end
+
 % Initial solution
 x0 = zeros(N*T,1);
 x0(1:N:end) = p0(1);
@@ -82,22 +82,12 @@ x0(4:N:end) = 0;
 x0(5:N:end) = 0;
 
 % Receding horizon goal
-<<<<<<< HEAD
-<<<<<<< HEAD
-xd = xdT(1:T,:)
-=======
 xd = xdT(1:T,:);
-ii=1;                                % figure name
+
 filename = 'NLP_Animation.gif';      % saving animation file in .gif file
->>>>>>> origin/i23-nonlinear_programming
-=======
-xd = xdT(1:T,:);
-ii=1;                                % figure name
-filename = 'NLP_Animation.gif';      % saving animation file in .gif file
->>>>>>> i23-nonlinear_programming
 
 % Repeat optimization at each timestep
-for i=1:TTot-T
+for i=1:TTot-T+1
 
     % Solve nonlinear program
     options = optimset('maxfunevals',50000,'display','off');
@@ -117,24 +107,11 @@ for i=1:TTot-T
     w = X(5:N:end);     % angular velocity
 
     % Plot results
-<<<<<<< HEAD
-<<<<<<< HEAD
-%     figure(2);clf; hold all;
-%     plot(1:T,x)
-%     plot(1:T,y)
-%     plot(1:T,th)
-%     plot(1:T,v)
-%     plot(1:T,w)
-
-    figure(i); clf; hold on;
-=======
-=======
->>>>>>> i23-nonlinear_programming
-    figure(ii); clf; hold on;
->>>>>>> origin/i23-nonlinear_programming
+    figure(1); clf; hold on;
     plot(x,y,'bx-');
+    title('Receding Horizon Planning')
     % draw vehicle as a two-wheeled car
-    drawcar(x(end),y(end),th(end),.15,ii)   
+    drawcar(x(1),y(1),th(1),.15,1)   
     if (~endonly)
         plot(xdT(1:end-1,1), xdT(1:end-1,2), 'ro--')
     else
@@ -143,27 +120,11 @@ for i=1:TTot-T
     % draw obstacles
     if (withobs)
         for j=1:numObsts
-<<<<<<< HEAD
-<<<<<<< HEAD
             plot(obs(j,1), obs(j,2),'bx');
-            circle(i, obs(j,:), radius(j));
+            circle(1, obs(j,:), radius(j));
         end
         axis equal
     end
-    drawnow();
-    F(i) = getframe;
-end
-=======
-=======
->>>>>>> i23-nonlinear_programming
-            plot(obs(j,1), obs(j,2),'kx');
-            circle(ii, obs(j,:), radius(j));
-        end
-        axis equal
-    end
-    F(i) = getframe;
-    
-    
     % saving animation file in .gif file
       im = frame2im(getframe(1));
       [imind,cm] = rgb2ind(im,256);
@@ -180,12 +141,6 @@ end
         display('----------------------------------------------------------------');
         display('Non-feasible solution: Some of the constraints are not satisfied.');break;
     end
+end
     
-    end
-
     
-
-<<<<<<< HEAD
->>>>>>> origin/i23-nonlinear_programming
-=======
->>>>>>> i23-nonlinear_programming

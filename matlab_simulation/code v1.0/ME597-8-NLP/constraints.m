@@ -13,9 +13,9 @@ for i = 1:T-1
 end
 
 % Environment
+C = [];
 if (withobs)
     nobs = length(obs(:,1));
-
     for i = 1:T
         for j = 1:nobs
             C(nobs*(i-1)+j, 1) = obs(j,3)^2-norm(obs(j,1:2)'-x(N*(i-1)+1:N*(i-1)+2))^2;
@@ -25,4 +25,4 @@ end
 
 % Velocity constraints
 ind_end=length(C);
-C(ind_end+1,1)=x(4)-vd_cnst;
+C(ind_end+1:ind_end+T,1)=x(4:N:end)-vd_cnst;

@@ -1,7 +1,7 @@
 % Nonlinear programming examples
-clear all; close all; clc
+clear all;  clc
 
-global n m N T dt xd obs pF withobs endonly
+global n m N T dt xd obs pF vd_cnst withobs endonly
 
 %% Optimization problem definition
 % Number of optimization variables per timestep: n states and m inputs
@@ -10,37 +10,39 @@ m = 2;
 N = (n+m);
 
 % Example #1 Basic tracking of sinusoidal desired trajectory
+% withobs = 0;
+% endonly = 0;
+% Example #2 Tracking of sinusoidal desired trajectory with obstacles
+withobs = 1;
+endonly = 0;
+% Example #3 Navigating to a destination (with or without obstacles from
+% above)
+% withobs = 1;
+% endonly = 1;
+
 % Time steps
-T = 10;
+T = 10;  % 20; 40;
 dt = 1;
 % Desired trajectory
 xd = [0:dt:(T-1)*dt; sin(0.3*[0:dt:(T-1)*dt]);zeros(size(0:dt:(T-1)*dt))]';
-%Initial position
+% Initial position
 p0 = [0 2 0];
+% Maximum velocity
+vd_cnst = 1;
 
-% Example #2 Tracking of sinusoidal desired trajectory with obstacles
-% Time steps
-withobs = 1;
+% Add obstacles
 if (withobs)
-    T = 40;
-    dt = 0.2;
-    % Desired trajectory
-    xd = [0:dt:(T-1)*dt; sin(0.3*[0:dt:(T-1)*dt]);zeros(size(0:dt:(T-1)*dt))]';
-    %Initial position
-    p0 = [0 2 0];
     % Set up environment
     posMinBound = [0 -1];
-    posMaxBound = [4 3];
-    numObsts = 6;
+    posMaxBound = [9 3];
+    numObsts = 8;
 end
 
-% Example #3 Navigating to a destination (with or without obstacles from
-% above)
-endonly = 0;
+% Add end point constraint
 if (endonly)
     T = 10;
     dt = 1;
-    pF = [ 4 0 0.5];
+    pF = [ 9 0 0.5];
 end 
 
 % Initial solution
@@ -85,11 +87,6 @@ end
 
 
 figure(1); clf; hold on;
-if (~endonly)
-    plot(xd(:,1), xd(:,2), 'ro--')
-else
-    plot(pF(1),pF(2),'ro')
-end
 if (withobs)
         for i=1:numObsts
         plot(obs(i,1), obs(i,2),'bx');
@@ -97,12 +94,18 @@ if (withobs)
     end
     axis equal
 end
+if (~endonly)
+    plot(xd(:,1), xd(:,2), 'ro--')
+else
+    plot(pF(1),pF(2),'ro')
+end
+title('Nonlinear programming motion planning')
 drawnow();
 
 % Solve nonlinear program
 options = optimset('display', 'off','maxfunevals',50000);
 tic;
-[X,FVAL,EXITFLAG,OUTPUT,LAMBDA] = FMINCON(@(x) cost(x),x0,A,B,Aeq,Beq,LB,UB,@(x) constraints(x), options);
+[X,FVAL,EXITFLAG,OUTPUT,LAMBDA] = fmincon(@(x) cost(x),x0,A,B,Aeq,Beq,LB,UB,@(x) constraints(x), options);
 toc;
 % Rename results
 x = X(1:N:end);
@@ -111,13 +114,18 @@ th = X(3:N:end);
 v = X(4:N:end);
 w = X(5:N:end);
 
-% Plot results
+% Plot trajectory
+figure(1); hold on;
+plot(x,y,'bx-');
+
+% Plot time series data
 figure(2);clf; hold all;
 plot(1:T,x)
 plot(1:T,y)
 plot(1:T,th)
 plot(1:T,v)
 plot(1:T,w)
-
-figure(1); hold on;
-plot(x,y,'bx-');
+title('NLP State evolution')
+xlabel ('Time (s)')
+ylabel ('State');
+legend ('x','y','\theta', 'v', '\omega')
