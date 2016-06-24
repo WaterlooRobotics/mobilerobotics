@@ -1,0 +1,59 @@
+function MultiRateEKFGit(W,f,r,l,e,X0,R,Q,Sk,n,Cm)
+
+dt = 1/f;
+
+%initial state
+X(:,1)=X0;
+Xk(:,1)=X0;
+
+
+for i=2:n*f
+
+% World frame motion
+[Xideal(:,i),X(:,i),Y,V]=omniRobotFrame(r,l,W,X0(3),dt);
+
+Xideal(:,i)=X0+V;
+N=Noise(3,e)
+X(:,i)=Xideal(:,i)+N;
+
+% Update initial state
+X0=Xideal(:,i);
+
+  
+
+   % Predict state
+
+   A=LinearOmniMotion(r,l,W,X0(3),dt);
+   S=A*Sk*A'+R;
+   % Measurement
+   [Z,h,H]=omniLinearMeasure(X(:,i-1),Q);
+
+   
+   % Update State
+
+   % Correction
+  d=size(Cm);
+  for j=1:d(2);
+   if(mod(i,Cm(1,j))==0)
+       Q1=Q;
+       Q1(j,j)=Cm(2,j);
+       [Zt,ht,H]=omniLinearMeasure(X(:,i-1),Q1);
+       Z(j,1)=Zt(j,1);
+   end
+  end
+  
+  % Kalman gain
+    K= S*H'*inv(H*S*H'+Q);
+
+   % Generate measurement
+    Xk(:,i)=X0(:,i-1)+K*(Z-h);
+    Sk=(eye(3)-K*H)*S;
+
+ end
+                                    
+   figure
+   plot(Xideal(1,:),Xideal(2,:),'b-',X(1,:),X(2,:),'r-',Xk(1,:),Xk(2,:),'g-');
+   title('Ideal,True and Estimated position Multi rate EKF');
+
+
+end
