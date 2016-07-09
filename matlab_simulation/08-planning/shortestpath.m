@@ -49,7 +49,7 @@ while (~done)
     end
 
     % Get all neighbours of best node
-    neigh = find(edges(bestnode(1),:)==1);
+   neigh = [find(edges(bestnode(1),:)==1),find(edges(:,bestnode(1))==1)'];
     
     % Process each neighbour
     for i=1:length(neigh)
