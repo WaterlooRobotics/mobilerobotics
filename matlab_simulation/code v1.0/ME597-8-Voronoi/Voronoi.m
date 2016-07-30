@@ -26,6 +26,8 @@ writeVideo(vidObj, getframe(gcf));
 % Generate start and end locations
 startLocation = s*rand(1,2);
 endLocation = s*rand(1,2);
+startLocation = [10,10];
+endLocation = s*[0.9, 0.9];
 %Closes Voronoi vertex to the end and start locations
 closestToStart = dsearchn(V, startLocation);
 closestToEnd = dsearchn(V, endLocation);
@@ -46,17 +48,10 @@ robotWidth = 2*l;
 wheelVelocity = [];
 
 %% Create graph with edges of the Voronoi Diagram
-G = graph;
-G = addnode(G,length(V));
-
-for i=1:length(C)
-    for k=1:(length(C{i})-1)
-        idxOut = findedge(G,C{i}(k),C{i}(k+1));
-        if(idxOut == 0)
-            G = addedge(G, C{i}(k), C{i}(k+1), distanceTwoPoints(V(C{i}(k),:),V(C{i}(k+1),:)));    
-        end; 
-    end;
-end;
+display('Generating graph object to represent the Voronoi graph');
+tic
+G = createVoronoiGraph(C,V);
+toc
 
 %% Find shortest path
 % Discard any paths passing in between obtacles where the robot wouldn't
@@ -85,12 +80,6 @@ end;
 
 %% Calculate angular velocity of wheels
 % A different wheel veloicty is calculated for each path segment. 
-i=1;
-wheelVelocity = [];
-while i<=(length(path)-1)
-    worldVelocity = V(path(i+1),:) - V(path(i),:);
-    wheelVelocity = [wheelVelocity; transpose(IKOmniDirectionRobot(worldVelocity, l, r))];
-    i = i+1;
-end;
+wheelVelocity = getVelocityVectors(path, V,l,r);
 
 close(vidObj);
