@@ -126,7 +126,7 @@ if r==3 & c==3
   if nargout
     h=[h1 h2 h3 h4];
   end
-elseif r==2 & c==2
+elseif r==2 && c==2
   % Make the matrix has positive eigenvalues - else it's not a valid covariance matrix!
   if any(eig(C) <=0)
     error('The covariance matrix must be positive definite (it has non-positive eigenvalues)')
