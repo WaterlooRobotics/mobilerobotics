@@ -1,6 +1,14 @@
+%An example of using inverse measurement model to scan and create a occupancy grid map is presented in the example.m.
+
+%In the example.m, various functions will be called and most of them are in the 04-sensor folder, only one called "create_a_map.m" is in   the 10-environment folder.
+
+%Robot will keep spinning and scanning while moving inside the real map. It will bounce back once it collide with walls or obstables.
+
+%The "creat_a_map.m" function generates a map with some random-scale obstacles, and this function may probabbly used by others.
+
 clear;clc;
 %% Create AVI object
-makemovie1 = 1;
+makemovie1 = 0;
 if(makemovie1)
     vidObj1 = VideoWriter('Scanning_bres.avi');
     vidObj1.Quality = 100;
@@ -8,7 +16,7 @@ if(makemovie1)
     open(vidObj1);
 end
 
-makemovie2 = 1;
+makemovie2 = 0;
 if(makemovie2)
     vidObj2 = VideoWriter('Map_and_robot.avi');
     vidObj2.Quality = 100;
@@ -16,7 +24,7 @@ if(makemovie2)
     open(vidObj2);
 end
 
-makemovie3 = 1;
+makemovie3 = 0;
 if(makemovie3)
     vidObj3 = VideoWriter('Occupancy_grid_map.avi');
     vidObj3.Quality = 100;
@@ -43,7 +51,7 @@ x0= [ round(40 +2*randn(1)), round(40 + 2*randn(1)), 0]; % Initial states of rob
 X = zeros(3,length(1:T));
 
 % Produce Robot Motions
-X = robot_motion(map_real, X, x0, T);
+X = udlr_robot_motion(map_real, X, x0, T);
 
 %% Sensor Parameters
 meas_phi = -0.4:0.05:0.4; % Laser headings
