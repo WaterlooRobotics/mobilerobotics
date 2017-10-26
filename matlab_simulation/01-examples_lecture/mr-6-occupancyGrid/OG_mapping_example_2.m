@@ -12,14 +12,14 @@
 clear; clc;
 
 %% Create AVI object
-makemovie1 = 1; % Inverse Measurement Model Video
+makemovie1 = 0; % Inverse Measurement Model Video
 if(makemovie1)
     vidObj1 = VideoWriter('ex2_measurement_model.avi');
     vidObj1.Quality = 100;
     vidObj1.FrameRate = 4;
     open(vidObj1);
 end
-makemovie2 = 1; % Occupancy Grid Video
+makemovie2 = 0; % Occupancy Grid Video
 if (makemovie2)
     vidObj2 = VideoWriter('ex2_occupancy_grid.avi');
     vidObj2.Quality = 100;
@@ -91,8 +91,8 @@ for t = 2:length(T)
     % Belief map
     plot_occupancy_grid(og, M, N, 3);
     plot_robot_path(x, t, 3);
-    if (makemovie2) writeVideo(vidObj2, getframe(gca)); end
-    
+    if (makemovie2) writeVideo(vidObj2, getframe(gca)); 
+    else drawnow; pause(0.05);end
 end
 if (makemovie1) close(vidObj1); end
 if (makemovie2) close(vidObj2); end

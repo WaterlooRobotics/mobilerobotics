@@ -28,26 +28,17 @@ end
    
 % Add base and all subdirectories to path
 if (strcmp(mode, 'remove'))
-    rmpath(base);
-else
-    addpath(base);
-end
-
-dirlist = {'03-motion','04-sensor','05-estimation','06-mapping','07-control','08-planning','09-utilities','09-utilities/geometry','09-utilities/animation','10-environments','11-datasets'}; 
-
-for i=1:length(dirlist)
-    subdir = sprintf('%s%s%s', base,sep,dirlist{i});
-    if (strcmp(mode, 'remove'))
-        rmpath(subdir);
-    else
-        addpath(subdir);
-    end
-end
-
-savepath
-disp('Setup complete')
-if (strcmp(mode, 'remove'))
+    rmpath(genpath(base));
+    !rm pathdef.m
     disp('Removed all directories from path');
 else
+    addpath(genpath(base));
+    % remove code v1.0 to avoid duplication, can be eliminated when v2.0
+    % complete
+    oldbase = strcat(base,sep,'code v1.0')
+    rmpath(genpath(oldbase));
+    savepath pathdef.m
     disp('Added all directories to path');
 end
+
+disp('Setup complete')
