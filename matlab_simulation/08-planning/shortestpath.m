@@ -178,8 +178,8 @@ while (~done)
      % Move best to closed set
      C = [C; bestnode];
 
-     % Get all neighbours of best node
-     neigh = find(edges(bestnode(1),:)==1);
+    % Get all neighbours of best node
+   neigh = [find(edges(bestnode(1),:)==1),find(edges(:,bestnode(1))==1)'];
     
      % Process each neighbour
      for i=1:length(neigh)
