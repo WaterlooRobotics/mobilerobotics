@@ -10,6 +10,9 @@ function [m] = inversescanner(M,N,x,y,theta,meas_phi,meas_r,rmax,alpha,beta,p_oc
 
 % TODO: Modify to take in grid cell size.
 
+% Initialize measurement model
+m = 0.5*ones(M, N);
+
 % Range finder inverse measurement model
 for i = 1:M
     for j = 1:N
