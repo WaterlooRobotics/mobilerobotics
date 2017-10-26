@@ -1,7 +1,7 @@
 # mobilerobotics
-Matlab and Robot code for ME 597: Autonomous Mobile Robotics at the University of Waterloo
+Matlab and Robot code for MTE 544: Autonomous Mobile Robotics at the University of Waterloo
 
-This repository includes a Matlab simulation library and Turtlebot example code for the ME 597 course.
+This repository includes a Matlab simulation library and Turtlebot example code for the MTE 544 course.
 
 For the Matlab simulation library, run MobileRoboticsSetup.m to add all necessary subfolders to your Matlab path.
 

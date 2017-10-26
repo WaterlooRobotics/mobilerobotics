@@ -1,6 +1,6 @@
 % Unscented Kalman filter example
 clear;clc;
-reset(RandStream.getDefaultStream);
+%reset(RandStream.getDefaultStream);
 
 % Discrete time step
 dt = 0.1;
@@ -145,6 +145,7 @@ for t=2:length(T)
     K_Su(:,t) = K_u;
     
     %% Plot results
+    PlotData(t,x,mu_S,mu_Su,S);
     figure(1);clf; hold on;
     % True state
     plot(x(1,2:t),x(3,2:t), 'ro--')

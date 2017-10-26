@@ -1,17 +1,56 @@
 % Extended Kalman Filter SLAM example
-clear;clc;
+clear;clc;close all
 
+%% Select an example to run
+% Example=1: robot travelling in a circular path between 2 lines of obstacles
+% Example=2: robot travelling back and forth between 2 lines of obstacles
+% Example=3: robot travelling in a circular path. 6 obstacles form a small circle
+% Example=4: robot travelling in a circular path. 6 obstacles form a large circle
+Example=2;
+
+%% Main Code
 % Time
 Tf = 40;
 dt = 0.5;
 T = 0:dt:Tf;
 
-% Initial Robot State
+% Initial Robot State: (x,y,heading)
 x0 = [0 0 0]';
 
-% Control inputs
-u = ones(2, length(T));
-u(2,:)=0.3*u(2,:);
+% Generate control inputs and feature map based on example selection
+switch Example
+    case 1
+        u = ones(2, length(T));
+        u(2,:)=0.3*u(2,:);
+        map = [-5:1:5 5:-1:-5; -2*ones(1,11) 8*ones(1,11)];
+    case 2
+        turns=5;    % number of 180 deg turns to make
+        u=ones(2,length(T));
+        u(2,:)=0;
+        for n=1:turns
+            u(2,floor(length(T)./(turns+1)*n))=pi./dt;
+        end;
+        map=[-1:1:8,8:-1:-1; 2*ones(1,10),-2*ones(1,10)];
+    case 3
+        u = ones(2, length(T));
+        u(2,:)=0.3*u(2,:);
+        N=6; %number of features
+        Radius=6;
+        center=[1;3];
+        theta=linspace(2*pi./N,2*pi,N);
+        map=[center(1)+Radius.*cos(theta);
+             center(2)+Radius.*sin(theta)];
+    case 4
+        u = ones(2, length(T));
+        u(2,:)=0.3*u(2,:);
+        N=6; %number of features
+        Radius=12;
+        center=[1;3];
+        theta=linspace(2*pi./N,2*pi,N);
+        map=[center(1)+Radius.*cos(theta);
+             center(2)+Radius.*sin(theta)];
+end
+M = length(map);
 
 % Motion Disturbance model
 R = [0.001 0 0; 
@@ -23,24 +62,17 @@ R = [0.001 0 0;
 mu0r = [0 0 0]'; % mean (mu)
 S0rr = 0.00000000001*eye(3);% covariance (Sigma)
 
-% Feature Map
-%M = 10;
-%map = 8*rand(2,M);
-map = [-5:1:5 5:-1:-5; -2*ones(1,11) 8*ones(1,11)];
-M = length(map);
 % Prior over feature map
-mu0m = zeros(2*M,1);
-S0mm = 100*eye(2*M);
+S0mm=eye(2);  %predefined covariance for each feature when it is just detected;
 newfeature = ones(M,1);
 
 %Measurement model
-rmax = 5; % Max range
+rmax = 20; % Max range
 thmax = pi/4; % 1/2 Field of view
 
 % Measurement noise
 Qi = [0.00001 0; 
      0 0.00001];
-
 [QiE, Qie] = eig(Qi);
 
 
@@ -52,45 +84,18 @@ N = n+2*M;
 m = length(Qi(:,1)); % Number of measurements per feature 
 y = zeros(m*M,length(T)); % Measurements
 
-mu = [mu0r; mu0m];
-S = [S0rr zeros(n,2*M);  zeros(2*M,n) S0mm];
-%S = [S0rr 100*ones(n,2*M);  100*ones(2*M,n) S0mm];
+mu = mu0r;
+S=S0rr; % initially the map is empty, so the estimate and covariance only have the vehicle info
 
 mu_S = zeros(N,length(T)); % Belief
-mu_S(:,1) = mu;
+mu_S(1:3,1) = mu;
+count=0;    % count of detected features in the map
 
-%% Plot results
+%% Plot initial step
 t=1;
-    figure(1);clf; 
-    subplot(1,2,1); hold on;
-    plot(map(1,:),map(2,:),'go', 'MarkerSize',10,'LineWidth',2);
-    plot(xr(1,1:t),xr(2,1:t), 'ro--')
-    plot([xr(1,t) xr(1,t)+1*cos(xr(3,t))],[xr(2,t) xr(2,t)+1*sin(xr(3,t))], 'r-')
-    plot(mu_S(1,1:t),mu_S(2,1:t), 'bx--')
-    plot([mu_S(1,t) mu_S(1,t)+1*cos(mu_S(3,t))],[mu_S(2,t) mu_S(2,t)+1*sin(mu_S(3,t))], 'b-')
-    mu_pos = [mu(1) mu(2)];
-    S_pos = [S(1,1) S(1,2); S(2,1) S(2,2)];
-    error_ellipse(S_pos,mu_pos,0.75);
-    error_ellipse(S_pos,mu_pos,0.95);
-    for i=1:M
-          if (~newfeature(i))
-              fi = 2*(i-1)+1;
-              fj = 2*i;
-              plot([xr(1,t) xr(1,t)+y(fi,t)*cos(y(fj,t)+xr(3,t))], [xr(2,t) xr(2,t)+y(fi,t)*sin(y(fj,t)+xr(3,t))], 'c');
-              plot(mu(3+fi),mu(3+fj), 'gx')
-              mu_pos = [mu(3+fi) mu(3+fj)];
-              S_pos = [S(3+fi,3+fi) S(3+fi,3+fj); S(3+fj,3+fi) S(3+fj,3+fj)];
-              error_ellipse(S_pos,mu_pos,0.75);
-          end
-    end
-    axis equal
-%     axis([-4 6 -1 7])
-    title('SLAM with Range & Bearing Measurements')
-    subplot(1,2,2);
-    image(10000*S);
-    colormap('gray');
-    title('Covariance matrix')
-    F(t) = getframe(gcf);
+figure(1);clf; 
+ekfSLAMplot(map,y,xr,mu_S,S,t,newfeature)
+F(t) = getframe(gcf);
 
     
 %% Main loop
@@ -99,9 +104,7 @@ for t=2:length(T)
     % Select a motion disturbance
     e = RE*sqrt(Re)*randn(n,1);
     % Update robot state
-    xr(:,t) = [xr(1,t-1)+u(1,t)*cos(xr(3,t-1))*dt;
-              xr(2,t-1)+u(1,t)*sin(xr(3,t-1))*dt;
-              xr(3,t-1)+u(2,t)*dt] + e;
+      xr(:,t) = two_wheel_motion_model(xr(:,t-1),u(:,t),dt)+e;
 
     % Take measurements
     % For each feature
@@ -113,102 +116,94 @@ for t=2:length(T)
             % Select a motion disturbance
             d = QiE*sqrt(Qie)*randn(m,1);
             % Determine measurement
-            y(2*(i-1)+1:2*i,t) = [sqrt((map(1,i)-xr(1,t))^2 + (map(2,i)-xr(2,t))^2);
-                atan2(map(2,i)-xr(2,t),map(1,i)-xr(1,t))-xr(3,t)] + d;
+            y(2*(i-1)+1:2*i,t) = range_bearing_meas_model(xr(:,t),map(:,i))+d;
         end
     end
     
     %% Extended Kalman Filter Estimation
     % Prediction update
-    mu(1:3) = [mu(1)+u(1,t)*cos(mu(3))*dt;
-           mu(2)+u(1,t)*sin(mu(3))*dt;
-           mu(3)+u(2,t)*dt];
-    
-    Gt = [ 1 0 -u(1,t)*sin(mu(3))*dt;
-           0 1 u(1,t)*cos(mu(3))*dt;
-           0 0 1];
-    
+    mu(1:3)= two_wheel_motion_model(mu(1:3),u(:,t),dt);
+    predicted_xr=mu(1:3);
+    Gt = two_wheel_motion_linearized_model(mu,u(:,t),dt);
     S(1:n,1:n) = Gt*S(1:n,1:n)*Gt' + R;
 
-    
     % Measurement update
     for i=1:M
         if (flist(i))
+         % j is the index for the measured feature. It is needed because
+         % when the map is updated and rearranged, j will be diff from i
+            j=i;
             % Feature initialization
             if (newfeature(i) == 1)
-                mu(3+2*(i-1)+1) = mu(1)+y(2*(i-1)+1,t)*cos(y(2*i,t)+mu(3));
-                mu(3+2*i) = mu(2)+y(2*(i-1)+1,t)*sin(y(2*i,t)+mu(3));
+                count=count+1;
+                % rearrange the order of estimates so that those of the newly
+                % detected feture is placed on top, right after the vehicle
+                % states
+                if count==1
+                   mu=[mu(1:3);
+                        mu(1)+y(2*(i-1)+1,t)*cos(y(2*i,t)+mu(3));
+                        mu(2)+y(2*(i-1)+1,t)*sin(y(2*i,t)+mu(3))];
+                else
+                    mu=[mu(1:3);
+                        mu(1)+y(2*(i-1)+1,t)*cos(y(2*i,t)+mu(3));
+                        mu(2)+y(2*(i-1)+1,t)*sin(y(2*i,t)+mu(3));
+                        mu(4:end)];  % augment measured features into states
+                end
+                % rearrange the covariance matrix. Those of the newly
+                % discovered features are set to be S0mm, a predefined
+                % value. Off-diagonal terms are set to 0.
+                temp=zeros(length(S)+2,length(S)+2);
+                temp(1:3,1:3)=S(1:3,1:3);
+                temp(4:5,4:5)=S0mm;
+                if length(S)>3
+                    temp(6:end,1:3)=S(4:end,1:3);
+                    temp(1:3,6:end)=S(1:3,4:end);
+                    temp(6:end,6:end)=S(4:end,4:end);
+                end
+                S=temp;
                 newfeature(i) = 0;
+                % rearrange map, newfeature, y, and flist so that they
+                % follow the same order as mu
+                [map, newfeature, y, flist]=rearrangeMap(map,newfeature,y,flist,i,count);
+                % after rearranging, this newly discovered feature is the
+                % first feature in the list
+                j=1;
+                disp([num2str(count) ' of the ' num2str(M) ' features have been detected'])
             end
+           
             % Linearization
             % Predicted range
-            dx = mu(3+2*(i-1)+1)-mu(1);
-            dy = mu(3+2*i)-mu(2);
+            dx = mu(3+2*(j-1)+1)-mu(1);
+            dy = mu(3+2*j)-mu(2);
             rp = sqrt((dx)^2+(dy)^2);
-
-            Fi = zeros(5,N);
-            Fi(1:n,1:n) = eye(n);
-            Fi(4:5,3+2*(i-1)+1:3+2*i) = eye(2);
-            Ht = [ -dx/rp ...
-                -dy/rp ...
-                0 ...
-                dx/rp ...
-                dy/rp;
-                dy/rp^2 ...
-                -dx/rp^2 ...
-                -1 ...
-                -dy/rp^2 ...
-                dx/rp^2]*Fi;
-
-            I = y(2*(i-1)+1:2*i,t)-[rp;
-                (atan2(dy,dx) - mu(3))];
-            
+            Ht = range_bearing_meas_linearized_model(mu,j);
+            I = y(2*(j-1)+1:2*j,t)- range_bearing_meas_model(mu(1:3),mu((3+2*(j-1)+1):3+2*j));
  
             % Measurement update
             K = S*Ht'*inv(Ht*S*Ht'+Qi);
             mu = mu + K*I;
-            S = (eye(n+2*M)-K*Ht)*S;
+            S = (eye(length(S))-K*Ht)*S;
+            
+            % In cases if S bemoes not positive definite, manually make it
+            % P.D.
+            if min(eig(S))<0
+               S=S-eye(length(S)).*min(eig(S));
+               warning('S was manually made positive definite')
+            end
+            
+            % warn the user that linearization may not be accurate if the 
+            % change in vehicle position is too large compared to input speed
+            if norm(mu(1:2)-mu_S(1:2,t-1))>2.*u(1,t).*dt
+                warning('Linearization may have failed')
+            end
         end
     end
  
     % Store results
-    mu_S(:,t) = mu;
-
+    mu_S(1:length(mu),t) = mu;
 
     %% Plot results
     figure(1);clf; 
-    subplot(1,2,1); hold on;
-    plot(map(1,:),map(2,:),'go', 'MarkerSize',10,'LineWidth',2);
-    plot(xr(1,1:t),xr(2,1:t), 'ro--')
-    plot([xr(1,t) xr(1,t)+1*cos(xr(3,t))],[xr(2,t) xr(2,t)+1*sin(xr(3,t))], 'r-')
-    plot(mu_S(1,1:t),mu_S(2,1:t), 'bx--')
-    plot([mu_S(1,t) mu_S(1,t)+1*cos(mu_S(3,t))],[mu_S(2,t) mu_S(2,t)+1*sin(mu_S(3,t))], 'b-')
-    mu_pos = [mu(1) mu(2)];
-    S_pos = [S(1,1) S(1,2); S(2,1) S(2,2)];
-    error_ellipse(S_pos,mu_pos,0.75);
-    error_ellipse(S_pos,mu_pos,0.95);
-
-    for i=1:M
-          if (~newfeature(i))
-              fi = 2*(i-1)+1;
-              fj = 2*i;
-              plot([xr(1,t) xr(1,t)+y(fi,t)*cos(y(fj,t)+xr(3,t))], [xr(2,t) xr(2,t)+y(fi,t)*sin(y(fj,t)+xr(3,t))], 'c');
-              plot(mu(3+fi),mu(3+fj), 'gx')
-              mu_pos = [mu(3+fi) mu(3+fj)];
-              S_pos = [S(3+fi,3+fi) S(3+fi,3+fj); S(3+fj,3+fi) S(3+fj,3+fj)];
-              error_ellipse(S_pos,mu_pos,0.75);
-          end
-    end
-    axis equal
-%     axis([-4 6 -1 7])
-    title('SLAM with Range & Bearing Measurements')
-    
-    subplot(1,2,2);
-    image(10000*S);
-    colormap('gray');
-    title('Covariance matrix')
- 
-    F(t) = getframe(gcf);
-    
+    ekfSLAMplot(map,y,xr,mu_S,S,t,newfeature)
+    F(t) = getframe(gcf); 
 end
-
