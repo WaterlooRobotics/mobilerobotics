@@ -1,12 +1,22 @@
 % Extended Kalman Filter SLAM example
 clear;clc;close all
 
+%% Create AVI object
+makemovie = 1;
+if(makemovie)
+    vidObj = VideoWriter('ekfSLAM.mp4');
+    vidObj.Quality = 100;
+    vidObj.FrameRate = 2;
+    open(vidObj);
+end
+
+
 %% Select an example to run
 % Example=1: robot travelling in a circular path between 2 lines of obstacles
 % Example=2: robot travelling back and forth between 2 lines of obstacles
 % Example=3: robot travelling in a circular path. 6 obstacles form a small circle
 % Example=4: robot travelling in a circular path. 6 obstacles form a large circle
-Example=2;
+Example=1;
 
 %% Main Code
 % Time
@@ -95,8 +105,8 @@ count=0;    % count of detected features in the map
 t=1;
 figure(1);clf; 
 ekfSLAMplot(map,y,xr,mu_S,S,t,newfeature)
-F(t) = getframe(gcf);
-
+if (makemovie) writeVideo(vidObj, getframe(gcf)); end
+  
     
 %% Main loop
 for t=2:length(T)
@@ -205,5 +215,8 @@ for t=2:length(T)
     %% Plot results
     figure(1);clf; 
     ekfSLAMplot(map,y,xr,mu_S,S,t,newfeature)
-    F(t) = getframe(gcf); 
+   
+    if (makemovie) writeVideo(vidObj, getframe(gcf)); end
+  
 end
+if (makemovie) close(vidObj); end
