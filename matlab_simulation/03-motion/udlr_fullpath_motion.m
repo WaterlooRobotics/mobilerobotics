@@ -1,4 +1,4 @@
-function [X] = udlr_robot_motion( map, X, x0, T)
+function [X] = udlr_fullpath_motion( map, X, x0, T)
 % This function create a random robot position and a random robot motion
 % map -- real map
 % X -- robot states

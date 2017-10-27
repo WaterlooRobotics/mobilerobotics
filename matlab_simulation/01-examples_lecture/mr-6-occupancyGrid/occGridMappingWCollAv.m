@@ -55,7 +55,7 @@ x0= [ round(40 +2*randn(1)), round(40 + 2*randn(1)), 0]; % Initial states of rob
 X = zeros(3,length(1:T));
 
 % Produce Robot Motions for entire simulation
-X = udlr_robot_motion(map_real, X, x0, T);
+X = udlr_fullpath_motion(map_real, X, x0, T);
 
 %% Sensor Parameters
 meas_phi = -0.4:0.05:0.4; % Laser headings

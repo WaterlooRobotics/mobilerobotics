@@ -1,4 +1,4 @@
-function plot_initial_state(figure_index, map, x, X, D)
+function plot_localization_state(figure_index, map, x, X, D)
     figure(figure_index);
     clf; 
     hold on;
@@ -10,7 +10,4 @@ function plot_initial_state(figure_index, map, x, X, D)
     end
     
     axis equal
-    axis([-4 6 -1 7]);
-    title('Particle Filter Localization')
-    %F(1) = getframe;
 end

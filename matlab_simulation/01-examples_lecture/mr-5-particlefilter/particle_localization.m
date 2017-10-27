@@ -70,8 +70,9 @@ mf = zeros(2, length(T));
 muParticle_S = zeros(1, D, length(T));
 
 % plot intial state
-plot_initial_state(1, map, x, X, D);
-
+plot_localization_state(1, map, x, X, D);
+axis([-4 6 -1 7]);
+title('Particle Filter Localization')
 
 % Main loop
 for t = 2:length(T)    
@@ -111,8 +112,11 @@ for t = 2:length(T)
     % record
     if (makemovie) 
         % plot results
-        plot_results(1, meas, map, t, x, X, y, mf, D);
-        
+        plot_localization_results(1, meas, map, t, x, X, y, mf, D);
+        axis equal
+        axis([-5 7 -2 8]);
+        title('Particle Filter Localization')
+
         % record plot frame
         writeVideo(vidObj, getframe(gca)); 
     end

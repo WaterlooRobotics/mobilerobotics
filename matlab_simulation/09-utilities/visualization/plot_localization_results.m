@@ -1,4 +1,4 @@
-function plot_results(figure_index, meas, map, t, x, X, y, mf, D)
+function plot_localization_results(figure_index, meas, map, t, x, X, y, mf, D)
     % plot setup
     figure(figure_index);
     clf; 
@@ -21,10 +21,5 @@ function plot_results(figure_index, meas, map, t, x, X, y, mf, D)
     for dd = 1:D
      plot(X(1, dd), X(2, dd), 'b.')
     end
-    
-    % plot details
-    axis equal
-    axis([-5 7 -2 8]);
-    title('Particle Filter Localization')
 end
 
