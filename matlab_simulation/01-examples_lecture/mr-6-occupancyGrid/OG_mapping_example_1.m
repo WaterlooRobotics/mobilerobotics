@@ -27,54 +27,82 @@ if (makemovie2)
     open(vidObj2);
 end
 
+%% Select simulation example
+% 0 - Default example, 50X60 map, Bresenham's update with Lidar
+% 1 - Default example, 50X60 map, windowed update with Lidar
+% 2 - Default example, 50X60 map, windowed update wth sonar
+% 3 - Large scale 1000X1000 map, Bresenham's update with Lidar
+
+example = 0; 
+
+% Sensor model parameters - this example uses a lidar
+if (example ~= 2)
+    % Lidar model
+    phi_m = -.4:0.01:.4; % Measurement bearings
+    r_max = 30; % Max range
+    alpha = 1; % Width of an obstacle (Distance about measurement to fill in)
+    beta = 0.05; % Width of a beam (Angle beyond which to exclude)
+    % Probabilites of cells
+    p_occ = 0.8;
+    p_free = 0.3;
+else
+    % Sonar model
+    phi_m = 0; % Measurement bearing
+    fov = 60*pi/180; %  Field of view of sonar in rad 
+    r_max = 30; % Max range
+    alpha = 1; % Width of an obstacle (Distance about measurement to fill in)
+    beta = fov; % Width of a beam in rad (Angle beyond which to exclude)
+    % Probabilites of cells
+    p_occ = 0.6;
+    p_free = 0.2;
+end
+
 % Simulation time
-Tmax = 150;
+Tmax = 250;
 T = 0:Tmax;
 
-% Load map
-[map, M, N, x0] = load_cell_map(1);
+% State Initialization (x, y, theta, psi)
+% x,y position
+% theta robot heading (absolute)
+% psi sensor heading (absolute, but could be relative to robot)
+x0 = [25; 10; 0; 0];
+x = zeros(4, length(T) + 1);
+x(:, 1) = x0;
 
-% Robot motions
-u = [3 0 -3 0;
-     0 3 0 -3];
-ui=1;
+% Robot velocity command
+v = 3;
 
 % Robot sensor rotation command
-w = 0.3 * ones(length(T));
+w = 0.6;
+
+% Load map - binary, 1 = occupied
+[map, M, N] = load_cell_map(1);
 
 % Occupancy grid in both probablity and log odds form
 og = 0.5*ones(M, N);
 ogl0 = log(og./(1-og));
 ogl = ogl0;
 
-% Sensor model parameters - this example uses a lidar
-phi_m = -.4:0.01:.4; % Measurement bearings
-r_max = 30; % Max range
-alpha = 1; % Width of an obstacle (Distance about measurement to fill in)
-beta = 0.05; % Width of a beam (Angle beyond which to exclude) 
-
-% State Initialization
-x = zeros(3, length(T) + 1);
-x(:, 1) = x0;
 
 %% Main simulation
-for t = 2:length(T)
+for t = 2:length(T)+1
+    %% Simulation
     % Robot motion
-    move = x(1:2, t-1) + u(:, ui)
-	% If the robot hits a wall or obstacle, change direction
-    if ((move(1)>M || move(2)>N || move(1)<1 || move(2)<1) || (map(move(1), move(2)) == 1))
-        x(:, t) = x(:, t-1);
-        ui = mod(ui, 4)+1;
+    [x(:,t)] = udlr_motion(map, x(:,t-1), v);
+    x(4,t) = x(4,t-1) + w;
+
+    % Generate a measurement data set
+    if (example == 2)
+        r_m = get_sonar_range(map, x([1:2,4],t), phi_m, fov, r_max)
     else
-        x(1:2, t) = move;
+        r_m = getranges(map, x([1:2,4],t), phi_m, r_max);
     end
-    x(3, t) = x(3, t-1) + w(t);
-
+    
     %% Map update;
-	% Call occupancy grid mapping function
-    [ogl, imml, r_m] = ogmap(map, ogl, x(:, t), phi_m, r_max, alpha, beta, 0);
+	% Call occupancy grid mapping logit update function using Bresenham
+    [ogl, imml] = ogmap_update(ogl, x(:,t), phi_m, r_m, r_max, alpha, beta, p_occ, p_free, example);
 
-    % Calculate probabilities
+    % Calculate probability map from log odds map
     og = exp(ogl)./(1 + exp(ogl));
     og_mm = exp(imml)./(1 + exp(imml));
 
@@ -91,9 +119,10 @@ for t = 2:length(T)
     % Belief map
     plot_occupancy_grid(og, M, N, 3);
     plot_robot_path(x, t, 3);
-    if (makemovie2) writeVideo(vidObj2, getframe(gca)); 
-    else drawnow; pause(0.05);end
-    
+    if (makemovie2) writeVideo(vidObj2, getframe(gca)); end
+   
+    drawnow;
 end
+
 if (makemovie1) close(vidObj1); end
 if (makemovie2) close(vidObj2); end

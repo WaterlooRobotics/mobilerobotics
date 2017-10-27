@@ -1,4 +1,4 @@
-function r_m = get_sonar_range(map, x, fov, r_max)
+function r_m = get_sonar_range(map, x, phi_m, fov, r_max)
 % Finds the closest occupied cell within the fov and max range and returns 
 % the inverse measurement model for the sonar sensor. Uses windowing to
 % reduce checked cells.
@@ -6,10 +6,11 @@ function r_m = get_sonar_range(map, x, fov, r_max)
 % Input:
 %   [map] = True map of environment
 %   [x] = Robot state vector [x position; y position; heading]
+%   phi_m = heading of sonar 
 %   fov = Sonar field of view
 %   r_max = Max range of sonar
 % Output:
-%   r_m = Range of measured object
+%   r_m = Range of closest measured object
 
 % Pad the map to avoid checking map edges 
 map = padarray(map, [1 1], 1);
@@ -30,8 +31,8 @@ win_pos(1) = x(1) - w_Mi + 1;
 win_pos(2) = x(2) - w_Ni + 1;
 
 % FOV limits
-phi_min = -fov / 2;
-phi_max = fov / 2; 
+phi_min = phi_m(1) - fov/2;
+phi_max = phi_m(1) + fov/2;
 
 r_m = r_max;
 

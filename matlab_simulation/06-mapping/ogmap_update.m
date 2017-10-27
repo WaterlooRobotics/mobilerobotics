@@ -1,4 +1,4 @@
-function [og, imml] = ogmap_update(og, x, phi_m, r_m, alpha, beta, mode)
+function [og, imml] = ogmap_update(og, x, phi_m, r_m, r_max, alpha, beta, p_occ, p_free, mode)
 % Takes a map, existing occupancy grid, and laser scan information then 
 % returns an updated occupancy grid.
 %
@@ -7,6 +7,7 @@ function [og, imml] = ogmap_update(og, x, phi_m, r_m, alpha, beta, mode)
 %   [x] = Robot state vector [x position; y position; robot heading; sensor heading]
 %   [phi_m] = Array of measurement angles relative to robot
 %   [r_m] = Array of corresponding range measurements
+%   r_max = Maximum measurement range for sensor
 %   alpha = Width of an obstacle (Distance about measurement to fill in)
 %   beta = Width of a beam (Angle beyond which to exclude) 
 %   mode = Occupancy grid update mode
@@ -19,15 +20,15 @@ function [og, imml] = ogmap_update(og, x, phi_m, r_m, alpha, beta, mode)
 % True map dimensions
 [M, N] = size(og);
 
-% Probabilites of cells
-p_occ = 0.7;
-p_free = 0.3;
+% Default logodds probabilities
+p0 = 0.5;
+L0 = log(p0/(1-p0))*ones(M,N);
 
 % The cells affected by this specific measurement in log odds (only used
 % in Bresenham ray trace mode)
-imml = zeros(M,N);
+imml = L0;
 
-if (mode == 1)
+if ((mode == 1) || (mode == 2))
     % -Windowed block update (could be optimized further based on FOV
     % and angle of sensor)
        
@@ -41,13 +42,10 @@ if (mode == 1)
 
 else
     % --- Bresenham ray trace mode
-    % Generate a measurement data set
-    r_m = getranges(map, x, phi_m, r_max);
-    
     % Loop through each laser measurement
     for i = 1:length(phi_m)
         % Get inverse measurement model
-        invmod = inverse_scanner_bres(M, N, x(1), x(2), phi_m(i)+x(3), ...
+        invmod = inverse_scanner_bres(M, N, x(1), x(2), phi_m(i)+x(4), ...
             r_m(i), r_max, p_occ, p_free);
 
         % Loop through each cell from measurement model		

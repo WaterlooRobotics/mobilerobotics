@@ -1,7 +1,7 @@
 function xcur = bicycle(xprev,v,delta,l,dt)
 %% Bicycle robot model kinematics. This function takes in previous state 
 %  xprev = [x,y,theta]', speed v and steering angle delta, the distance from 
-%  the front wheel to cg, l, as well as the timestep dt. It returns the new 
+%  the front wheel to rear, l, as well as the timestep dt. It returns the new 
 %  robot pose. 
 
 

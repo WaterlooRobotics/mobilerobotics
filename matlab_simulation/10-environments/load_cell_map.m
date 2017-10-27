@@ -12,7 +12,8 @@ function [map, M, N, x] = load_cell_map(mapNum)
 %		0 represents an empty cell
 %   M = The height of the map
 %   N = The width of the map
-%	[x] = The inital state of the robot in vector form
+%	[x] = The inital state of the robot in vector form [x, y, robot
+%	heading, sensor heading]
 
 % Map features to be used in different size maps
 submap = zeros(50, 50);
@@ -34,7 +35,7 @@ switch (mapNum)
 		map(40:50, 5:25) = 1;
 		
 		% Initial Robot location
-		x = [25; 10; 0];
+		x = [25; 10; 0; 0];
 	case 2
 		% Map size and contents
 		M = 100;
@@ -46,7 +47,7 @@ switch (mapNum)
 		map(51:100, 51:100) = submap;
 		
 		% Initial Robot location
-		x = [25; 10; 1.5];
+		x = [25; 10; 0; 1.5];
     case 3
 		% Map size and contents
 		M = 1000;
@@ -59,7 +60,7 @@ switch (mapNum)
         end
         
 		% Initial Robot location
-		x = [500; 800; 0];
+		x = [500; 800; 0; 0];
 	otherwise
 		% Default to case 0
 		% Map size and contents
@@ -73,5 +74,5 @@ switch (mapNum)
 		map(40:50, 5:25) = 1;
 		
 		% Initial Robot location
-		x = [25; 10; 0];
+		x = [25; 10; 0; 0];
 end

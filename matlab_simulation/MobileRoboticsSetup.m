@@ -35,7 +35,7 @@ else
     addpath(genpath(base));
     % remove code v1.0 to avoid duplication, can be eliminated when v2.0
     % complete
-    oldbase = strcat(base,sep,'code v1.0')
+    oldbase = strcat(base,sep,'code v1.0');
     rmpath(genpath(oldbase));
     savepath pathdef.m
     disp('Added all directories to path');

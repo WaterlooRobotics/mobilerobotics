@@ -45,11 +45,12 @@ for i = 1:w_M
         
         % Find range and bearing to the current cell
         r = sqrt((x_wi - x(1))^2 + (y_wj - x(2))^2);
-        phi = mod(atan2(y_wj - x(2), x_wi - x(1)) - x(3) + pi, 2*pi) - pi;
+        phi = mod(atan2(y_wj - x(2), x_wi - x(1)) - x(4) + pi, 2*pi) - pi;
         
         % Find the applicable range measurement 
         [meas_cur,k] = min(abs(phi - phi_m));
-
+        
+        
         % If out of range, or behind range measurement, or outside of field
         % of view, no new information is available
         if (r > min(r_max, r_m(k) + alpha/2) || (abs(phi - phi_m(k)) > beta/2))

@@ -54,7 +54,7 @@ alpha = 1; % Width of an obstacle (Distance about measurement to fill in)
 beta = 0.05; % Width of a beam (Angle beyond which to exclude) 
 
 % State Initialization
-x = zeros(3, length(T) + 1);
+x = zeros(4, length(T) + 1);
 x(:, 1) = x0;
 
 %% Main simulation

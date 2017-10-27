@@ -1,10 +1,14 @@
-%An example of using inverse measurement model to scan and create a occupancy grid map is presented in the example.m.
+%% Occupancy grid mapping with collision avoidance and diagonal motion
 
-%In the example.m, various functions will be called and most of them are in the 04-sensor folder, only one called "create_a_map.m" is in   the 10-environment folder.
+% This example uses create_a_map.m to make an interesting environment, then
+% uses udrl_robot_motion.m to produce the entire trajectory of the robot
+% through the known environment.  It then uses inverse_scanner_bres.m to
+% build an occupancy grid map along the way.  It uses the same spinning
+% lidar as in previous examples for occupancy grid mapping
 
-%Robot will keep spinning and scanning while moving inside the real map. It will bounce back once it collide with walls or obstables.
-
-%The "creat_a_map.m" function generates a map with some random-scale obstacles, and this function may probabbly used by others.
+% TODO: It would of course be more interesting to see the robot reacting to 
+% its own map and updating its motion based on where it thinks obstacles 
+% are, and then crashing if it gets it wrong.  
 
 clear;clc;
 %% Create AVI object
@@ -44,13 +48,13 @@ map_bel_logodds = log(map_bel./(1-map_bel)); % Transform the belief map into log
 map_initial = map_bel_logodds; % Initial belif map
 
 %% Robot Motion
-T = 1000; % 1000[sec] simulation time
+T = 200; % 1000[sec] simulation time
 
 % Robot State Initialization
 x0= [ round(40 +2*randn(1)), round(40 + 2*randn(1)), 0]; % Initial states of robot
 X = zeros(3,length(1:T));
 
-% Produce Robot Motions
+% Produce Robot Motions for entire simulation
 X = udlr_robot_motion(map_real, X, x0, T);
 
 %% Sensor Parameters
@@ -97,9 +101,6 @@ for i = 1 : length(X) % Each robot motion step
         plot( X(2,i) + meas_r(j) * sin (meas_phi(j) + X(3,i)) , X(1,i) + meas_r(j) * cos (meas_phi(j) + X(3,i)) ,'ko','MarkerSize',5);
      end  
 
-     if (makemovie1) 
-       writeVideo(vidObj1, getframe(gca)); 
-     end   
      
    % Plot real map and robot position
      figure(2);clf;hold on;
@@ -109,10 +110,7 @@ for i = 1 : length(X) % Each robot motion step
      plot(X(2,1:i),X(1,1:i),'-','Linewidth',2);
      title('Real map & Robot positions');
      axis ([0 M 0 N]);
-     if (makemovie2) 
-       writeVideo(vidObj2, getframe(gca)); 
-     end
-   
+     
    % Plot occupancy grid map and robot position
      figure(3);clf;hold on;
      image(100 * (map_bel_probability));
@@ -120,11 +118,21 @@ for i = 1 : length(X) % Each robot motion step
      plot(X(2,i),X(1,i),'w*','Markersize',15);
      title('Occupancy grid mapping');
      axis ([0 M 0 N]);
+     drawnow;
+     
+     if (makemovie1) 
+       writeVideo(vidObj1, getframe(gca)); 
+     end   
+     if (makemovie2) 
+       writeVideo(vidObj2, getframe(gca)); 
+     end
      if (makemovie3) 
        writeVideo(vidObj3, getframe(gca)); 
      end
+
 end
 
+     
 
 if (makemovie1) 
     close(vidObj1); end

@@ -54,7 +54,7 @@ alpha = 1; % Width of an obstacle (Distance about measurement to fill in)
 beta = 0.8; % Width of a beam (Angle beyond which to exclude) 
 
 % State Initialization
-x = zeros(3, length(T) + 1);
+x = zeros(4, length(T) + 1);
 x(:, 1) = x0;
 
 %% Main simulation
@@ -68,11 +68,11 @@ for t = 2:length(T)
     else
         x(1:2, t) = move;
     end
-    x(3, t) = x(3, t-1) + w(t);
+    x(4, t) = x(4, t-1) + w(t);
 
     %% Map update;
 	% Call occupancy grid mapping function
-    [ogl, imml, r_m] = ogmap(map, ogl, x(:, t), phi_m, r_max, alpha, beta, 2);
+    [ogl, imml, r_m] = ogmap(map, ogl, x([1:2,4], t), phi_m, r_max, alpha, beta, 2);
 
     % Calculate probabilities
     og = exp(ogl)./(1 + exp(ogl));
@@ -85,7 +85,7 @@ for t = 2:length(T)
     plot_robot_path(x, t, 1);
 
     % Inverse measurement model
-    plot_inverse_mm(og_mm, M, N, x(:, t), phi_m, r_m, 2);
+    plot_inverse_mm(og_mm, M, N, x([1:2,4], t), phi_m, r_m, 2);
     if (makemovie1) writeVideo(vidObj1, getframe(gca)); end
 
     % Belief map
