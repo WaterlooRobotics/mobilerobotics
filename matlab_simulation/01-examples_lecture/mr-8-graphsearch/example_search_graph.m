@@ -15,7 +15,7 @@ close all;clear;clc;
 
 
 %% Generate a graph
-n = 50; % Nodes
+n = 100; % Nodes
 s = 100; % Space
 % Random nodes
 nodes = s*rand(n,2);
@@ -63,13 +63,13 @@ end
 %   1.spath: all path nodes
 %   2.sdist: total distance
 subplot(2,2,1)
-[spath,sdist] = shortestpath(nodes, e, start, finish, 1,2,0)
+[spath,sdist] = shortestpath(nodes, e, start, finish, 4,2,0)
 
 subplot(2,2,2)
-[spath,sdist] = shortestpath(nodes, e, start, finish, 2,2,0)
+[spath,sdist] = shortestpath(nodes, e, start, finish, 1,2,0)
 
 subplot(2,2,3)
-[spath,sdist] = shortestpath(nodes, e, start, finish, 3,2,0)
+[spath,sdist] = shortestpath(nodes, e, start, finish, 2,2,0)
 
 subplot(2,2,4)
-[spath,sdist] = shortestpath(nodes, e, start, finish, 4,2,0)
+[spath,sdist] = shortestpath(nodes, e, start, finish, 3,2,0)

@@ -1,7 +1,6 @@
 %test script
 close all
-addpath('./lib');
-testimage = imread('example_environments/E5_Third_Floor.png');
+testimage = imread('E5_Third_Floor.png');
 testimage = image_to_binary_map(testimage);
 
 startpos = [103, 480];
