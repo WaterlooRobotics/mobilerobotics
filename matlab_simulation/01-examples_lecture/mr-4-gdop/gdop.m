@@ -20,7 +20,7 @@ num = 4;
 
 for i=1:num
     % Convert satellite position to ENU 
-    satsenu(i,:) = Wgslla2enu(sats(i,1), sats(i,2), sats(i,3), cur(1), cur(2), cur(3));
+    satsenu(i,:) = wgslla2enu(sats(i,1), sats(i,2), sats(i,3), cur(1), cur(2), cur(3));
     % Find range to satellite from receiver
     r = sqrt(satsenu(i,1)^2+satsenu(i,2)^2+satsenu(i,3)^2);
     % Calculate A matrix
