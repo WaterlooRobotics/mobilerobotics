@@ -2,11 +2,13 @@
 clear; clc;
 
 %% Create AVI object
-vidObj = VideoWriter('prmIII.avi');
-vidObj.Quality = 100;
-vidObj.FrameRate = 15;
-open(vidObj);
-
+make_video = 0;
+if (make_video)
+    vidObj = VideoWriter('prmIII.avi');
+    vidObj.Quality = 100;
+    vidObj.FrameRate = 15;
+    open(vidObj);
+end
 %% Problem parameters
 tic;
 
@@ -51,7 +53,7 @@ drawnow();
 figure(1); hold on;
 disp('Time to create environment');
 toc;
-writeVideo(vidObj, getframe(gcf));
+if (make_video) writeVideo(vidObj, getframe(gcf)); end
 
 %% Vehicle
 dt = 0.1;
@@ -109,7 +111,7 @@ while ((~done) && (t < 1000))
     if (norm(milestones(end,1:2)-xF)<1)
         done = 1;
     end
-    writeVideo(vidObj, getframe(gcf));
+    if (make_video) writeVideo(vidObj, getframe(gcf)); end
 end
 
 % Find and plot final path through back tracing
@@ -132,9 +134,9 @@ while (~done)
     curC = milestones(cur,:);
     prev = curC(4);
     p=p+1;
-    writeVideo(vidObj, getframe(gcf));
+    if (make_video) writeVideo(vidObj, getframe(gcf)); end
 end
 disp('Time to find a path');
 toc;
-close(vidObj);
+if (make_video) close(vidObj); end
 

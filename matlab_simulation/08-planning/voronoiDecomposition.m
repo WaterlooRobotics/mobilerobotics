@@ -79,7 +79,7 @@ for i=1:length(vx)
 end
 
 %Calculate shortest path along graph using existing function
-[spath,path_length] = shortestpath_new(nodes,edges,start_id,finish_id,4,1,0);
+[spath,path_length] = shortestpath_mr(nodes,edges,start_id,finish_id,4,1,0);
 path_coord = [nodes(spath,1),nodes(spath,2)];
 
 %Plotting to show veronoi structure, obstacles & path

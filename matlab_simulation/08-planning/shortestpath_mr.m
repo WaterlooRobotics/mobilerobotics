@@ -1,5 +1,6 @@
-function [spath,sdist] = shortestpath_new(nodes, edges, start, finish, method, heuristicDist, createVideo)
-%SHORTESTPATH Find shortest path using differenet search algoritms
+function [spath,sdist] = shortestpath_mr(nodes, edges, start, finish, method, heuristicDist, createVideo)
+%SHORTESTPATH_MR Find shortest path using differenet search algorithms
+% name includes MR to deconflict with Matlab shortestpath
 % Inputs: 
 %   nodes: list of n node locations in 2D
 %   edges: nXn connectivity of nodes (1 = connected), symmetric only uses

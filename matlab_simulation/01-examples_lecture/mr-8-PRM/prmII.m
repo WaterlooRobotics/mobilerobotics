@@ -101,7 +101,7 @@ while ((~done) && (t < 100))
     te = te + t3 - t2;
     % Check if a path from start to end is found
     t4 = cputime;
-    [sp, sd] = shortestpath(milestones, e, 1, 2);
+    [sp, sd] = shortestpath_mr(milestones, e, 1, 2,4,1,0);
     if (sd>0)
         done = 1;
         for i=1:length(sp)-1
