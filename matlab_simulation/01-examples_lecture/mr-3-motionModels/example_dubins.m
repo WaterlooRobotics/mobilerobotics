@@ -6,28 +6,39 @@ x0 = [0 0 0.1]'; % Initial State
 v = 1; % Speed
 w = 0.1; % Heading rate of change
 
+% Noise Model (x,y pos and heading)
+Q = [0.001 0 0;
+     0 0.001 0;
+     0 0 0.05];
+[QE, Qe] = eig (Q);
+
 % Noise Model (speed and heading)
 R = [0.001 0;
      0 0.05];
 [RE, Re] = eig (R);
 
 n=1000; % Samples
-for i=1:n
-    % Disturbance
+
+
+% disturbance free motion
+x1 = dubins(x0,v,w,dt)
+
+for i=2:n
+    % Disturbance-driven motion
+    D = QE*sqrt(Qe)*randn(3,1);
     E = RE*sqrt(Re)*randn(2,1);
     % Dynamics
-    x(:,i) = x0 + [ dt*(v)*cos(x0(3)) ;  dt*(v)*sin(x0(3)); E(2)+ dt*w] + diag([0.05 0.05 0.1])*randn(3,1);
-    %x(:,i) = x0 + [ dt*(v+E(1))*cos(x0(3)+E(2)) ;  dt*(v+E(1))*sin(x0(3)+E(2)); E(2)+ dt*w];
+    x_lin(:,i) = dubins(x0, v, w, dt) + D;
+    x_nl(:,i) = dubins(x0+[0;0;dt*E(2)], v+E(1), w+E(2), dt); 
 end
-% Disturbance free dynamics
-x1 = x0 + [ dt*v*cos(x0(3)) ;  dt*v*sin(x0(3)); dt*w];
 
 % Plot
 figure(1); clf; hold on;
 plot( x0(1), x0(2), 'bo', 'MarkerSize',20, 'LineWidth', 3)
 plot( x1(1), x1(2), 'bo', 'MarkerSize',20, 'LineWidth', 3)
 plot( [x0(1) x1(1)], [x0(2) x1(2)],'b')
-plot( x(1,:),x(2,:), 'm.', 'MarkerSize', 3)
+plot( x_lin(1,:),x_lin(2,:), 'm.', 'MarkerSize', 3)
+plot( x_nl(1,:),x_nl(2,:), 'c.', 'MarkerSize', 3)
 title('Motion Model Distribution for two-wheeled robot')
 xlabel('x (m)');
 ylabel('y (m)');

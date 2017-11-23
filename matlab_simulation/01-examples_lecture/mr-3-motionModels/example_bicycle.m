@@ -88,7 +88,7 @@ for t=1:2:n % For every second position of the robot
     end
     plot(x(1,1:t), x(2,1:t), 'bx'); % Draw the path of the vehicle
     axis equal; % Use same scale on both axes
-    axis([-0.2 1 -0.2 1.0]); % Set the dimensions of the plot
+    axis([-1 1 -1 1]); % Set the dimensions of the plot
     drawnow; % Draw the plot now instead of when Matlab feels like it
     if video 
         writeVideo(vidObj, getframe(gcf)); % Record the plot as a frame in the movie

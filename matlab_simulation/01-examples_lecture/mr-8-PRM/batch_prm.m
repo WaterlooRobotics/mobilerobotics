@@ -1,4 +1,4 @@
-%% Probabilistic Road Map example
+%% Probabilistic Road Map example - batch form
 clear; clc;
 
 
@@ -50,7 +50,7 @@ toc;
 tic;
 
 % Get milestones
-nS = 500;
+nS = 200;
 samples = [xR(1)*rand(nS,1)+xMin(1) xR(2)*rand(nS,1)+xMin(2)];
 keep = inpolygon(samples(:,1),samples(:,2), env(:,1),env(:,2));
 milestones = [x0; xF; samples(find(keep==1),:)];
@@ -90,9 +90,9 @@ toc;
 
 % Find shortest path
 tic;
-[sp, sd] = shortestpath_mr(milestones, e, 1, 2, 4, 1, 0);
+[sp, sd] = shortestpath_mr(milestones, e, 1, 2, 1, 1, 0);
+disp('Time to find shortest path');
+toc;
 for i=1:length(sp)-1
     plot(milestones(sp(i:i+1),1),milestones(sp(i:i+1),2), 'go-', 'LineWidth',3);
 end
-disp('Time to find shortest path');
-toc;

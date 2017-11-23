@@ -1,4 +1,4 @@
-%% Probabilistic Road Map example
+%% Probabilistic Road Map example - Direct PRM
 clear; clc;
 
 %% Create AVI object
