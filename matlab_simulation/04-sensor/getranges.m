@@ -8,7 +8,7 @@ function meas_r = getranges(map,X,meas_phi, rmax)
 x = X(1);
 y = X(2);
 th = X(3);
-meas_r = rmax*ones(size(meas_phi));
+meas_r = rmax*ones(size(meas_phi'));
 
 % For each measurement bearing
 for i=1:length(meas_phi)
@@ -19,12 +19,12 @@ for i=1:length(meas_phi)
        yi = round(y+r*sin(th+meas_phi(i)));
        % If not in the map, set measurement there and stop going further 
        if (xi<=1||xi>=M||yi<=1||yi>=N)
-           meas_r(i) = r;
+           meas_r(i) = sqrt((x-xi)^2+(y-yi)^2);
            break;
        % If in the map but hitting an obstacle, set measurement range and
        % stop going further
        elseif (map(xi,yi))
-           meas_r(i) = r;
+           meas_r(i) = sqrt((x-xi)^2+(y-yi)^2);
            break;
        end
    end

@@ -41,16 +41,25 @@ u = [];
 % Measurement vector
 y = [];
 
+% Prompt user for inputs
+get_inputs = 0;
+
 %% Initial Set-up
 % At beginning, assume the door is equally likely to be open or closed
 % This forms our initial prior belief
 bel_open = [];
 bel_open = [bel_open; 0.5]; % Concatenate
-
+done = 0;
+t=0;
 %% Running the model
-while(true)
-    prompt = '0: none, 1: open   u = ';
-    in = input(prompt);
+while(~done)
+    if (get_inputs)
+        prompt = '0: none, 1: open   u = ';
+        in = input(prompt);
+    else
+        in = 1;
+    end
+    
     while ~(~isempty(in) ...
             && isnumeric(in) ...
             && isreal(in) ...
@@ -62,8 +71,12 @@ while(true)
     end
     
     u = [u; in];
-    prompt = '0: sens_open, 1: sens_closed   y = ';
-    in = input(prompt);
+    if (get_inputs)
+        prompt = '0: sens_open, 1: sens_closed   y = ';
+        in = input(prompt);
+    else
+        in = 1;
+    end
     while ~(~isempty(in) ...
         && isnumeric(in) ...
         && isreal(in) ...
@@ -85,6 +98,10 @@ while(true)
     
     fprintf('%3s %3s %10s\r\n','u','y','bel_open');
     fprintf('%3i %3i %10.5f\r\n',[u y bel_open(2:end)]'); % Yes, this printing is a bit unintuitive. 
+    t = t+1;
+    if (t==2)
+        done = 1;
+    end
 end
 
 

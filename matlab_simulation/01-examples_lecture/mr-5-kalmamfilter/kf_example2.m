@@ -13,7 +13,7 @@ close all
 example = 2;
 
 % Create AVI object
-makemovie = 1;
+makemovie = 0;
 if(makemovie)
     vidObj = VideoWriter('example2kf.avi');
     vidObj.Quality = 100;

@@ -30,12 +30,12 @@ ylabel('Map y axis')
 text( 1,0.5, 'Map axes');
 axis([ -axis_l+2 axis_l+1 -1 axis_l+1])
 axis equal
-pause;
+pause(1);
 
 % Draw Robot, Object in Map
 drawbot(pr_m(1),pr_m(2),thr_m,0.5,1); % Draw robot
 plot(po_m(1), po_m(2), 'go', 'MarkerSize', 6, 'LineWidth', 2); % Draw object
-pause;
+pause(1);
 
 % Draw Robot X-Y axes 
 robotaxisep = Rm2r*[axis_l 0;0 axis_l]' + [pr_m pr_m]% Robot axis end points
@@ -43,7 +43,7 @@ plot( pr_m(1), pr_m(2), 'ro', 'MarkerSize', 8, 'LineWidth', 2) ; % Robot locatio
 plot( [pr_m(1) robotaxisep(1,1)], [pr_m(2) robotaxisep(2,1)], 'r') ; 
 plot( [pr_m(1) robotaxisep(1,2)], [pr_m(2) robotaxisep(2,2)], 'r') ; 
 text( pr_m(1)+1,pr_m(2)+1, 'Robot axes');
-pause;
+pause(1);
 
 % Object measurement line from robot in map frame
 plot([pr_m(1) po_m(1)], [pr_m(2) po_m(2)], 'b'); 

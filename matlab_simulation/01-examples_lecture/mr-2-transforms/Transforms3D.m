@@ -36,13 +36,13 @@ text( 1,0.5, 0, 'Map axes');
 grid on;
 axis equal;
 view(45, 45);
-pause;
+pause(1);
 
 % Draw Robot, Object in Map
 load('quad_starmac.mat')
 drawquadrotor(qm_fnum, qm_xyz, pr_m(1), pr_m(2), pr_m(3), robot_euler(1), robot_euler(2), robot_euler(3),[0.6 0.1 0.1]);
 plot3(po_m(1), po_m(2), po_m(3), 'go', 'MarkerSize', 6, 'LineWidth', 2); % Draw object
-pause;
+pause(1);
 
 % Draw Robot axes 
 robotaxisep = Rr2m*NED + [pr_m pr_m pr_m]% Robot axis end points
@@ -50,7 +50,7 @@ plot3( [pr_m(1) robotaxisep(1,1)], [pr_m(2) robotaxisep(2,1)],[pr_m(3) robotaxis
 plot3( [pr_m(1) robotaxisep(1,2)], [pr_m(2) robotaxisep(2,2)],[pr_m(3) robotaxisep(3,2)], 'r') ; 
 plot3( [pr_m(1) robotaxisep(1,3)], [pr_m(2) robotaxisep(2,3)],[pr_m(3) robotaxisep(3,3)], 'r') ; 
 text( pr_m(1)+1,pr_m(2)+1, pr_m(3)+1, 'Robot axes');
-pause;
+pause(1);
 
 % Object measurement line from robot in map frame
 plot3([pr_m(1) po_m(1)], [pr_m(2) po_m(2)], [pr_m(3) po_m(3)], 'b'); 

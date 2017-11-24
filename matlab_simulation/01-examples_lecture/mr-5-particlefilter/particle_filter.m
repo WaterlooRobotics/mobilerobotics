@@ -28,6 +28,7 @@ R = 1;
 
 % Measurement model
 C = 1;
+D = 0;
 Q = 1;
 
 % Simulation Initializations
@@ -44,6 +45,15 @@ mu_S = zeros(1, length(T));
 muP_S = zeros(1, length(T));
 SP_S = zeros(1, length(T));
 
+% Make state space model
+ssm.A = A; 
+ssm.B = B;
+ssm.C = C; 
+ssm.D = D;
+ssm.R = R;
+ssm.Q = Q;
+ssm.n = 1;
+ssm.m = 1;
 
 % Main loop
 tic;
@@ -53,8 +63,8 @@ for t = 1:length(T)
         u(t) = u(t - 1);
     end
     if (mu > 10)
-        u(t) = 0;
-    elseif (mu < 2);
+        u(t) = 0
+    elseif (mu < 2)
         u(t) = 1;
     end
 
@@ -67,8 +77,8 @@ for t = 1:length(T)
     y(t) = C * x(t + 1) + d;
 
     % kalman filter estimation
-    [mup, mu, Sp, S] = kf(t, A, B, C, R, Q, y, u, mu, S);
-    
+    [mu,S,mup,Sp,K] = kalman_filter(ssm, mu, S, u(t), y(t), 1, t, dt);
+
     % particle filter estimation
     [muParticle, SParticle, Xp] = pf(t, M, A, B, C, X, R, Q, y, u);
 

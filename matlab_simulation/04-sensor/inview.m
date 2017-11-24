@@ -9,7 +9,7 @@ function viewable = inview(f,x, rmax, thmax)
 % TODO: In view check could be vectorized
 
 %% Input checks
-if (length(f(1,:) ~= 2)) error('Feature vector incorrectly dimensioned'); end
+if (length(f(1,:)) ~= 2) error('Feature vector incorrectly dimensioned'); end
 if (length(x) ~= 3) error('Robot pose vector incorrectly dimensioned'); end
  
 % Output initialization
@@ -17,8 +17,8 @@ n = length(f(:,1));
 viewable = zeros(1,n);
 
 % Relative distance and orientation
-dx = f(1,:)-x(1);
-dy = f(2,:)-x(2);
+dx = f(:,1)-x(1);
+dy = f(:,2)-x(2);
 r = sqrt(dx.^2+dy.^2);
 th = mod(atan2(dy,dx)-x(3)+pi,2*pi)-pi;
 

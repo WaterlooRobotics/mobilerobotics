@@ -70,13 +70,13 @@ for t=2:length(T)
     y(:,t) = sqrt(x(1,t)^2 + x(2,t)^2) + d;
 
 
-    %% Extended Kalman Filter Estimation
-    [mup,mu,S,K] = EKF (Ad,Bd,0,0,dt,y(:,t),v,mu,S,R,Q,n);
+    %% Extended Kalman Filter Estimation (not working, wrong model for now)
+    % [mup,mu,S,K] = ekf(mu, S, y(:,t), @airplane_radar_motion_model, @airplane_radar_measurement_model, @airplane_radar_linearized_motion_model, @airplane_radar_linearized_measurement_model, Q, R, v);
     
     % Store results
-    mup_S(:,t) = mup;
-    mu_S(:,t) = mu;
-    K_S(:,t) = K;
+    % mup_S(:,t) = mup;
+    % mu_S(:,t) = mu;
+    % K_S(:,t) = K;
 
     %% Unscented Kalman Filter Estimation
     % Prediction update
@@ -111,5 +111,6 @@ for t=2:length(T)
     %% Plot results
     PlotData(t,x,mu_u,mu_S,mu_Su,mu,S,S_u);
 end
-%%UKF and EFK error comparison
-CompareEKF_UKF (T,x,mu_S,mu_Su);
+
+%% UKF and EFK error comparison
+%CompareEKF_UKF (T,x,mu_S,mu_Su);

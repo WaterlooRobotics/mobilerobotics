@@ -50,7 +50,6 @@ R = Rx*Ry*Rz;
 M = R * D + repmat(T, 1, n);
 
 % Add noise to model and data
-rng(2912673);
 M = M + 0.01*randn(3,n);
 D = D + 0.01*randn(3,n);
 

@@ -8,7 +8,7 @@
 clear;clc;
 
 %% Create AVI object
-makemovie = 1;
+makemovie = 0;
 if(makemovie)
     vidObj = VideoWriter('ekf.avi');
     vidObj.Quality = 100;

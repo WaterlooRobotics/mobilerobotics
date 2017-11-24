@@ -14,7 +14,7 @@ close all
 example = 3;
 
 % Create AVI object
-makemovie = 1;
+makemovie = 0;
 if(makemovie)
     vidObj = VideoWriter('multiratekf.avi');
     vidObj.Quality = 100;

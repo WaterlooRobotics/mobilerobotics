@@ -5,7 +5,7 @@ clear;
 clc;
 
 %% Create AVI object
-makemovie = 1;
+makemovie = 0;
 if(makemovie)
     vidObj = VideoWriter('ekflocalization.avi');
     vidObj.Quality = 100;

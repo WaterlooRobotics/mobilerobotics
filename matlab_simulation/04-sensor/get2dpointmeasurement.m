@@ -37,7 +37,7 @@ end
 %% Main Calculations
 for i=1:nFeatures
         % If feature is visible
-        if (inview(featureMap(i,:) , state , RANGE_MAX , THETA_MAX))
+        if (inview(featureMap(i,:), state , RANGE_MAX , THETA_MAX))
             featureInViewFlag(i) = 1;   % Set feature to visible
             selectedFeature = featureMap(i,:);
             % Select a motion disturbance

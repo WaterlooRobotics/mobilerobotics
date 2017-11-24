@@ -1,6 +1,3 @@
-addpath('./lib/nonlinear');
-
-
 %% Comparison of linear and nonlinear transformations
 % Original Gaussian distribution
 mu = 0;  % mean (mu)
