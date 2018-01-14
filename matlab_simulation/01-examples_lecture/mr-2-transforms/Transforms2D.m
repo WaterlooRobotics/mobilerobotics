@@ -16,7 +16,7 @@ Rm2rinv - Rm2r'  % Confirm inverse = transpose for rotation matrix, should retur
 
 % Find position of object in map frame using equation on slide 8 of transforms
 % p^o_m = (R^r_m)^-1*p^o_r + p^r_m
-po_m = Rm2r*po_r + pr_m
+po_m = Rm2rinv*po_r + pr_m
 
 % Plot axes and locations of objects.
 axis_l = 10; % Length of axes to plot
@@ -38,7 +38,7 @@ plot(po_m(1), po_m(2), 'go', 'MarkerSize', 6, 'LineWidth', 2); % Draw object
 pause(1);
 
 % Draw Robot X-Y axes 
-robotaxisep = Rm2r*[axis_l 0;0 axis_l]' + [pr_m pr_m]% Robot axis end points
+robotaxisep = Rm2rinv*[axis_l 0;0 axis_l]' + [pr_m pr_m]% Robot axis end points
 plot( pr_m(1), pr_m(2), 'ro', 'MarkerSize', 8, 'LineWidth', 2) ; % Robot location
 plot( [pr_m(1) robotaxisep(1,1)], [pr_m(2) robotaxisep(2,1)], 'r') ; 
 plot( [pr_m(1) robotaxisep(1,2)], [pr_m(2) robotaxisep(2,2)], 'r') ; 
