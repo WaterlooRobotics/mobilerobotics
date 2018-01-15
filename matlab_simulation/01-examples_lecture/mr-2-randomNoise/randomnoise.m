@@ -34,6 +34,7 @@ figure(2); clf; hold on;
 plot(r(1,:), r(2,:),'g.')
 mu = [0 0];
 error_ellipse(Q,mu,0.75);
+error_ellipse(Q,mu,0.95);
 axis equal
 
 

@@ -115,7 +115,7 @@ while ((~done) && (t < max_iters))
     keep = inpolygon(samples(:,1), samples(:,2), env(:,1),env(:,2));
 
     if (sum(keep)==steps)
-        milestones = [milestones; samples(end,:) curstone];
+        milestones = [milestones; samples(end,:) length(milestones(:,1))];
         nM = nM+1;
         plot(samples(:,1),samples(:,2),'m');
         plot(milestones(end,1),milestones(end,2),'mo');
@@ -138,7 +138,7 @@ if (done)
         if (prev == 1)
             done = 1;
         end
-        plot([milestones(prev,1) milestones(cur,1)], [milestones(prev,2) milestones(cur,2)],'go','MarkerSize',6, 'LineWidth',2)
+        plot([milestones(prev,1) milestones(cur,1)], [milestones(prev,2) milestones(cur,2)],'go-','MarkerSize',6, 'LineWidth',2)
         dtot = dtot + norm(milestones(prev,1:2)-milestones(cur,1:2));
         nMiles = nMiles+1;
         cur = prev;

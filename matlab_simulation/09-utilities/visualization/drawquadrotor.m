@@ -8,8 +8,8 @@
 %   Parameters
 %   Input, integer QUAD_FNUM, # of faces in quadrotor model
 %   Input, real QUADXYZ(NODENUM,3), quadrotor xyz node positions (m)
-%   Input, real PHI, current roll (rad)
-%   Input, real THETA, current pitch (rad)
+%   Input, real PHI, current pitch (rad)
+%   Input, real THETA, current roll (rad)
 %   Input, real PSI, current yaw (rad)
 %   Input, real CX, current center x position (m)
 %   Input, real CY, current center y position (m)
@@ -18,16 +18,17 @@
 %   Output, handle QUAD_HANDLE, patch handle for quadrotor
 
 %first need to get euler rotation matrix for the rotor
-R = [rot(PHI,3)*rot(THETA,2)*rot(PSI,1)];  %rotation matrix
+R = [rot(PHI,1)*rot(THETA,2)*rot(PSI,3)];  %rotation matrix
+%R = SpinCalc('EA123toDCM', radtodeg([PHI, THETA, PSI]));
 T = zeros(length(QUADXYZ(:,1)), 3); 
 T(:,1) = CX; T(:,2) = CY; T(:,3) = CZ;  %translation matrix
 
 %perform rotation and translation
-xyz = QUADXYZ*R'+T;   %rotate and translate
+xyz = R'*QUADXYZ' + T';   %rotate and translate from robot frame to inertial
 
 %draw quadrotor model
 QUAD_HANDLE = trisurf(QUAD_FNUM, ...
-                      xyz(:,1), xyz(:,2), xyz(:,3), ...
+                      xyz(1,:), xyz(2,:), xyz(3,:), ...
                       'FaceColor', FCOLOR,'EdgeColor',FCOLOR);
 
 end
