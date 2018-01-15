@@ -29,4 +29,4 @@ title('Multiplication of Gaussians N1(0,1) * N2(0,4)')
 figure(3); clf; hold on;
 histfit(z3,10000);
 xlim([-200 200])
-title('Multiplication of Gaussians N1(0,1) / N2(0,4)')
+title('Division of Gaussians N1(0,1) / N2(0,4)')
