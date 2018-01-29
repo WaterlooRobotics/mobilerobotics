@@ -29,7 +29,7 @@ l = 0.2; % Distance from wheel to center
 
 %% Dubins Model Commands
 % Speed command
-v = .6*ones(1,n); % Constant throughout
+v = 0.6*ones(1,n); % Constant throughout
 
 % Angular velocity
 omega = 2*ones(1,n);
