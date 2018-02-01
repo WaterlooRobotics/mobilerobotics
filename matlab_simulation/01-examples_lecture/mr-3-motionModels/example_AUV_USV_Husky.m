@@ -49,7 +49,7 @@ for i=2:n
     
 end
 
-figure
+figure(1); clf; hold on;
 subplot(2,2,1)
 plot(x_husky(1,:),x_husky(2,:))
 title('Husky')
@@ -84,7 +84,7 @@ for i=2:n
     
 end
 
-figure
+figure(2); clf; hold on;
 subplot(2,2,1)
 plot(x_husky(1,:),x_husky(2,:))
 title('Husky')
