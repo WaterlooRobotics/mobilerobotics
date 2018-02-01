@@ -10,11 +10,15 @@ function xcur = Husky(xprev,omegal, omegar, dt)
 r = 0.1775;
 l = 0.2854;
 
-% Motion increment in the body frame
-dx_b = dt*[r*omegal+ r*omegar 0 (r*omegal*l-r*omegar*l]';
+% Motion increment in the body frame -- left thrust (omegal) rotates the
+% body clockwise, in the direction of -theta.  Right rotates towards
+% positive theta
+dx_b = dt*[r*omegal+r*omegar 0 (-r*omegal*l+r*omegar*l)]';
 
-% Rotation matrix for conversion from body to inertial frame
-R = rot(xprev(3),3); 
+% Rotation matrix for conversion from body to inertial frame -- the
+% transpose of the Inertial-to-Body matrix provided by the rot() function.
+% The rot() function provides a clockwise rotation.
+R = rot(xprev(3),3)'; 
 
 % Robot state update in inertial frame
 xcur = xprev + R*dx_b;

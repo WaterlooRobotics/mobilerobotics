@@ -40,6 +40,7 @@ pause(1);
 % Draw Robot X-Y axes, by taking axis end points in robot frame ((10,0), (0,10)
 % and converting to map frame
 robotaxisep_m = Rm2r'*[axis_l 0;0 axis_l]' + [pr_m pr_m]% Robot axis end points
+
 plot( pr_m(1), pr_m(2), 'ro', 'MarkerSize', 8, 'LineWidth', 2) ; % Robot location
 plot( [pr_m(1) robotaxisep_m(1,1)], [pr_m(2) robotaxisep_m(2,1)], 'r') ; 
 plot( [pr_m(1) robotaxisep_m(1,2)], [pr_m(2) robotaxisep_m(2,2)], 'r') ; 

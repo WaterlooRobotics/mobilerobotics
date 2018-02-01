@@ -9,7 +9,7 @@ function xcur = bicycle(xprev,v,delta,l,dt)
 dx_b = dt*[v 0 v*tan(delta)/l]';
 
 % Rotation matrix for conversion from body to inertial frame
-R = rot(xprev(3),3); 
+R = rot(xprev(3),3)'; 
 
 % Robot state update in inertial frame
 xcur = xprev + R*dx_b;

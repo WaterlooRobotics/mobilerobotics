@@ -9,7 +9,7 @@ function xcur = twowheel(xprev,phidl,phidr,r,l,dt)
 dx_b = dt*[r*(phidl + phidr)/2 0 r*(phidr - phidl)/(2*l)]';
 
 % Rotation matrix for conversion from body to inertial frame
-R = rot(xprev(3),3); 
+R = rot(xprev(3),3)'; 
 
 % Robot state update in inertial frame
 xcur = xprev + R*dx_b;
