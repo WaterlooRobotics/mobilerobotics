@@ -8,7 +8,7 @@ function xcur = dubins(xprev,v,omega,dt)
 dx_b = dt*[v 0 omega]';
 
 % Rotation matrix for conversion from body to inertial frame
-R = rot(xprev(3),3); 
+R = rot(xprev(3),3)'; 
 
 % Robot state update in inertial frame
 xcur = xprev + R*dx_b;
