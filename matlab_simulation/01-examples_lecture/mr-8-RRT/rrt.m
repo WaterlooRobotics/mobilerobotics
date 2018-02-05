@@ -138,7 +138,7 @@ if (done)
         if (prev == 1)
             done = 1;
         end
-        plot([milestones(prev,1) milestones(cur,1)], [milestones(prev,2) milestones(cur,2)],'go','MarkerSize',6, 'LineWidth',2)
+        plot([milestones(prev,1) milestones(cur,1)], [milestones(prev,2) milestones(cur,2)],'go-','MarkerSize',6, 'LineWidth',2)
         dtot = dtot + norm(milestones(prev,1:2)-milestones(cur,1:2));
         nMiles = nMiles+1;
         cur = prev;

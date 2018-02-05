@@ -19,11 +19,14 @@ z3 = x./y;
 figure(1); clf; hold on;
 histfit(z1);
 xlim([-10 10])
+title('Addition of Gaussians N1(0,1) + N2(0,4)')
 
 figure(2); clf; hold on;
 histfit(z2);
 xlim([-10 10])
+title('Multiplication of Gaussians N1(0,1) * N2(0,4)')
 
 figure(3); clf; hold on;
 histfit(z3,10000);
 xlim([-200 200])
+title('Multiplication of Gaussians N1(0,1) / N2(0,4)')

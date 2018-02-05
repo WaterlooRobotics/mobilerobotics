@@ -1,4 +1,4 @@
-%% Plot fucntion for Gyrro Data Estimation.
+%% Plot fucntion for Gyro Data Estimation.
 
 % Plot the Original data
 figure(1);clf;
