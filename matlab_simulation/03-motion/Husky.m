@@ -11,7 +11,7 @@ r = 0.1775;
 l = 0.2854;
 
 % Motion increment in the body frame
-dx_b = dt*[r*omegal+ r*omegar 0 (r*omegal*l-r*omegar*l]';
+dx_b = dt*[r*omegal+ r*omegar 0 (r*omegal*l-r*omegar*l)]';
 
 % Rotation matrix for conversion from body to inertial frame
 R = rot(xprev(3),3); 

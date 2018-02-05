@@ -19,7 +19,7 @@ load('gyroData.mat'); % Load the Gyro Dataset.
 G_data = [gx gy gz]; % Vectorize the Dataset. G(:,1)=gx,G(:,2)=gy;G(:,3)=gz;
 G_data = G_data*RAD2DEG; % Convert the Dataset to degrees.
 % Assume underlying motion is negligible, and measurements are independent
-% This is our ground truth.Assume the original GyroData is accurate.
+% This is our ground truth.  Assume the original GyroData is accurate.
 
 S= cov(G_data);%Calculate the Covariance for reproduction of simulated data
 fprintf('The Covariance of the Original Dataset is:\n');disp(S);
