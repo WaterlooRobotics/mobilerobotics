@@ -17,15 +17,15 @@ F_drag=-0.5*1000*0.7*0.31364*xprev(4)*abs(xprev(4));
 
 %update velocities
 v_x = xprev(4) + ((Tl/m + Tr/m + F_drag/m)*dt);
-v_theta = xprev(6) + ((Tl*ll - Tr*lr)/m)*dt;
+v_theta = xprev(6) + ((- Tl*ll + Tr*lr)/m)*dt;
 
 % Motion increment in the body frame
 dx_b = [v_x*dt 0 v_theta*dt]';
 
-% Rotation matrix for conversion from body to inertial frame
+% Rotation matrix for conversion from inertial frame to the robot frame.
 R = rot(xprev(3),3); 
 
-% Robot state update in inertial frame
-xcur = [xprev(1:3) + R*dx_b; v_x;0;v_theta];
+% Robot state update in inertial frame -- use the transpose of R
+xcur = [xprev(1:3) + R'*dx_b; v_x;0;v_theta];
 
 
