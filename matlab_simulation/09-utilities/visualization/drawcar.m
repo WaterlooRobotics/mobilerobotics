@@ -16,7 +16,9 @@ wlength = 0.2;
 wheel = [-wlength/2 -wwidth/2; wlength/2 -wwidth/2; wlength/2 wwidth/2; -wlength/2 wwidth/2; -wlength/2 -wwidth/2];
 R = rot2D(delta);
 R = R(1:2,1:2)
-fwheel = (R*wheel')';
+
+% rotate the wheel coordinates into the inertial frame using R'
+fwheel = (R'*wheel')';
 
 % Define car
 n = length(wheel(:,1));
@@ -36,7 +38,7 @@ car = scale*car;
 
 % Rotation matrix
 R = rot2D(h);
-car = (R*car')';
+car = (R'*car')';
 
 % Centre
 car(:,1) = car(:,1)+x;
