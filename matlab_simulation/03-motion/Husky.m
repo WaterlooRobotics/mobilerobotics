@@ -10,7 +10,7 @@ function xcur = Husky(xprev,omegal, omegar, dt)
 r = 0.1775;
 l = 0.2854;
 
-% Motion increment from thrust -- left thrust (omegal) rotates the
+% Motion increment from applied forces -- left force (omegal) rotates the
 % body clockwise
 dx_b = dt*[r*omegal+ r*omegar 0 (-r*omegal*l+r*omegar*l)]';
 
