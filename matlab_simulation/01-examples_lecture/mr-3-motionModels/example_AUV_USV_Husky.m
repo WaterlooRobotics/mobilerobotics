@@ -49,7 +49,7 @@ for i=2:n
     
 end
 
-figure
+figure(1); clf; hold on;
 subplot(2,2,1)
 plot(x_husky(1,:),x_husky(2,:))
 title('Husky')
@@ -83,8 +83,7 @@ for i=2:n
     x_AUV(:,i) = AUV(x_AUV(:,i-1),AUV_thrust_x, AUV_thrust_y, AUV_thrust_z, AUV_mass,dt);
     
 end
-
-figure
+figure(2); clf; hold on;
 subplot(2,2,1)
 plot(x_husky(1,:),x_husky(2,:))
 title('Husky')
