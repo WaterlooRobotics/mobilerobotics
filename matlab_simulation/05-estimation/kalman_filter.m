@@ -1,4 +1,4 @@
-function [mu,S,mup,Sp,K] = kalman_filter(ssm,mu,S,u,y,example,t,freq)
+function [mu,S,mup,Sp,K] = kalman_filter(ssm,mu,S,u,y)
 
 % Performs one iteration of Kalman Filtering
 
@@ -39,26 +39,6 @@ mup = A*mu + B*u;
 Sp = A*S*A' + R;
 
 % Measurement Step: ------------------------------------------------
-% If/else statement added since example 3 is a multirate kalman filter and 
-% requires processing different measurement models at a certain frequency. 
-
-if example == 3
-    % Measures position and velocity
-    if (mod(t,freq) == 0)
-        % Calculate kalman gain
-        K = Sp*C'*inv(C*Sp*C'+Q);
-        % Get new mean of state after measurement
-        mu = mup + K*(y-C*mup);
-        % Get new covaraince of state after measurement
-        S = (eye(n)-K*C)*Sp;
-    else
-        % Only measures velocity
-        K = Sp*C'*inv(C*Sp*C'+Q);
-        mu = mup + K*(y([2 4],:)-C*mup);
-        S = (eye(n)-K*C)*Sp;
-    end
-else % example 1 an 2
-    K = Sp*C'*inv(C*Sp*C'+Q);
-    mu = mup + K*(y-C*mup);
-    S = (eye(n)-K*C)*Sp;
-end
+K = Sp*C'*inv(C*Sp*C'+Q);
+mu = mup + K*(y-C*mup);
+S = (eye(n)-K*C)*Sp;

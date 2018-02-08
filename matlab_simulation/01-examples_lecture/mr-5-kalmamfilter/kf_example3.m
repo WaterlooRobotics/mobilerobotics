@@ -31,6 +31,7 @@ dt = 0.01;
 
 % Prior
 mu = zeros(numStates,1); % mean (mu)
+mup = mu; % predicted mean
 S = 0.01*eye(numStates);% covariance (Sigma)
 
 [QpE, Qpe] = eig(Q.Qp);
@@ -63,6 +64,7 @@ mv = length(ssm.C.Cv(:,1));
 y = zeros(mp,length(T));
 mup_S = zeros(numStates,length(T));
 mu_S = zeros(numStates,length(T));
+K_S = zeros(numStates*2,length(T));
 
 % Multirate Kalman filter frequency (Hz) update for position measurement
 freq = 10;
@@ -82,16 +84,19 @@ for t=2:length(T)
         ssm.C = ssm_temp.C.Cp;
         d = QpE*sqrt(Qpe)*randn(mp,1);
         y(:,t) = ssm.C*x(:,t) + d;
+
+        y_t = y(:,t);
     else
         ssm.Q = ssm_temp.Q.Qv;
         ssm.C = ssm_temp.C.Cv;
         d = QvE*sqrt(Qve)*randn(mv,1);
         y([2 4],t) = ssm.C*x(:,t) + d;
+        y_t = y([2 4],t);
     end
-    
+
     %% Kalman Filter Estimation
-    [mu,S,mup,Sp,K] = kalman_filter(ssm,mu,S,u(:,t),y(:,t),example,t,freq);
-    
+    [mu,S,mup,Sp,K] = kalman_filter(ssm,mu,S,u(:,t),y_t);
+
     % Store results
     mup_S(:,t) = mup;
     mu_S(:,t) = mu;
@@ -100,7 +105,14 @@ for t=2:length(T)
     %% Plot results
     figure(1);clf; hold on;
     plot(x(3,2:t),x(1,2:t), 'ro--')
-    if (mod(t,10)==0) plot(y(3,t),y(1,t), 'gx'); end
+    
+    % Commented this out because it messes up the graph -- matlib doesn't
+    % allow the concatenation of multiple plots into a single legend entry
+    % causing things to jump around
+    %     if (mod(t,10)==0) 
+    %         plot(y(3,t),y(1,t), 'gx'); 
+    %     end
+    
     plot(mu_S(3,2:t),mu_S(1,2:t), 'bx--')
     xlabel('World X location [m]')
     ylabel('World Y location [m]')
@@ -111,7 +123,12 @@ for t=2:length(T)
     title('True state and beliefs')
     legend('State', 'Measurement','Estimate')
     axis([-.5 2.5 -.5 2])
-    if (makemovie) writeVideo(vidObj, getframe(gca)); end
+    if (makemovie) 
+        writeVideo(vidObj, getframe(gca)); 
+    end
     
 end
-if (makemovie) close(vidObj); end
+
+if (makemovie) 
+    close(vidObj); 
+end
