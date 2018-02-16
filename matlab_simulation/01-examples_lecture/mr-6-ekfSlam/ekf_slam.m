@@ -206,7 +206,7 @@ for t=2:length(T)
             
             % warn the user that linearization may not be accurate if the 
             % change in vehicle position is too large compared to input speed
-            if norm(mu(1:2)-mu_S(1:2,t-1))>2.*u(1,t).*dt
+            if norm(mu(1:2)-mu_S(1:2,t-1))>2*u(1,t)*dt
                 warning('Linearization may have failed')
             end
         end
