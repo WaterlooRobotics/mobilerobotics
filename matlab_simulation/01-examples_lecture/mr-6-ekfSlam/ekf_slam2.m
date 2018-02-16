@@ -94,11 +94,14 @@ N = n+2*M;
 m = length(Qi(:,1)); % Number of measurements per feature 
 y = zeros(m*M,length(T)); % Measurements
 
-mu = mu0r;
-S=S0rr; % initially the map is empty, so the estimate and covariance only have the vehicle info
+S=zeros(N,N);
+S(1:n,1:n) = S0rr; % initially the map is empty, so the estimate and covariance only have the vehicle info
+
+mu = zeros(N,1); % current belief
+mu(1:n) = mu0r;
 
 mu_S = zeros(N,length(T)); % Belief
-mu_S(1:3,1) = mu;
+mu_S(:,1) = mu;
 count=0;    % count of detected features in the map
 
 %% Plot initial step
@@ -126,87 +129,64 @@ for t=2:length(T)
         % If feature is visible
         if (inview(map(:,i)',xr(:,t),rmax,thmax))
             flist(i) = 1;
+
+            fStart = (i-1)*2 + 1;
+            fEnd = fStart + 1;
+            
             % Select a motion disturbance
             d = QiE*sqrt(Qie)*randn(m,1);
             % Determine measurement
-            y(2*(i-1)+1:2*i,t) = range_bearing_meas_model(xr(:,t),map(:,i))+d;
+            y(fStart:fEnd,t) = range_bearing_meas_model(xr(:,t),map(:,i))+d;
         end
     end
     
     %% Extended Kalman Filter Estimation
     % Prediction update
-    mu(1:3)= simpleRobotMotionModel(mu(1:3),u(:,t),dt);
-    predicted_xr=mu(1:3);
+    mu(1:3) = simpleRobotMotionModel(mu(1:3),u(:,t),dt);
     Gt = simpleLinearizedRobotMotionModel(mu,u(:,t),dt);
     S(1:n,1:n) = Gt*S(1:n,1:n)*Gt' + R;
 
     % Measurement update
     for i=1:M
-        if (flist(i))
-         % j is the index for the measured feature. It is needed because
-         % when the map is updated and rearranged, j will be diff from i
-            j=i;
+        if flist(i) == 1
+            fStart = n + (i-1)*2 + 1;
+            fEnd = fStart + 1;
+
             % Feature initialization
-            if (newfeature(i) == 1)
+            if newfeature(i) == 1
                 count=count+1;
-                % rearrange the order of estimates so that those of the newly
-                % detected feture is placed on top, right after the vehicle
-                % states
-                if count==1
-                   mu=[mu(1:3);
-                        mu(1)+y(2*(i-1)+1,t)*cos(y(2*i,t)+mu(3));
-                        mu(2)+y(2*(i-1)+1,t)*sin(y(2*i,t)+mu(3))];
-                else
-                    mu=[mu(1:3);
-                        mu(1)+y(2*(i-1)+1,t)*cos(y(2*i,t)+mu(3));
-                        mu(2)+y(2*(i-1)+1,t)*sin(y(2*i,t)+mu(3));
-                        mu(4:end)];  % augment measured features into states
-                end
-                % rearrange the covariance matrix. Those of the newly
-                % discovered features are set to be S0mm, a predefined
-                % value. Off-diagonal terms are set to 0.
-                temp=zeros(length(S)+2,length(S)+2);
-                temp(1:3,1:3)=S(1:3,1:3);
-                temp(4:5,4:5)=S0mm;
-                if length(S)>3
-                    temp(6:end,1:3)=S(4:end,1:3);
-                    temp(1:3,6:end)=S(1:3,4:end);
-                    temp(6:end,6:end)=S(4:end,4:end);
-                end
-                S=temp;
+
+                % initialize the measurement
+                mu(fStart:fEnd) = [ mu(1)+y(fStart-n,t)*cos(y(fEnd-n,t)+mu(3));
+                                    mu(2)+y(fStart-n,t)*sin(y(fEnd-n,t)+mu(3)) ];
+                % add the initial covariance estimate (I) for the new feature
+                S(fStart:fEnd,fStart:fEnd) = S0mm;
+
+                % don't initialize this feature again
                 newfeature(i) = 0;
-                % rearrange map, newfeature, y, and flist so that they
-                % follow the same order as mu
-                [map, newfeature, y, flist]=rearrangeMap(map,newfeature,y,flist,i,count);
-                % after rearranging, this newly discovered feature is the
-                % first feature in the list
-                j=1;
+
                 disp([num2str(count) ' of the ' num2str(M) ' features have been detected'])
             end
-           
+
             % Linearization
             % Predicted range
-            %dx = mu(3+2*(j-1)+1)-mu(1);
-            %dy = mu(3+2*j)-mu(2);
-            %rp = sqrt((dx)^2+(dy)^2);
-            Ht = range_bearing_meas_linearized_model(mu,j);
-            I = y(2*(j-1)+1:2*j,t)- range_bearing_meas_model(mu(1:3),mu((3+2*(j-1)+1):3+2*j));
- 
+            Ht = range_bearing_meas_linearized_model2(mu,i);
+
             % Measurement update
-            K = S*Ht'*inv(Ht*S*Ht'+Qi);
-            mu = mu + K*I;
+            K = S*Ht'* inv(Ht*S*Ht'+Qi);
+            mu = mu + K*(y(fStart-n:fEnd-n,t) - range_bearing_meas_model(mu(1:3),mu(fStart:fEnd)));
             S = (eye(length(S))-K*Ht)*S;
-            
+
             % In cases if S bemoes not positive definite, manually make it
             % P.D.
             if min(eig(S))<0
                S=S-eye(length(S)).*min(eig(S));
                warning('S was manually made positive definite')
             end
-            
+
             % warn the user that linearization may not be accurate if the 
             % change in vehicle position is too large compared to input speed
-            if norm(mu(1:2)-mu_S(1:2,t-1))>2.*u(1,t).*dt
+            if norm(mu(1:2)-mu_S(1:2,t-1))>2*u(1,t)*dt
                 warning('Linearization may have failed')
             end
         end

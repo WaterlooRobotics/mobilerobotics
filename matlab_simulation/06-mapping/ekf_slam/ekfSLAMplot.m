@@ -18,7 +18,7 @@ function ekfSLAMplot(map,y,xr,mu_S,S,t,newfeature)
     for i=1:M
           if (~newfeature(i))
               fi = 2*(i-1)+1;
-              fj = 2*i;
+              fj = fi + 1;
               plot([xr(1,t) xr(1,t)+y(fi,t)*cos(y(fj,t)+xr(3,t))], [xr(2,t) xr(2,t)+y(fi,t)*sin(y(fj,t)+xr(3,t))], 'c');
               plot(mu_S(3+fi,t),mu_S(3+fj,t), 'gx')
               mu_pos = [mu_S(3+fi,t) mu_S(3+fj,t)];
@@ -34,6 +34,6 @@ function ekfSLAMplot(map,y,xr,mu_S,S,t,newfeature)
     image(10000*S);
     colormap('gray');
     axis('square')
-    axis([0,N,0,N])
+    axis([0.5,N+0.5,0.5,N+0.5])
     title('Covariance matrix')
 end
