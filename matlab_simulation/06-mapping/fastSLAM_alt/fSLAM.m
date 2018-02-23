@@ -29,9 +29,11 @@ function [Pnew, featuresSeen] = fSLAM( P, z, u, R, Q, featureState, dt )
         % move the particle forward in time
         P(p).mu = applyMotionModel( P(p).mu, u, noiseFactor, dt );
 
-        if exist( 'z', 'var' ) 
-            countFeatures = size(z,2);
-
+        countFeatures = size(z,2);
+        if countFeatures == 0
+            % no judgement info -- use the last weight
+            w(p) = P(p).w;
+        else
             % Allocate enough space to store the calculated co-variance, as well
             % as both the measured and predicted measurements
             zMeas = zeros(2 * size(z,2), 1);
@@ -62,29 +64,18 @@ function [Pnew, featuresSeen] = fSLAM( P, z, u, R, Q, featureState, dt )
                 P(p).f_mu(:,featureIndex) = P(p).f_mu(:,featureIndex) + K*(z(1:2,f) - zp);
                 P(p).f_cov(:,covStart:covEnd) = (eye(2)-K*H)*cov;
 
-                % Store the co-variance caluculated, and the two related values of Z.  They'll be used
+                % Store the co-variance calculated, and the two related values of Z.  They'll be used
                 % later to calculate the overall weight for this particle.
-                qStart = size(Qm, 1) * (f - 1) + 1;
-                qEnd = qStart + size(Qm,1) - 1;
-                multiQm( qStart:qEnd, qStart:qEnd ) = round( Qm, 6 );  % prevent cholcov error
-
                 zStart = 2 * (f-1) + 1;
                 zEnd = zStart + 1;
+                multiQm( zStart:zEnd, zStart:zEnd ) = round( Qm, 6 );  % prevent cholcov error
                 zMeas( zStart:zEnd, 1 ) = z(1:2,f); 
                 zPred( zStart:zEnd, 1 ) = zp(1:2,1); 
             end
 
-            if countFeatures > 0
-                % if we saw anything, recalculate the final weight for the 
-                % particle
-                P(p).w = max( 0.00001, mvnpdf(zPred,zMeas,multiQm));
-            end
-            w(p) = P(p).w;
-        else
-            % no judgement info -- use the last weight
-            if length(P(p).w) ~= 1
-                P(p).w = 1;
-            end
+            % if we saw anything, recalculate the final weight for the 
+            % particle
+            P(p).w = max( 0.00001, mvnpdf(zPred,zMeas,multiQm));
             w(p) = P(p).w;
         end
     
@@ -102,14 +93,9 @@ function [Pnew, featuresSeen] = fSLAM( P, z, u, R, Q, featureState, dt )
     for i = 1:countParticles
         seed = W(end) * rand(1);
         cur = find(W > seed,1);
-        % Pnew(i) = P(cur);
         Pnew(i).mu = P(cur).mu;
         Pnew(i).f_mu = P(cur).f_mu;
         Pnew(i).f_cov = P(cur).f_cov;
-        if length(P(cur).w) ~= 1
-            P(p).w = 1;
-        end
-
         Pnew(i).w = P(cur).w;
     end
 

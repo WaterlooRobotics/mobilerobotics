@@ -71,28 +71,29 @@ function [Pnew, featuresSeen] = fSLAM( P, z, u, R, Q, featureState, dt )
                 % calculate a possible belief for the particle's position
                 covXt = inv(Hx' * Qm_inv * Hx + Rinv);
                 mup_f = mup_f + covXt * Hx' * Qm_inv * zErr + mup;
-
+                
                 % update the Kalman gain and calculate the new feature
                 % position and covariance.
                 K = cov * Hm' * Qm_inv;
                 P(p).f_mu(:,featureIndex) = P(p).f_mu(:,featureIndex) + K*zErr;
                 P(p).f_cov(:,covStart:covEnd) = (eye(2)-K*Hm)*cov;
 
-                % Store the co-variance caluculated, and the two related values of Z.  They'll be used
+                % Store the co-variance calculated, and the two related values of Z.  They'll be used
                 % later to calculate the overall weight for this particle.
-                qStart = size(Qm, 1) * (f - 1) + 1;
-                qEnd = qStart + size(Qm,1) - 1;
-                multiQm( qStart:qEnd, qStart:qEnd ) = round( Qm, 6 );  % prevent cholcov error
-
                 zStart = 2 * (f-1) + 1;
                 zEnd = zStart + 1;
+                
+                % Calculate the covariance for the importance weighting 
+                covWt = Hx * R * Hx' + Hm * cov * Hm' + Q;
+                
+                multiQm( zStart:zEnd, zStart:zEnd ) = round( covWt, 6 );  % prevent cholcov error
                 zMeas( zStart:zEnd, 1 ) = z(1:2,f); 
                 zPred( zStart:zEnd, 1 ) = zp(1:2,1); 
             end
             
             % if we saw anything, recalculate the final weight for the
             % particle
-            P(p).w = max( 0.00001, mvnpdf(zPred,zMeas,multiQm));
+            P(p).w = max( 0.00001, mvnpdf(zMeas, zPred, multiQm));
             
             % true belief is the average of all the guesses
             P(p).mu = mup_f / countFeatures;
@@ -112,7 +113,6 @@ function [Pnew, featuresSeen] = fSLAM( P, z, u, R, Q, featureState, dt )
     for i = 1:countParticles
         seed = W(end) * rand(1);
         cur = find(W > seed,1);
-        % Pnew(i) = P(cur);
         Pnew(i).mu = P(cur).mu;
         Pnew(i).f_mu = P(cur).f_mu;
         Pnew(i).f_cov = P(cur).f_cov;
