@@ -1,4 +1,4 @@
-function [muParticle, SParticle, Xp] = pf(t, M, A, B, C, X, R, Q, y, u)
+function [muParticle, SParticle, X, Xp] = pf(t, M, A, B, C, X, R, Q, y, u)
     % sample
     for m = 1:M
         e = sqrt(R) * randn(1);

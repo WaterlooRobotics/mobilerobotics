@@ -79,7 +79,7 @@ for t=2:length(T)
 
     
     %% Kalman Filter Estimation
-    [mu,S,mup,Sp,K] = kalman_filter(ssm,mu,S,u(:,t),y(:,t),example,t,freq);
+    [mu,S,mup,Sp,K] = kalman_filter(ssm,mu,S,u(:,t),y(:,t));
     
     % Store results
     mup_S(:,t) = mup;

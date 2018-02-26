@@ -1,5 +1,4 @@
-clear;
-clc;
+clear; close all; clc;
 
 % Discrete time step
 dt = 0.1;
@@ -61,7 +60,7 @@ for t = 1:length(T)
         u(t) = u(t - 1);
     end
     if (mu > 10)
-        u(t) = 0
+        u(t) = 0;
     elseif (mu < 2)
         u(t) = 1;
     end
@@ -75,10 +74,10 @@ for t = 1:length(T)
     y(t) = C * x(t + 1) + d;
 
     % kalman filter estimation
-    [mu,S,mup,Sp,K] = kalman_filter(ssm, mu, S, u(t), y(t), 1, t, dt);
+    [mu,S,mup,Sp,K] = kalman_filter(ssm, mu, S, u(t), y(t));
 
     % particle filter estimation
-    [muParticle, SParticle, Xp] = pf(t, M, A, B, C, X, R, Q, y, u);
+    [muParticle, SParticle, X, Xp] = pf(t, M, A, B, C, X, R, Q, y, u);
 
     % store kalman filter estimates
     mup_S(t) = mup;
@@ -95,4 +94,4 @@ for t = 1:length(T)
 end
 toc
 
-plot_trajectory(4, T, x, y, mu_S, muP_S);
+plot_trajectory(4, T, x, y, mu_S, muP_S, M);
