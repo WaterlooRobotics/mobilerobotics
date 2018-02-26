@@ -1,5 +1,3 @@
-addpath('./lib')
-addpath('./lib/particle_filter')
 clear;
 clc;
 
@@ -15,7 +13,7 @@ mu_old = mu;
 S_old = S;
 
 % Number of particles
-M = 100;
+M = 1000;
 
 % Prior - uniform over 5 15
 X = 5 + 10 * rand(1, M);
