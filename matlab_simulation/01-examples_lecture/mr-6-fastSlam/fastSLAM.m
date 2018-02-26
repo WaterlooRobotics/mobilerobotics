@@ -25,7 +25,7 @@ Example=1;
 numParticles = 1000;
 
 % Select the fast slam implementation to use (fSLAM or FSLAM_2)
-fastSlamFn = @fSLAM;
+fastSlamFn = @fSLAM_2;
 
 %% Main Code
 % Time

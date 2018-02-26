@@ -55,26 +55,28 @@ function [Pnew, featuresSeen] = fSLAM( P, z, u, R, Q, featureState, dt )
                     % need an initial value -- use the predicted position
                     P(p).f_mu(:,featureIndex) = locateFeature( mup, z(1:2,f));
                     [zp, Hm, Hx] = calculateMeasurementAndJacobians( P(p).f_mu(:,featureIndex), mup );
-                    Hm_inv = inv(Hm);
-                    P(p).f_cov(:,covStart:covEnd) = Hm_inv * Q * Hm_inv';
+                    HmInv = inv(Hm);
+                    P(p).f_cov(:,covStart:covEnd) = HmInv * Q * HmInv';
                 else 
                     [zp, Hm, Hx] = calculateMeasurementAndJacobians( P(p).f_mu(:,featureIndex), P(p).mu );
                 end
 
                 cov = P(p).f_cov(:,covStart:covEnd);
                 Qm = Hm*cov*Hm'+Q;   % Qt(k)
-                Qm_inv = inv(Qm);
+                QmInv = inv(Qm);
 
                 % calculate the measurement error
                 zErr = z(1:2,f) - zp;
 
                 % calculate a possible belief for the particle's position
-                covXt = inv(Hx' * Qm_inv * Hx + Rinv);
-                mup_f = mup_f + covXt * Hx' * Qm_inv * zErr + mup;
+                covXt = inv(Hx' * QmInv * Hx + Rinv);
+               
+                % update the particle's belief for position
+                mup_f = mup_f + covXt * Hx' * QmInv * zErr;  
                 
                 % update the Kalman gain and calculate the new feature
                 % position and covariance.
-                K = cov * Hm' * Qm_inv;
+                K = cov * Hm' * QmInv;
                 P(p).f_mu(:,featureIndex) = P(p).f_mu(:,featureIndex) + K*zErr;
                 P(p).f_cov(:,covStart:covEnd) = (eye(2)-K*Hm)*cov;
 
@@ -93,17 +95,15 @@ function [Pnew, featuresSeen] = fSLAM( P, z, u, R, Q, featureState, dt )
             
             % if we saw anything, recalculate the final weight for the
             % particle
-            P(p).w = max( 0.00001, mvnpdf(zMeas, zPred, multiQm));
-            
-            % true belief is the average of all the guesses
-            P(p).mu = mup_f / countFeatures;
+            P(p).w = max( 0.00001, mvnpdf(zPred, zMeas, multiQm));
+            P(p).mu = mup + mup_f / countFeatures;
         end
         w(p) = P(p).w;
     end
 
     if exist( 'z', 'var' ) && size(z,1) == 3
         % mark features as seen
-        featuresSeen(z(3,:)) = 1;
+%        featuresSeen(z(3,:)) = 1;
     end
 
 
