@@ -1,5 +1,4 @@
-clear; close all;
-clc;
+clear; close all; clc;
 
 % Discrete time step
 dt = 0.1;
@@ -13,7 +12,7 @@ mu_old = mu;
 S_old = S;
 
 % Number of particles
-M = 500;
+M = 1000;
 
 % Prior - uniform over 5 15
 X = 5 + 10 * rand(1, M);
