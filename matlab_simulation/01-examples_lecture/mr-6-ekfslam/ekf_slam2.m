@@ -198,7 +198,7 @@ for t=2:length(T)
     %% Plot results
     figure(1);clf; 
     ekfSLAMplot(map,y,xr,mu_S,S,t,newfeature)
-   
+    drawnow;
     if (makemovie) 
         writeVideo(vidObj, getframe(gcf)); 
     end
