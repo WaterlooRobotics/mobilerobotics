@@ -1,5 +1,3 @@
-addpath('./lib/importance_sampling')
-
 %% Importance Sampling graphic
 clear;
 clc;
