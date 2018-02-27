@@ -79,7 +79,7 @@ figure(1);clf; hold on;
 plot(x(1:i,1),x(1:i,2),'b-');
 
 for t=1:30:i
-      drawbox(x(t,1),x(t,2),x(t,3),.5,1);
+      drawbox(x(t,1),x(t,2),-x(t,3),.5,1);
 end
 xlabel('x (m)')
 ylabel('y (m)')
