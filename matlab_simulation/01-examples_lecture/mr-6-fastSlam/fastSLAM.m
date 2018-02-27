@@ -1,11 +1,11 @@
 
-% Extended Kalman Filter SLAM example
+%% FastSLAM and FastSLAM v.2 example
 clear;clc;close all
 
 %% Create AVI object
 makemovie = 0;
 if(makemovie)
-    vidObj = VideoWriter('ekfSLAM.mp4');
+    vidObj = VideoWriter('fastSLAM.mp4');
     vidObj.Quality = 100;
     vidObj.FrameRate = 2;
     open(vidObj);
@@ -25,7 +25,7 @@ Example=1;
 numParticles = 1000;
 
 % Select the fast slam implementation to use (fSLAM or FSLAM_2)
-fastSlamFn = @fSLAM_2;
+fastSlamFn = @fSLAM;
 
 %% Main Code
 % Time
