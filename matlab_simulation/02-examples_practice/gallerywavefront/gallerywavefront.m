@@ -35,13 +35,15 @@ newplan = 1;
 t_start = 1;
 
 while ((t<Tmax))
-    t=t+1; % Update time
-    pos = x(:,t-1)';
+    t=t+1 % Update time
+    pos = x(:,t-1)'
+    tour(curGoal,:)
+    norm(pos-tour(curGoal,:))
     % Check if it's time to pause and change targets
     if (norm(pos-tour(curGoal,:))<1)
         % Pretend to pause and talk
         x(:,t:t+4) = x(:,t-1)*ones(1,5);
-        t = t+5;
+        t = t+5
  
         % Update goal unless at end
         if (curGoal==endCount)
@@ -52,12 +54,14 @@ while ((t<Tmax))
         startPos = tour(curGoal,:);
         curGoal = curGoal+1;
         endPos = tour(curGoal,:);
-        [wave,curpath] = wavefront(map,startPos,endPos);
+        [wave,curpath] = wavefront(map,startPos,endPos, 'urdl');
         t_start=t-1;
     end
-    x(:,t) = curpath(t-t_start,:)';
+    x(:,t) = curpath(t-t_start,:)'
     figure(1);clf;hold on
     imagesc(wave'); 
-    plot(x(1, 1:t,1),x(2,1:t),'r')
-    pause(0.1);
+    plot(x(1,t_start:t),x(2,t_start:t),'r')
+    plot(tour(curGoal,1), tour(curGoal,2), 'go')
+    pause(0.01);
 end
+ 

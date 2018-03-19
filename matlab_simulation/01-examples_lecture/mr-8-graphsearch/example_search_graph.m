@@ -1,16 +1,9 @@
 %%======================================
 %% GRAPH SEARCH EXAMPLE
 %%--------------------------------------
-% A*, breadth first, depth first and Dijkstra's 
+% A* and Dijkstra's 
 % 
-% Revision"
-%  V0.0.1 
-%       2016/03/19 -- CSL -- clean up the code and udpate some issues based
-%       on feedback.
-%%======================================
 
-% Get same problem every time (fix random number generator start point)
-%rng('default')   % If you want to see the same map every time, uncomment this line.
 close all;clear;clc;
 
 

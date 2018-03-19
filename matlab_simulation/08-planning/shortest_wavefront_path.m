@@ -1,4 +1,4 @@
-function [ path ] = shortest_wavefront_path(wavefrontmap, starting_position)
+function [ path ] = shortest_wavefront_path(wavefrontmap, starting_position, motion)
 % shortest_path: takes in a wavefront map from the wavefront function and
 % returns the shortest path
 
@@ -6,26 +6,40 @@ function [ path ] = shortest_wavefront_path(wavefrontmap, starting_position)
 % input: starting_position: the starting location the robot for this
 % iteration. If you want to change the endpoint the wavefront map must be
 % updated
-
+% input: motion is the type of allowable motion, up-down-left-right, or box
+% for all 8 directions away from a current cell.
 % Note that only one path is returned even in the case of a tie. 
 
-% initilize a java linked list in order to simulate a stack data structure.
-stack = javaObject('java.util.LinkedList');
+[m,n] = size(wavefrontmap);
 
+stack = [];
 
 % search locations, see wavefront function for more details
-test_locations = [[-1, 1];
-                   [0, 1];
-                   [1, 1];
-                   [-1, 0];
+switch (motion)
+    case 'urdl'
+        test_locations = [ [0, 1];
                    [1, 0];
-                   [-1, -1];
-                   [0, -1];
-                   [-1, -1];
+                   [0, -1];                   
+                   [-1, 0];                  
                    ];
+    case 'box'
+        test_locations = [ [0, 1];
+                   [1, 1];
+                   [1, 0];
+                   [1, -1];
+                   [0, -1];                   
+                   [1, -1];                   
+                   [1, 0];                   
+                   [1, 1];                  
+                   ];
+    otherwise
+        disp('No valid motion method provided')
+        return;
+end
+        
 curpos = starting_position;
 best_point = [curpos(1), curpos(2)];
-stack.addLast([best_point(1), best_point(2)]) 
+stack = [[best_point(1), best_point(2)]; stack]; 
 
 
 if(wavefrontmap(curpos(1), curpos(2)) < 0)    
@@ -40,8 +54,12 @@ while wavefrontmap(curpos(1), curpos(2)) ~= 0
     wavefrontpnts(:,1) = test_locations(:,1) + curpos(1);
     wavefrontpnts(:,2) = test_locations(:,2) + curpos(2);
 
-
-    for i = 1:8
+    for i = 1:length(wavefrontpnts(:,1))
+            % check if indices are valid
+            if (wavefrontpnts(i,1)<= 0) || (wavefrontpnts(i,2)<= 0) || (wavefrontpnts(i,1)>= m) || (wavefrontpnts(i,2)>=n)
+                continue;
+            end
+            
             % check to see if cell if free
             if (wavefrontmap(wavefrontpnts(i,1),wavefrontpnts(i,2)) < 0)
                 continue;
@@ -56,12 +74,7 @@ while wavefrontmap(curpos(1), curpos(2)) ~= 0
     end 
     curpos = best_point;
     % Save the best point by pushing it to the stack
-    stack.addLast([best_point(1), best_point(2)]);
+    stack = [[best_point(1), best_point(2)]; stack];
 end
 
-path = zeros(stack.size(), 2);
-% Pop each value from the stack to return the shortest path.
-for i = 1:length(path)
-    point = stack.removeLast();
-    path(i, :) = [point(2), point(1)];
-end
+path = flipud(stack);

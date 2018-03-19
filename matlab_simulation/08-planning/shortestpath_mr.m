@@ -7,18 +7,12 @@ function [spath,sdist] = shortestpath_mr(nodes, edges, start, finish, method, he
 %           upper triangle
 %   start: index of start node
 %   finish: index of finish node
-%   method: (1 = Astar) (2 = Breadth-First) (3= Depth-First) (4= Dijkstra's)
-%   heuristicDist: 1.Euclidean distance  2.Manhattan distance ...
+%   method: (1 = Astar) (2 = Dijkstra's)
+%   heuristicDist: 1.Euclidean distance  2.Manhattan distance 
 %   createVideo: (1 = YES) (the others: NO) 
 % Outputs:
 %   spath: all path nodes
 %   sdist: total distance
-%---------------------------------------
-% Revision
-%  V0.0.1 
-%       2016/03/19 -- CSL -- clean up the code and udpate some issues based
-%       on feedback.
-%%======================================
 
 switch method
     case 1 
@@ -36,27 +30,36 @@ if ((createVideo >0) && (createVideo <=1))
     switch method
         case 1 % Astart
             vidObj = VideoWriter('Astar.avi');
-        case 2 %Breadth-First
+        case 2 %Dijkstra's 
+            vidObj = VideoWriter('Dijkstra.avi');
+        case 3 %Breadth-First
             vidObj = VideoWriter('Breadth_First.avi');
-        case 3 %Depth-First
+        case 4 %Depth-First
             vidObj = VideoWriter('Depth_First.avi');
-        case 4 %Dijkstra's 
-            vidObj = VideoWriter('Dijkstra');
+        otherwise %Dijkstra's 
+            vidObj = VideoWriter('Dijkstra.avi');
+            
     end
 
     vidObj.Quality = 100;
     vidObj.FrameRate = 5;
     open(vidObj);
-end 
-% Find edge lengths
+end
+
+%% Find edge lengths
 n = length(nodes);
 switch heuristicDist
     case 1
+        if (method == 3) || (method == 4)
+           disp('Error, use manhattan distance for breadth and depth first search')
+           return;
+        end
         dists= squareform(pdist(nodes,'euclidean'));        
     case 2
         dists= squareform(pdist(nodes,'cityblock'));                
     otherwise        
-        dists= squareform(pdist(nodes,'euclidean'));                
+        disp('Error, no distance metric specified.');
+        return;
 end
 
 
@@ -195,7 +198,7 @@ while (~done)
         dcur = bestnode(4)+dists(min(bestnode(1),neigh(i)),max(bestnode(1),neigh(i)));
         found = find(OpenSet(:,1)==neigh(i),1);
         switch method
-            case 1 % Astart
+            case 1 % Astar  (Priority QUEUE)
                 dtogo = dists(min(neigh(i),finish),max(neigh(i),finish));
                 % If neighbour is not in open set, add it   
                 if (isempty(found))
@@ -206,7 +209,7 @@ while (~done)
                    end
                 end
               
-            case 2 %Breadth-First   (QUEUE)
+            case 2 % Breadth-First   (QUEUE)
                 % If neighbour is not in open set, add it
                 if (isempty(found))
                    OpenSet = [OpenSet; neigh(i) bestnode(1) dcur dcur];     
@@ -216,7 +219,7 @@ while (~done)
                    end
                 end                   
             
-            case 3 %Depth-First  (STACK)
+            case 3 % Depth-First  (STACK)
                 % If neighbour is not in open set, add it
                 if (isempty(found))
                    OpenSet = [neigh(i) bestnode(1) dcur dcur; OpenSet];
@@ -226,7 +229,7 @@ while (~done)
                    end
                 end                   
 
-            case 4 %Dijkstra's 
+            case 4 % Dijkstra's (Priority QUEUE)
                 % If neighbour is not in open set, add it
                 if (isempty(found)) 
                    OpenSet = [OpenSet; neigh(i) bestnode(1) dcur dcur]; 
@@ -239,7 +242,7 @@ while (~done)
      end
     
      switch method
-        case 1 % Astart
+        case 1 % Astar
                OpenSet = OpenSet([1:best-1 best+1:end],:); % remove best node from open set                            
         case 4 %Dijkstra's     
                OpenSet = OpenSet([1:best-1 best+1:end],:); % remove best node from open set                
@@ -253,6 +256,7 @@ while (~done)
          plot(nodes(neigh(i),1),nodes(neigh(i),2), 'mo');
          plot([nodes(bestnode(1),1) nodes(neigh(i),1)],[nodes(bestnode(1),2) nodes(neigh(i),2)], 'm');
      end
+     drawnow;pause(0.01);
      if ((createVideo >0) && (createVideo <=1))
          writeVideo(vidObj, getframe(gcf));
      end
