@@ -97,7 +97,7 @@ bestnode = OpenSet(best,:);
 while (~done)
      t=t+1; 
      switch method
-         case 1 % Astart
+         case 1 % Astar
             % Check if open set is empty
             if (isempty(OpenSet(:,1)))
                 spath = [];
