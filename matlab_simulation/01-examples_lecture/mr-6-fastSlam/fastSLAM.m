@@ -21,15 +21,25 @@ end
 %            features
 Example=1;
 
+
 % The number of particles to use in the simulation
 numParticles = 1000;
 
-% Select the fast slam implementation to use (fSLAM or FSLAM_2)
-fastSlamFn = @fSLAM;
+slamVersion = 2;
+% Select the fast slam implementation to use (func_fastSLAM or func_fastSLAM2)
+switch slamVersion
+    case 1
+        fastSlamFn = @func_fastSLAM;
+    case 2
+        fastSlamFn = @func_fastSLAM2;
+    otherwise
+        fastSlamFn = @func_fastSLAM;
+end
+        
 
 %% Main Code
 % Time
-Tf = 50;
+Tf = 25;
 dt = 0.5;
 T = 0:dt:Tf;
 
