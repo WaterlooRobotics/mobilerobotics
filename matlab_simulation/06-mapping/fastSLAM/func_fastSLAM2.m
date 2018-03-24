@@ -1,81 +1,122 @@
-%% Fast SLAM2.0 function
-% INPUTS:(in order of call)
-% -------
-% Robot's Current Pose
-% Control Input
-% Configurations
-% Map
-% Old particle Set
-% OUTPUTS:(in order of call)
-% --------
-% Predictd Pose of the Robot
-% Measurements  
-% new ParticleSet
-% Updated vector with flags for newly observed features
-% % AUTHOR: BISMAYA SAHOO, EMAIL:bsahoo@uwaterloo.ca
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%NOTE: The difference with FASTSLAM 1.0 is the sample_distribution before
-%the observations and the way the weights are update. 
+function [Pnew, featuresSeen] = func_fastSLAM2( P, z, u, R, Q, featureState, dt )
+    %% fastSLAM( P, z, u, R, Q, dt )
+    % perform one iteration of the fastSLAM algorithm.
+    %
+    % P  -- particle vector - each particle has the following features:
+    %        -- mu -- current estimated position (should be a distribution...)
+    %        -- f_mu -- matrix of all estimated feature positions
+    %        -- f_cov -- matrix of all feature covariances
+    % z  -- measurement info for available features (range, bearing, id)
+    % u  -- motion input
+    % R  -- motion noise
+    % Q  -- measurement noise
+    % featureState -- a vector of the features that have been seen or not
+    %                 (0 == unseen)
+    % rMax -- max
+    % dt -- time interval of motion
+    %
 
-function[predPose,measurements,particles_new,newfeature]...
-        =func_fastSLAM2(oldPose,u,config,map,particles_old)
-        
-    R=config.MeasNoise;Q=config.MotNoise;noFeatures=size(map,2);
-    rmax=config.maxRange;thmax=config.maxFOV;dt=config.timeInterval;
-    totalParticles=config.totalParticles;newfeature=config.newFeat;
+    countParticles = size(P,2);
+    w = zeros(countParticles,1);
+
+    featuresSeen = featureState;
+
+    [eV,ev] = eig(R);
+    noiseFactor = eV * sqrt(ev);
     
-    %Move the robot forward.This Motion has noise Q
-    predPose=motionUpdate_fs(oldPose,u,Q,dt);
-    %Look for features that are in FOV
-    meas_ind=featureSearch_fs(noFeatures,map,predPose,rmax,thmax); 
-    %Take Measurements and accumulate them in a observation matrix
-    y=[];
-    for feature_index = meas_ind       
-        y_new=measurementUpdate_fs(map(:,feature_index),predPose,R);
-        y=[y,y_new];     
-    end
+    Rinv = inv(R);
     
-    measurements.indices=meas_ind;measurements.value=y;
-    %Loop through all particles
-    for particle=1:totalParticles
-       %Move the Particles forward
-        particles_old(particle).pose=motionUpdate_fs(particles_old(particle).pose,u,Q,dt);
-       clear yw hmuw Qw;
-       %Run Individual EKFs for each particles to predict and correct features
-       for j=1:length(meas_ind)
-           i = meas_ind(j);
-           
-%          %Sample Proposal (new in 2.0)
-           [mu_pose,cov_pose,H_pose,H_feat,pred_obs]=sample_proposal(...
-               particles_old(particle).meanFeat(:,i),...
-               particles_old(particle).covFeat(:,:,i),...
-               particles_old(particle).pose,y(:,j),R,Q);
-           %CORRECTION OF FEATURES OR Addition of new features
-           if(newfeature(i)==1)
-                [mu,cov]=addFeature(particles_old(particle).pose,y(:,j),H_feat,R);
-           else
-                [mu,cov]=ekf_correct(particles_old(particle).meanFeat(:,i),...
-                    particles_old(particle).covFeat(:,:,i),...
-                    y(:,j),H_feat,pred_obs,R);
-           end
-           particles_old(particle).meanFeat(:,i)=mu;
-           particles_old(particle).covFeat(:,:,i)=cov;
-           %Accumulate the weights for the Particle Filter Update
-           yw(2*(j-1)+1:2*j) = y(:,j);% target distribution
-           hmuw(2*(j-1)+1:2*j) = pred_obs;% proposal distribution Mean
-           %proposal distribution Covariance (new in 2.0)
-           Qw(2*(j-1)+1:2*j,2*(j-1)+1:2*j) =H_pose*Q*H_pose'+...
-               H_feat*particles_old(particle).covFeat(:,:,i)*H_feat'+R;
-       end
-       
-       %Calculate the Weights and Ensure that they are not too low.
-       if (exist('Qw1'))
-            Qw1=round(Qw,6);% To avoid error in cholcov in mvnpdf.
-            w(particle) = max(0.000001,mvnpdf(yw,hmuw,Qw1));
-       end
+    for p = 1:countParticles
+
+        % move the particle forward in time
+        mup = applyMotionModel( P(p).mu, u, noiseFactor, dt );
+
+        countFeatures = size(z,2);
+        if countFeatures == 0
+            % no feature information -- use the original prediction
+            P(p).mu = mup;
+        else
+            % Allocate enough space to store the calculated co-variance, as well
+            % as both the measured and predicted measurements
+            zMeas = zeros(2 * size(z,2), 1);
+            zPred = zeros(2 * size(z,2), 1);
+            multiQm = zeros(2 * size(z,2), 2 * size(z,2));
+
+            mup_f = [0;0;0];
+            for f = 1:countFeatures
+
+                % for each feature, perform an EKF update
+                featureIndex = z(3,f);
+
+                covStart = (featureIndex - 1) * 2 + 1;
+                covEnd = covStart + 1;
+
+                if featuresSeen( featureIndex ) == 0
+                    % need an initial value -- use the predicted position
+                    P(p).f_mu(:,featureIndex) = locateFeature( mup, z(1:2,f));
+                    [zp, Hm, Hx] = calculateMeasurementAndJacobians( P(p).f_mu(:,featureIndex), mup );
+                    HmInv = inv(Hm);
+                    P(p).f_cov(:,covStart:covEnd) = HmInv * Q * HmInv';
+                else 
+                    [zp, Hm, Hx] = calculateMeasurementAndJacobians( P(p).f_mu(:,featureIndex), P(p).mu );
+                end
+
+                cov = P(p).f_cov(:,covStart:covEnd);
+                Qm = Hm*cov*Hm'+Q;   % Qt(k)
+                QmInv = inv(Qm);
+
+                % calculate the measurement error
+                zErr = z(1:2,f) - zp;
+
+                % calculate a possible belief for the particle's position
+                covXt = inv(Hx' * QmInv * Hx + Rinv);
+               
+                % update the particle's belief for position
+                mup_f = mup_f + covXt * Hx' * QmInv * zErr;  
+                
+                % update the Kalman gain and calculate the new feature
+                % position and covariance.
+                K = cov * Hm' * QmInv;
+                P(p).f_mu(:,featureIndex) = P(p).f_mu(:,featureIndex) + K*zErr;
+                P(p).f_cov(:,covStart:covEnd) = (eye(2)-K*Hm)*cov;
+
+                % Store the co-variance calculated, and the two related values of Z.  They'll be used
+                % later to calculate the overall weight for this particle.
+                zStart = 2 * (f-1) + 1;
+                zEnd = zStart + 1;
+                
+                % Calculate the covariance for the importance weighting 
+                covWt = Hx * R * Hx' + Hm * cov * Hm' + Q;
+                
+                multiQm( zStart:zEnd, zStart:zEnd ) = round( covWt, 6 );  % prevent cholcov error
+                zMeas( zStart:zEnd, 1 ) = z(1:2,f); 
+                zPred( zStart:zEnd, 1 ) = zp(1:2,1); 
+            end
+            
+            % if we saw anything, recalculate the final weight for the
+            % particle
+            P(p).w = max( 0.00001, mvnpdf(zPred, zMeas, multiQm));
+            P(p).mu = mup + mup_f / countFeatures;
+        end
+        w(p) = P(p).w;
     end
-        %Take note for all observed features.0:observed 1:New
-        newfeature(meas_ind) = 0;
-        %Run the RaoBlackwellization resampling step
-        [particles_new]=raoBlackwell_fs(totalParticles,particles_old);
+
+    if exist( 'z', 'var' ) && size(z,1) == 3
+        % mark features as seen
+%        featuresSeen(z(3,:)) = 1;
+    end
+
+
+    % draw a new set of particles
+    W = cumsum(w);
+    % Pnew = zeros( ... )  % preallocate new structure space
+    for i = 1:countParticles
+        seed = W(end) * rand(1);
+        cur = find(W > seed,1);
+        Pnew(i).mu = P(cur).mu;
+        Pnew(i).f_mu = P(cur).f_mu;
+        Pnew(i).f_cov = P(cur).f_cov;
+        Pnew(i).w = P(cur).w;
+    end
+
 end
