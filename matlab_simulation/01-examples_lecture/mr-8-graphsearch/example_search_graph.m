@@ -1,16 +1,9 @@
 %%======================================
 %% GRAPH SEARCH EXAMPLE
 %%--------------------------------------
-% A*, breadth first, depth first and Dijkstra's 
+% A* and Dijkstra's 
 % 
-% Revision"
-%  V0.0.1 
-%       2016/03/19 -- CSL -- clean up the code and udpate some issues based
-%       on feedback.
-%%======================================
 
-% Get same problem every time (fix random number generator start point)
-%rng('default')   % If you want to see the same map every time, uncomment this line.
 close all;clear;clc;
 
 
@@ -62,14 +55,9 @@ end
 % Outputs:
 %   1.spath: all path nodes
 %   2.sdist: total distance
-subplot(2,2,1)
+subplot(1,2,1)
 [spath,sdist] = shortestpath_mr(nodes, e, start, finish, 4,2,0)
 
-subplot(2,2,2)
+subplot(1,2,2)
 [spath,sdist] = shortestpath_mr(nodes, e, start, finish, 1,2,0)
 
-subplot(2,2,3)
-[spath,sdist] = shortestpath_mr(nodes, e, start, finish, 2,2,0)
-
-subplot(2,2,4)
-[spath,sdist] = shortestpath_mr(nodes, e, start, finish, 3,2,0)

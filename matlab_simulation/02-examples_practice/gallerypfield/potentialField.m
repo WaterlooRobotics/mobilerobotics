@@ -1,5 +1,5 @@
 % Gallery map
-[boundary, o, tour] = makegallerymap();
+[boundary, obsts, tour] = makegallerymap();
 
 % Convert map to occupancy grid
 M = max(boundary(:,1));
