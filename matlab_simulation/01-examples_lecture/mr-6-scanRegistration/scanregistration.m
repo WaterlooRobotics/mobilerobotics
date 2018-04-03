@@ -64,6 +64,10 @@ end
 n = length(R(:,1)); % Number of vehicle states
 xr = zeros(n,length(T)); % Vehicle states 
 xr(:,1) = x0;
+xICP = zeros(n, length(T));
+diffT = zeros(n, length(T));
+diffICP = zeros(n,length(T));
+errICP = zeros(1, length(T));
 mur = x0;
 
 % Belief map
@@ -113,15 +117,15 @@ for t=2:length(T)
     end
 
     % Perform ICP scan registration
-    [Ricp Ticp ER tau] = icp(pc_prev', pc',10);
+    [Ricp, Ticp, ER, tau] = icp(pc_prev', pc',10);
     % Transform pointcloud for display
-    pc_new = [];
+    pc_new = zeros(size(pc));
     for kk = 1:length(pc)
         pc_new(kk,:) = (Ricp*pc(kk,:)' + Ticp)'; 
     end
     
     % Store robot pose estimate
-    xICP(:,t) = Ricp*(xr(:,t)) + Ticp;
+    xICP(:,t) = Ricp*(mur(:,t)) + Ticp;
 
     % Plot scan registration results
     figure(5); clf;hold on;
@@ -141,7 +145,7 @@ for t=2:length(T)
         % motion prediction)
         invmod = inversescannerbres(M,N,xICP(1,t),xICP(2,t),meas_phi(i)+xICP(3,t),meas_r(i),rmax);
         % invmod = inversescannerbres(M,N,mur(1,t),mur(2,t),meas_phi(i)+mur(3,t),meas_r(i),rmax);
-        for j = 1:length(invmod(:,1));
+        for j = 1:length(invmod(:,1))
             ix = invmod(j,1);
             iy = invmod(j,2);
             il = invmod(j,3);
@@ -180,16 +184,23 @@ for t=2:length(T)
 
     % Belief map
     figure(3);clf; hold on;
-    image(100*(m));
+    image(100*(1-m));
     colormap(gray);
     plot(mur(2,max(1,t-10):t),mur(1,max(1,t-10):t),'bx-')
     axis([0 N 0 M])
     %F3(t-1) = getframe;
     title('Current occupancy grid map')
-    if (makemovie) writeVideo(vidObj, getframe(gca)); end
+    
+    if (makemovie) 
+        writeVideo(vidObj, getframe(gca)); 
+    end
+    
     drawnow;
 end
-if (makemovie) close(vidObj); end
+
+if (makemovie)
+    close(vidObj); 
+end
 
 figure(4);clf;hold on;
 plot(errICP)
