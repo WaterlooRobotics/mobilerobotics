@@ -6,12 +6,12 @@ testimage = image_to_binary_map(testimage);
 startpos = [103, 480];
 endpos = [110, 400];
 
-[wavefrontmap, path] = wavefront(testimage, startpos, endpos);
+[wavefrontmap, path] = wavefront(testimage, startpos, endpos, 'urdl');
 
 % you can just run this function without rebuilding the wavefront map if the
 % goal location (or end point) does not change. 
 
-path = shortest_wavefront_path(wavefrontmap, startpos);
+path = shortest_wavefront_path(wavefrontmap, startpos, 'urdl');
 imagesc(wavefrontmap);
 hold on
 plot(path(:,1), path(:,2), '-r');
