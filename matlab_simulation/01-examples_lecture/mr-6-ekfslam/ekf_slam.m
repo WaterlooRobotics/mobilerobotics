@@ -170,7 +170,7 @@ for t=2:length(T)
 
             % Linearization
             % Predicted range
-            Ht = range_bearing_meas_linearized_model2(mu,i);
+            Ht = range_bearing_meas_linearized_model(mu,i);
 
             % Measurement update
             K = S*Ht'* inv(Ht*S*Ht'+Qi);
