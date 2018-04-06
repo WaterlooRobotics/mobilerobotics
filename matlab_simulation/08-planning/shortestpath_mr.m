@@ -7,7 +7,7 @@ function [spath,sdist] = shortestpath_mr(nodes, edges, start, finish, method, he
 %           upper triangle
 %   start: index of start node
 %   finish: index of finish node
-%   method: (1 = Astar) (2 = Dijkstra's)
+%   method: (1 = Astar) (2 = BFS) (3 = DFS) (4 = Dijkstra's)
 %   heuristicDist: 1.Euclidean distance  2.Manhattan distance 
 %   createVideo: (1 = YES) (the others: NO) 
 % Outputs:
@@ -50,7 +50,7 @@ end
 n = length(nodes);
 switch heuristicDist
     case 1
-        if (method == 3) || (method == 4)
+        if (method == 2) || (method == 3)
            disp('Error, use manhattan distance for breadth and depth first search')
            return;
         end
@@ -122,26 +122,6 @@ while (~done)
                 continue;
             end 
             
-         case 4 %Dijkstra's 
-            % Check if open set is empty
-            if (isempty(OpenSet(:,1)))
-                spath = [];
-                sdist = 0;
-                return;
-            end             
-            %--------------------------------
-            % Reminder: OpenSet(:,4)= distance to neighbours;
-            [val, best] = min(OpenSet(:,4));
-            %--------------------------------
-            bestnode = OpenSet(best,:);
-            % Check end condition
-            if (bestnode(1)==finish)
-                done = 1;
-                % Move best to closed set
-                C = [C; bestnode];                
-                continue;
-            end           
-            
          case 2 %Breadth-First
             if (isempty(OpenSet(:,1)))
                 done = 1;
@@ -175,6 +155,26 @@ while (~done)
             if (bestnode(1)==finish)
                % Move best to closed set
                 C = [C;bestnode];
+                continue;
+            end
+            
+         case 4 %Dijkstra's 
+            % Check if open set is empty
+            if (isempty(OpenSet(:,1)))
+                spath = [];
+                sdist = 0;
+                return;
+            end             
+            %--------------------------------
+            % Reminder: OpenSet(:,4)= distance to neighbours;
+            [val, best] = min(OpenSet(:,4));
+            %--------------------------------
+            bestnode = OpenSet(best,:);
+            % Check end condition
+            if (bestnode(1)==finish)
+                done = 1;
+                % Move best to closed set
+                C = [C; bestnode];                
                 continue;
             end
      end
@@ -244,7 +244,7 @@ while (~done)
      switch method
         case 1 % Astar
                OpenSet = OpenSet([1:best-1 best+1:end],:); % remove best node from open set                            
-        case 4 %Dijkstra's     
+        case 4 % Dijkstra's     
                OpenSet = OpenSet([1:best-1 best+1:end],:); % remove best node from open set                
      end
     
