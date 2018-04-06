@@ -50,14 +50,14 @@ switch (motion)
                    [-1, 0];                  
                    ];
     case 'box'
-        test_locations = [ [0, 1];
-                   [1, 1];
-                   [1, 0];
+        test_locations = [ [1, 1];
                    [1, -1];
+                   [-1, -1];
+                   [-1, 1];
+                   [0, 1];
+                   [1, 0];
                    [0, -1];                   
-                   [1, -1];                   
-                   [1, 0];                   
-                   [1, 1];                  
+                   [-1, 0];
                    ];
     otherwise
         disp('No valid motion method provided')
@@ -82,7 +82,7 @@ while (~isempty(queue))
 
     % for each of the neighboring cells check if it has been already
     % explored
-    for i = 1:4
+    for i = 1:length(wavefrontpnts(:,1))
             if (wavefrontmap(wavefrontpnts(i,1),wavefrontpnts(i,2)) ~= -10)
                 continue;
             end

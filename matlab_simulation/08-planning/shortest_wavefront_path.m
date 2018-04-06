@@ -23,14 +23,14 @@ switch (motion)
                    [-1, 0];                  
                    ];
     case 'box'
-        test_locations = [ [0, 1];
-                   [1, 1];
-                   [1, 0];
+        test_locations = [ [1, 1];
                    [1, -1];
+                   [-1, -1];
+                   [-1, 1];
+                   [0, 1];
+                   [1, 0];
                    [0, -1];                   
-                   [1, -1];                   
-                   [1, 0];                   
-                   [1, 1];                  
+                   [-1, 0];
                    ];
     otherwise
         disp('No valid motion method provided')
