@@ -4,11 +4,11 @@ function Ht = range_bearing_meas_linearized_model(mu,i)
             dx = mu(3+2*(i-1)+1)-mu(1);
             dy = mu(3+2*i)-mu(2);
             rp = sqrt((dx)^2+(dy)^2);
-            
+
             N=length(mu);
-            Fi = zeros(5,N);
-            Fi(1:3,1:3) = eye(3);
-            Fi(4:5,3+2*(i-1)+1:3+2*i) = eye(2);
-            Ht = [ -dx/rp,   -dy/rp,    0,  dx/rp,   dy/rp;
-                    dy/rp^2, -dx/rp^2, -1, -dy/rp^2, dx/rp^2]*Fi;
+            Ht = zeros(2,N);
+            Ht(1:2,1:3) = [ -dx/rp,     -dy/rp,     0;
+                             dy/rp^2,   -dx/rp^2,  -1 ];
+            Ht(1:2, 3+2*(i-1)+1:3+2*i) = [  dx/rp,   dy/rp;
+                                           -dy/rp^2, dx/rp^2 ];
 end
