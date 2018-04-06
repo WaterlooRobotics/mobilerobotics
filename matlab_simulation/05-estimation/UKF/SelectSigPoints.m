@@ -14,8 +14,8 @@ for i=1:n
         x(:,n+i+1) = A*xp(:,n+i+1) + B*u*dt;
     elseif type == 2
         % Measurement model applied to sigma points
-        x(:,i+1) = sqrt(xp(1,i+1)^2 + xp(2,i+1)^2);
-        x(:,n+i+1) = sqrt(xp(1,n+i+1)^2 + xp(2,n+i+1)^2);
+        x(:,i+1) = sqrt(xp(1,i+1)^2 + xp(3,i+1)^2);
+        x(:,n+i+1) = sqrt(xp(1,n+i+1)^2 + xp(3,n+i+1)^2);
     end
 end
 

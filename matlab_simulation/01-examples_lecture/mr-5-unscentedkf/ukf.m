@@ -6,23 +6,23 @@ clear;clc;
 dt = 0.1;
 
 % Initial State
-x0 = [20 3]';   %x position and y position
-v = [-2 0]';    %x speed and y speed respectively
+x0 = [20 -2 3]'; % horizontal distance, horizontal velocity, height
+v = [-2 0 0]';   % horizontal speed, horizontal acceleration, and vertical speed; respectively
 
 % Prior
-mu = [22 6]'; % mean (mu)
-S = 1*eye(2);% covariance (Sigma)
+mu = [22 -1.8 6.5]'; % mean (mu)
+S = 1*eye(3);% covariance (Sigma)
 mu_u = mu;
 S_u = S;
 
 % Discrete motion model
 % Separated the input out of the state matrix (A) to be more standard
 % With matrix A for state and matrix B for input
-Ad = [1 0; 0 1];    % State matrix for position
-Bd = [1 0; 0 1];    % Input matrix for speed
+Ad = eye(3);
+Bd = eye(3);
 
 % Position disturbance
-R = [0.001 0 ; 0 0.001];  %added extra disturbance in y motion
+R = [0.001 0 0; 0 0 0; 0 0 0.001];
 [RE, Re] = eig (R);
 
 % Measurement disturbance
@@ -67,16 +67,16 @@ for t=2:length(T)
     % Select a motion disturbance
     d = sqrt(Q)*randn(m,1);
     % Determine measurement
-    y(:,t) = sqrt(x(1,t)^2 + x(2,t)^2) + d;
+    y(:,t) = sqrt(x(1,t)^2 + x(3,t)^2) + d;
 
-
+    
     %% Extended Kalman Filter Estimation (not working, wrong model for now)
-    % [mup,mu,S,K] = ekf(mu, S, y(:,t), @airplane_radar_motion_model, @airplane_radar_measurement_model, @airplane_radar_linearized_motion_model, @airplane_radar_linearized_measurement_model, Q, R, v);
+    [mu,S,mup,K] = ekf(mu, S, y(:,t), @airplane_radar_motion_model, @airplane_radar_measurement_model, @airplane_radar_linearized_motion_model, @airplane_radar_linearized_measurement_model, Q, R, v);
     
     % Store results
-    % mup_S(:,t) = mup;
-    % mu_S(:,t) = mu;
-    % K_S(:,t) = K;
+    mup_S(:,t) = mup;
+    mu_S(:,t) = mu;
+    K_S(:,t) = K;
 
     %% Unscented Kalman Filter Estimation
     % Prediction update
@@ -113,4 +113,5 @@ for t=2:length(T)
 end
 
 %% UKF and EFK error comparison
-%CompareEKF_UKF (T,x,mu_S,mu_Su);
+figure();
+CompareEKF_UKF (T,x,mu_S,mu_Su);
