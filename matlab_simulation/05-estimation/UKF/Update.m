@@ -9,7 +9,7 @@ function [prediction,model,sigUpdate] = Update(n,A,B,u,dt,lambda,S_u,mu,type)
     if type == 1
         model(:,1) = A*prediction(:,1) + B*u*dt; %need to change per example
     elseif type == 2
-        model(:,1) = sqrt(prediction(1,1)^2+prediction(2,1)^2); %need to change per example
+        model(:,1) = sqrt(prediction(1,1)^2+prediction(3,1)^2); %need to change per example
     end
 end
 
