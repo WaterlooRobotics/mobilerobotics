@@ -8,7 +8,7 @@ map = ones(M,N);
 numObsts = length(obsts);
 
 for i=1:numObsts
-    co=o{i};
+    co=obsts{i};
     [co(:,1), co(:,2)] = poly2ccw(co(:,1), co(:,2)); % Convert to ccw poly
     K = convhull(co(:,1), co(:,2)); % Take convex hull
     co = co(K(1:end-1),:); 
@@ -64,7 +64,7 @@ while ((t<Tmax))
     
     gVcur = Katt*(pos-endPos);
     for m=1:numObsts
-        curobs = o{m};
+        curobs = obsts{m};
         if (inpolygon(pos(1),pos(2),curobs(:,1),curobs(:,2)))
             gVcur = [NaN NaN];
         else
@@ -86,6 +86,9 @@ figure(1); hold on;
 plot(x(1,1:t-1), x(2,1:t-1));
 figure(4);
 plot(x(:,1:t-1)');
+title('Robot Position');
+legend('X', 'Y', 'Location', 'South');
+axis([0 t-1 0 N]);
 
 % Grid up the space
 dx = 0.4;
@@ -109,7 +112,7 @@ for i=1:length(X(:,1))
         
         %Repulsive potentials
         for m=1:numObsts
-            curobs = o{m};
+            curobs = obsts{m};
             if (inpolygon(pos(1),pos(2),curobs(:,1),curobs(:,2)))
                 V(i,j) = Vmax;
                 gV(:,i,j) = [NaN NaN];
@@ -138,9 +141,13 @@ end
 
 figure(2); clf; hold on;
 surf(X,Y,V)
+title('Potential Field Surface');
+view(15, 80);
 %axis([posMinBound(1) posMaxBound(1) posMinBound(2) posMaxBound(2) 0 Vmax])
 
 figure(3); clf; hold on;
 quiver(X,Y,squeeze(-gV(1,:,:)),squeeze(-gV(2,:,:)))
+title('Potential Field');
+axis([0 M 0 N]);
 %plotEnvironment(obsPtsStore,posMinBound, posMaxBound, startPos, endPos);
 
